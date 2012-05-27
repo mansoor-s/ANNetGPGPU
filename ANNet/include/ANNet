@@ -1,0 +1,32 @@
+/*
+ * Net Types.h
+ *
+ *  Created on: 12.04.2010
+ *      Author: dgrat
+ */
+ 
+#ifndef NETTYPES_H_
+#define NETTYPES_H_
+
+#include <basic/ANExporter.h>
+#include <basic/ANImporter.h>
+
+#include <basic/ANEdge.h>
+
+#include <basic/ANAbsNeuron.h>
+#include <basic/ANAbsLayer.h>
+#include <basic/ANAbsNet.h>
+
+#include <ANBPNeuron.h>
+#include <ANBPLayer.h>
+#include <ANBPNet.h>
+
+#include <ANHFNeuron.h>
+#include <ANHFLayer.h>
+#include <ANHFNet.h>
+
+#include <ANSOMNeuron.h>
+#include <ANSOMLayer.h>
+#include <ANSOMNet.h>
+
+#endif /* NETTYPES_H_ */

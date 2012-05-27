@@ -1,0 +1,13 @@
+/*
+ * Net Types.h
+ *
+ *  Created on: 12.04.2010
+ *      Author: dgrat
+ */
+ 
+#ifndef GUI_H_
+#define GUI_H_
+
+#include <gui/QSOMReader.h>
+
+#endif /* GUI_H_ */

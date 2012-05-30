@@ -278,9 +278,14 @@ void hostSOMTraining( ANN::Matrix &SOMEdgeMatrix,
 	unsigned int iProgCount = 1;
 	
 	for(unsigned int i = 0; i < iCycles; i++) {
-		if(((i+1) / (iCycles/10)) == iProgCount && (i+1) % (iCycles/10) == 0) {
-			std::cout<<"Current cycle training progress calculated by the GPU is: "<<iProgCount*10.f<<"%/Step="<<i+1<<std::endl;
-			iProgCount++;
+		if(iCycles >= 10) {
+			if(((i+1) / (iCycles/10)) == iProgCount && (i+1) % (iCycles/10) == 0) {
+				std::cout<<"Current training progress calculated by the GPU is: "<<iProgCount*10.f<<"%/Step="<<i+1<<std::endl;
+				iProgCount++;
+			}
+		}
+		else {
+			std::cout<<"Current training progress calculated by the CPU is: "<<(float)(i+1.f)/(float)iCycles*100.f<<"%/Step="<<i+1<<std::endl;
 		}
 		// Set input
 		std::vector<float> vCurInput = InputSet.GetInput(ANN::RandInt(iMin, iMax) );

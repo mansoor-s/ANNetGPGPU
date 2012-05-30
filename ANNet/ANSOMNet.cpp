@@ -235,9 +235,14 @@ void SOMNet::Training(const unsigned int &iCycles) {
 
 	std::cout<< "Process the SOM now" <<std::endl;
 	for(m_iCycle = 0; m_iCycle < static_cast<unsigned int>(m_iCycles); m_iCycle++) {
-		if(((m_iCycle+1) / (m_iCycles/10)) == iProgCount && (m_iCycle+1) % (m_iCycles/10) == 0) {
-			std::cout<<"Current cycle training progress calculated by the CPU is: "<<iProgCount*10.f<<"%/Step="<<m_iCycle+1<<std::endl;
-			iProgCount++;
+		if(m_iCycles >= 10) {
+			if(((m_iCycle+1) / (m_iCycles/10)) == iProgCount && (m_iCycle+1) % (m_iCycles/10) == 0) {
+				std::cout<<"Current training progress calculated by the CPU is: "<<iProgCount*10.f<<"%/Step="<<m_iCycle+1<<std::endl;
+				iProgCount++;
+			}
+		}
+		else {
+			std::cout<<"Current training progress calculated by the CPU is: "<<(float)(m_iCycle+1.f)/(float)m_iCycles*100.f<<"%/Step="<<m_iCycle+1<<std::endl;
 		}
 
 	    // The input vectors are presented to the network at random

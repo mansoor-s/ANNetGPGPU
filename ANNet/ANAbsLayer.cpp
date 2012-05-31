@@ -61,11 +61,11 @@ AbsNeuron *AbsLayer::GetNeuron(const unsigned int &iID) const {
 	return NULL;
 }
 
-void AbsLayer::SetNetFunction(const Function *pFunction) {
+void AbsLayer::SetNetFunction(const TransfFunction *pFunction) {
 	assert( pFunction != 0 );
 	#pragma omp parallel for
 	for(int j = 0; j < static_cast<int>( m_lNeurons.size() ); j++) {
-		m_lNeurons[j]->SetNetFunction(pFunction);
+		m_lNeurons[j]->SetTransfFunction(pFunction);
 	}
 }
 

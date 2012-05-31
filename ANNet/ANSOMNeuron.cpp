@@ -20,7 +20,7 @@ SOMNeuron::SOMNeuron(SOMLayer *parent) : AbsNeuron(parent) {
 	m_fLearningRate = 0.5f;
 
 	// a standard sigmoid transfer function for the network
-	SetNetFunction(&Functions::fcn_log);
+	SetTransfFunction(&Functions::fcn_log);
 
 	// gives neuron random coordinates
 	for(unsigned int i = 0; i < m_vPosition.size(); i++) {

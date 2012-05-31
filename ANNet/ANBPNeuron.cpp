@@ -22,7 +22,7 @@ BPNeuron::BPNeuron(AbsLayer *parentLayer) : AbsNeuron(parentLayer) {
 	m_fMomentum 	= 0.f;
 
 	// a stdard sigmoid function for the network
-	SetNetFunction(&Functions::fcn_log);
+	SetTransfFunction(&Functions::fcn_log);
 }
 
 BPNeuron::BPNeuron(BPNeuron *pNeuron) : AbsNeuron(pNeuron) {
@@ -63,7 +63,7 @@ void BPNeuron::CalcValue() {
 		SetValue(GetValue() + (from->GetValue() * GetConI(i)->GetValue()));
 	}
 
-	float fVal = GetNetFunction()->normal( GetValue(), fBias );
+	float fVal = GetTransfFunction()->normal( GetValue(), fBias );
 	SetValue(fVal);
 }
 
@@ -81,7 +81,7 @@ void BPNeuron::AdaptEdges() {
 		pCurNeuron = GetConO(i)->GetDestination(this);
 		fVal += pCurNeuron->GetErrorDelta() * GetConO(i)->GetValue();
 	}
-	fVal *= GetNetFunction()->derivate( GetValue(), 0.f );
+	fVal *= GetTransfFunction()->derivate( GetValue(), 0.f );
 	SetErrorDelta(fVal);
 
 	// adapt weights

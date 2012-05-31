@@ -15,7 +15,7 @@ using namespace ANN;
 
 
 HFNeuron::HFNeuron(AbsLayer *parentLayer) : AbsNeuron(parentLayer) {
-	SetNetFunction(&Functions::fcn_binary);
+	SetTransfFunction(&Functions::fcn_binary);
 	SetValue(1);
 }
 
@@ -37,7 +37,7 @@ void HFNeuron::CalcValue() {
 		fVal += from->GetValue() * GetConI(i)->GetValue();
 	}
 
-	fVal = GetNetFunction()->normal( fVal, 0 );
+	fVal = GetTransfFunction()->normal( fVal, 0 );
 	SetValue(fVal);
 }
 

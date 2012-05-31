@@ -92,7 +92,7 @@ fcn_decay (const float& sigma0, const float& T, const float& lambda) {
   *
   * Complete definition of the function and it's derivate.
   */
-class Function {
+class TransfFunction {
 public:
 	/** \brief The symbolic name of the function. */
 	char * name;
@@ -109,6 +109,12 @@ public:
 	  * Used for the backpropagation algorithm.
 	  */
 	float (* derivate)(const float&, const float&);
+};
+
+class DistFunction {
+public:
+	/** \brief The symbolic name of the function. */
+	char * name;
 
 	/**  \brief The distance function for SOMs
 	 *
@@ -130,7 +136,6 @@ public:
 	float (* decay)(const float& sigma, const float& t, const float& lambda);
 };
 
-
 /** \class Functions
  ** \brief List of activation functions that are available to the
  **        Network.
@@ -142,33 +147,34 @@ public:
 	  * \param  name The function name, as given in the function structure.
 	  * \return NULL on failure, pointer to structure on success.
 	  */
-	static const Function *ResolveByName (const char *name);
+	static const TransfFunction* ResolveTransfFByName (const char *name);
+	static const DistFunction*	 ResolveDistFByName (const char *name);
 
 	 /**
 	  * \brief The sigmoid tanh function.
 	  *
 	  * \f$f_{act} (x, \Theta) = tanh (x - \Theta)\f$
 	  */
-	static const Function fcn_tanh;
+	static const TransfFunction fcn_tanh;
 	 /**
 	  * \brief The sigmoid log function.
 	  *
 	  * \f$f_{act} (x, \Theta) = \frac{1}{1 + e^{-(x - \Theta)}}\f$
 	  */
-	static const Function fcn_log;
+	static const TransfFunction fcn_log;
 	 /**
 	  * \brief A linear activation function.
 	  *
 	  * \f$f_{act} (x, \Theta) = x - \Theta\f$
 	  */
-	static const Function fcn_linear;
+	static const TransfFunction fcn_linear;
 	 /**
 	  * \brief A binary activation function.
 	  *
 	  * \f$f_{act} (x, \Theta) = \left\{\begin{array}{cl}1.0 & x \geq
 	  * \Theta\\-1.0 & x < \Theta\end{array}\right.\f$
 	  */
-	static const Function fcn_binary;
+	static const TransfFunction fcn_binary;
 
 	/**
 	 * \brief A gaussian distance function.
@@ -182,7 +188,7 @@ public:
 	 *  \\ \mbox{t is the current time-step (iteration of the loop).}
 	 * \f$
 	 */
-	static const Function fcn_gaussian;
+	static const DistFunction fcn_gaussian;
 
 	/**
 	 * \brief A gaussian distance function.
@@ -198,7 +204,7 @@ public:
 	 * \\ \mbox{and } \sigma \mbox{, is the width of the neighborhood function.}
 	 * \f$
 	 */
-	static const Function fcn_mexican;
+	static const DistFunction fcn_mexican;
 };
 
 };

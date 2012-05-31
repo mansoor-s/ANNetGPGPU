@@ -257,7 +257,7 @@ std::vector<float> AbsNet::GetOutput() {
 	return vResult;
 }
 
-void AbsNet::SetNetFunction(const Function *pFunction) {
+void AbsNet::SetNetFunction(const TransfFunction *pFunction) {
 	assert( pFunction != 0 );
 
 	m_ActFunction = pFunction;
@@ -266,7 +266,7 @@ void AbsNet::SetNetFunction(const Function *pFunction) {
 	}
 }
 
-const Function *AbsNet::GetNetFunction() const {
+const TransfFunction *AbsNet::GetNetFunction() const {
 	return m_ActFunction;
 }
 

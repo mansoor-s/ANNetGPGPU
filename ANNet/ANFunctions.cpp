@@ -9,65 +9,53 @@
 	/*
 	 * BP
 	 */
-	const Function
+	const TransfFunction
 	Functions::fcn_tanh = {
 		(char*)"tanh",
 		fcn_tanh_normal,
-		fcn_tanh_derivate,
-		NULL,	// only for SOMs
-		NULL,	// only for SOMs
+		fcn_tanh_derivate
 	};
 
-	const Function
+	const TransfFunction
 	Functions::fcn_log = {
 		(char*)"log",
 		fcn_log_normal,
-		fcn_log_derivate,
-		NULL,	// only for SOMs
-		NULL,	// only for SOMs
+		fcn_log_derivate
 	};
 
-	const Function
+	const TransfFunction
 	Functions::fcn_linear = {
 		(char*)"linear",
 		fcn_linear_normal,
-		fcn_linear_derivate,
-		NULL,	// only for SOMs
-		NULL,	// only for SOMs
+		fcn_linear_derivate
 	};
 
-	const Function
+	const TransfFunction
 	Functions::fcn_binary = {
 		(char*)"binary",
 		fcn_binary_normal,
-		fcn_binary_derivate,
-		NULL,	// only for SOMs
-		NULL,	// only for SOMs
+		fcn_binary_derivate
 	};
 
 	/*
 	 * SOM
 	 */
-	const Function
+	const DistFunction
 	Functions::fcn_gaussian = {
 		(char*)"gaussian",
-		NULL,	// only for BPs
-		NULL,	// only for BPs
 		fcn_gaussian_bell,
 		fcn_decay
 	};
 
-	const Function
+	const DistFunction
 	Functions::fcn_mexican = {
 		(char*)"mexican",
-		NULL,	// only for BPs
-		NULL,	// only for BPs
 		fcn_mexican_hat,
 		fcn_decay
 	};
 
-	const Function*
-	Functions::ResolveByName (const char *name) {
+	const TransfFunction*
+	Functions::ResolveTransfFByName (const char *name) {
 		if (strcmp (name, "tanh") == 0)
 			return (&fcn_tanh);
 		if (strcmp (name, "log") == 0)
@@ -76,6 +64,11 @@
 			return (&fcn_linear);
 		if (strcmp (name, "binary") == 0)
 			return (&fcn_binary);
+		return (NULL);
+	}
+
+	const DistFunction*
+	Functions::ResolveDistFByName (const char *name) {
 		if (strcmp (name, "gaussian") == 0)
 			return (&fcn_gaussian);
 		if (strcmp (name, "mexican") == 0)

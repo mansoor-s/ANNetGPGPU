@@ -317,11 +317,11 @@ void SOMNet::FindBMNeuron() {
 	assert(m_pBMNeuron != NULL);
 }
 
-void SOMNet::SetDistFunction (const Function *pFCN) {
+void SOMNet::SetDistFunction (const DistFunction *pFCN) {
 	this->m_DistFunction = pFCN;
 }
 
-const Function *SOMNet::GetDistFunction() const {
+const DistFunction *SOMNet::GetDistFunction() const {
 	return (m_DistFunction);
 }
 

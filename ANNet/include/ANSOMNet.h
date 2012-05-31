@@ -14,10 +14,11 @@
 namespace ANN {
 
 class SOMNeuron;
+class DistFunction;
 
 class SOMNet : public AbsNet {
 protected:
-	const Function 	*m_DistFunction;
+	const DistFunction 	*m_DistFunction;
 	SOMNeuron 		*m_pBMNeuron;
 
 	unsigned int 	m_iCycle;	// current cycle step in learning progress
@@ -131,12 +132,12 @@ public:
 	/**
 	 * @param pFCN Kind of function the net has to use while back-/propagating.
 	 */
-	void SetDistFunction (const Function *pFCN);
+	void SetDistFunction (const DistFunction *pFCN);
 
 	/**
 	 * @return Return the kind of function the net has to use while back-/propagating.
 	 */
-	const Function *GetDistFunction() const;
+	const DistFunction *GetDistFunction() const;
 };
 
 }

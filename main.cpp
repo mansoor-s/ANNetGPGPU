@@ -107,7 +107,7 @@ for(int x = 0; x < w1*w1; x++) {
 w.Save("CPU.png");
 
 // GPU
-gpu.Training(9);
+gpu.Training(1000);
 
 for(int x = 0; x < w1*w1; x++) {
 	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);

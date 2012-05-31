@@ -22,7 +22,7 @@ class F3DArray;
 class TrainingSet;
 class ConTable;
 // math
-class Function;
+class TransfFunction;
 // net
 class AbsLayer;
 class Layer;
@@ -54,7 +54,7 @@ protected:
 	float m_fLearningRate;				// global learning rate
 	float m_fMomentum;
 	float m_fWeightDecay;
-	const Function *m_ActFunction;
+	const TransfFunction *m_ActFunction;
 
 	/* list of all layers in this net; last should be output layer, first input layer */
 
@@ -214,11 +214,11 @@ public:
 	 * Defines the type of "activation" function the net has to use for back-/propagation.
 	 * @param pFunction New "activation" function
 	 */
-	virtual void SetNetFunction 	(const Function *pFunction);
+	virtual void SetNetFunction 	(const TransfFunction *pFunction);
 	/**
 	 * @return Returns the current net (activation) function.
 	 */
-	const Function *GetNetFunction() const;
+	const TransfFunction *GetNetFunction() const;
 
 	/**
 	 * Only usable if input/output layer was already set.

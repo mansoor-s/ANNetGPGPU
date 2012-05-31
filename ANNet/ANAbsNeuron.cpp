@@ -146,12 +146,12 @@ AbsLayer *AbsNeuron::GetParent() const {
 	return m_pParentLayer;
 }
 
-void AbsNeuron::SetNetFunction (const Function *pFCN) {
+void AbsNeuron::SetTransfFunction (const TransfFunction *pFCN) {
 	this->m_ActFunction = pFCN;
 }
 
 
-const Function *AbsNeuron::GetNetFunction() const {
+const TransfFunction *AbsNeuron::GetTransfFunction() const {
 	return (m_ActFunction);
 }
 

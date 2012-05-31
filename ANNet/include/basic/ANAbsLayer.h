@@ -17,7 +17,7 @@ namespace ANN {
 
 // own classes
 class AbsNeuron;
-class Function;
+class TransfFunction;
 
 
 enum {
@@ -98,7 +98,7 @@ public:
 	 * Defines the type of "activation" function the net has to use for back-/propagation.
 	 * @param pFunction New "activation" function
 	 */
-	virtual void SetNetFunction 	(const Function *pFunction);
+	virtual void SetNetFunction 	(const TransfFunction *pFunction);
 
 	/**
 	 * Sets the type of the layer (input, hidden or output layer)

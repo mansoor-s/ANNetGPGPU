@@ -22,7 +22,7 @@ class F3DArray;
 class TrainingSet;
 class ConTable;
 // math
-class Function;
+class TransfFunction;
 // net
 class AbsLayer;
 class AbsNeuron;
@@ -53,7 +53,7 @@ protected:
 	std::vector<Edge*> m_lOutgoingConnections;
 	std::vector<Edge*> m_lIncomingConnections;
 
-	const Function *m_ActFunction;
+	const TransfFunction *m_ActFunction;
 
 public:
 	/**
@@ -153,11 +153,11 @@ public:
 	/**
 	 * @param pFCN Kind of function the net has to use while back-/propagating.
 	 */
-	virtual void SetNetFunction (const Function *pFCN);
+	virtual void SetTransfFunction (const TransfFunction *pFCN);
 	/**
 	 * @return Return the kind of function the net has to use while back-/propagating.
 	 */
-	const Function *GetNetFunction() const;
+	const TransfFunction *GetTransfFunction() const;
 
 	/**
 	 * Overload to define how the net has to act while propagating back.

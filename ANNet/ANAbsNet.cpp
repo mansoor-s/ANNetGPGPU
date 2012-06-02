@@ -22,7 +22,8 @@
 using namespace ANN;
 
 
-AbsNet::AbsNet() : Importer(this),  Exporter(this) {
+AbsNet::AbsNet() //: Importer(this),  Exporter(this)
+{
 	m_fLearningRate = 0.0f;
 	m_fMomentum 	= 0.f;
 	m_fWeightDecay 	= 0.f;
@@ -38,9 +39,52 @@ AbsNet::AbsNet() : Importer(this),  Exporter(this) {
 	INIT_TIME
 }
 
-AbsNet::AbsNet(AbsNet *pNet) : Importer(this),  Exporter(this) {
+AbsNet::AbsNet(AbsNet *pNet) //: Importer(this),  Exporter(this)
+{
 	assert( pNet != NULL );
 	*this = *pNet;
+}
+
+void AbsNet::CreateNet(const ConTable &Net) {
+	std::cout<<"Create AbsNet()"<<std::endl;
+
+	/*
+	 * Initialisiere Variablen
+	 */
+	unsigned int iDstNeurID 	= 0;
+	unsigned int iSrcNeurID 	= 0;
+	unsigned int iDstLayerID 	= 0;
+	unsigned int iSrcLayerID 	= 0;
+
+	float fEdgeValue			= 0.f;
+
+	AbsLayer *pDstLayer 		= NULL;
+	AbsLayer *pSrcLayer 		= NULL;
+	AbsNeuron *pDstNeur 		= NULL;
+	AbsNeuron *pSrcNeur 		= NULL;
+
+	/*
+	 * Basic information for ~all networks
+	 */
+	for(unsigned int i = 0; i < Net.NeurCons.size(); i++) {
+		iDstNeurID = Net.NeurCons.at(i).m_iDstNeurID;
+		iSrcNeurID = Net.NeurCons.at(i).m_iSrcNeurID;
+		iDstLayerID = Net.NeurCons.at(i).m_iDstLayerID;
+		iSrcLayerID = Net.NeurCons.at(i).m_iSrcLayerID;
+		if(iDstNeurID < 0 || iSrcNeurID < 0 || iDstLayerID < 0 || iSrcLayerID < 0) {
+			return;
+		}
+		else {
+			fEdgeValue 	= Net.NeurCons.at(i).m_fVal;
+
+			pDstLayer 	= GetLayer(iDstLayerID);
+			pSrcLayer 	= GetLayer(iSrcLayerID);
+
+			pDstNeur 	= pDstLayer->GetNeuron(iDstNeurID);
+			pSrcNeur 	= pSrcLayer->GetNeuron(iSrcNeurID);
+			Connect(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
+		}
+	}
 }
 
 AbsNet::~AbsNet() {
@@ -129,7 +173,6 @@ void AbsNet::SetInput(const std::vector<float> &inputArray) {
 }
 
 void AbsNet::SetInput(const std::vector<float> &inputArray, const unsigned int &layerID) {
-// TODO implement
 //	assert( m_lLayers[layerID]->GetFlag() & LayerInput );
 	assert( layerID < m_lLayers.size() );
 	assert( inputArray.size() <= m_lLayers[layerID]->GetNeurons().size() );
@@ -268,6 +311,62 @@ void AbsNet::SetNetFunction(const TransfFunction *pFunction) {
 
 const TransfFunction *AbsNet::GetNetFunction() const {
 	return m_ActFunction;
+}
+
+void AbsNet::ExpToFS(std::string path) {
+	int iBZ2Error;
+	NetTypeFlag fNetType 		= GetFlag();
+	unsigned int iNmbOfLayers 	= GetLayers().size();
+
+	FILE 	*fout = fopen(path.c_str(), "wb");
+	BZFILE	*bz2out;
+	bz2out = BZ2_bzWriteOpen(&iBZ2Error, fout, 9, 0, 0);
+
+	if (iBZ2Error != BZ_OK) {
+		std::cout<<"return: "<<"SaveNetwork()"<<std::endl;
+		return;
+	}
+	std::cout<<"Save network.."<<std::endl;
+	BZ2_bzWrite( &iBZ2Error, bz2out, &fNetType, sizeof(int) );
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iNmbOfLayers, sizeof(int) );
+
+	for(unsigned int i = 0; i < iNmbOfLayers; i++) {
+		GetLayer(i)->ExpToFS(bz2out, iBZ2Error);
+	}
+
+	BZ2_bzWriteClose ( &iBZ2Error, bz2out, 0, NULL, NULL );
+	fclose( fout );
+}
+
+void AbsNet::ImpFromFS(std::string path) {
+	int iBZ2Error;
+	ConTable Table;
+	NetTypeFlag fNetType 		= 0;
+	unsigned int iNmbOfLayers 	= 0;
+
+	FILE *fin = fopen(path.c_str(), "rb");
+	BZFILE* bz2in;
+	bz2in = BZ2_bzReadOpen(&iBZ2Error, fin, 0, 0, NULL, 0);
+
+	if (iBZ2Error != BZ_OK) {														// ABBRUCHBEDINGUNG
+		std::cout<<"return: "<<"LoadNetwork()"<<std::endl;
+		return;
+	}
+
+	std::cout<<"Load network.."<<std::endl;
+	BZ2_bzRead( &iBZ2Error, bz2in, &fNetType, sizeof(int) );
+	Table.NetType = fNetType;
+	BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfLayers, sizeof(int) );
+	Table.NrOfLayers = iNmbOfLayers;
+
+	for(unsigned int i = 0; i < iNmbOfLayers; i++) {
+		GetLayer(i)->ImpFromFS(bz2in, iBZ2Error, Table); // TODO SEEMS to be CRITICAL
+	}
+
+	CreateNet( Table );
+
+	BZ2_bzReadClose ( &iBZ2Error, bz2in );
+	fclose(fin);
 }
 
 /*

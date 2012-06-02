@@ -38,23 +38,23 @@ public:
 	 * This function uses bzip2 compression (big nets are very memory consuming).
 	 * @param sPath Path of the filesystem with name of the new file.
 	 */
-	void ExpToFS(std::string sPath) const; 	// TODO further testing for this function required
+	void ExpToFS(std::string sPath) const;
 
 	/**
 	 * Exports the weights of the net to a "normal" 1D array.
 	 * Necessary for processing data with CUDA.
 	 */
-//	F3DArray 	*ExpToWArray(); 	// TODO further testing for this function required
+//	F3DArray 	*ExpToWArray();
 	/**
 	 * Exports the Neurons of the net to a "normal" 1D array.
 	 * Necessary for processing data with CUDA.
 	 */
-//	F2DArray 	*ExpToNArray(); 	// TODO further testing for this function required
+//	F2DArray 	*ExpToNArray();
 	/**
 	 * Exports the error deltas of the net to a "normal" 1D array.
 	 * Necessary for processing data with CUDA.
 	 */
-//	F2DArray 	*ExpToDArray(); 	// TODO further testing for this function required
+//	F2DArray 	*ExpToDArray();
 };
 
 }

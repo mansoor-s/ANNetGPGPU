@@ -19,6 +19,7 @@ namespace ANN {
 // own classes
 class Function;
 class BPNeuron;
+class ConTable;
 
 
 /**
@@ -113,6 +114,16 @@ public:
 	 * @param fVal New value of the weight decay. Recommended: 0.f
 	 */
 	void SetWeightDecay 	(const float &fVal);
+
+	/**
+	 * Save layer's content to filesystem
+	 */
+	virtual void ExpToFS(BZFILE* bz2out, int iBZ2Error);
+	/**
+	 * Load layer's content to filesystem
+	 * @return The ID of the current layer.
+	 */
+	virtual int ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
 
 	/**
 	 * standard output of the layer.

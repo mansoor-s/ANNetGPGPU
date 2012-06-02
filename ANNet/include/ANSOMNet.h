@@ -54,8 +54,7 @@ protected:
 	virtual void PropagateBW();
 
 	/**
-	 * Implement to determine propagation behavior
-	 * TODO implement
+	 * TODO Implement to determine propagation behavior
 	 */
 	virtual void PropagateFW();
 
@@ -138,6 +137,11 @@ public:
 	 * @return Return the kind of function the net has to use while back-/propagating.
 	 */
 	const DistFunction *GetDistFunction() const;
+
+	/*
+	 *
+	 */
+	virtual void CreateNet(const ConTable &Net);
 };
 
 }

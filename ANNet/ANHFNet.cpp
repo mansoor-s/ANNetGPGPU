@@ -14,7 +14,9 @@
 #include <ANHFLayer.h>
 
 #include <math/ANFunctions.h>
+
 #include <containers/ANTrainingSet.h>
+#include <containers/ANConTable.h>
 
 using namespace ANN;
 
@@ -37,6 +39,49 @@ HFNet::HFNet(AbsNet *pNet) : AbsNet(pNet) {
 
 HFNet::~HFNet() {
 
+}
+
+void HFNet::CreateNet(const ConTable &Net) {
+	std::cout<<"Create HFNet"<<std::endl;
+
+	/*
+	 * Init
+	 */
+	unsigned int iNmbLayers 	= Net.NrOfLayers;	// zahl der Layer im Netz
+	unsigned int iNmbNeurons	= 0;
+
+	LayerTypeFlag fType 		= 0;
+	/*
+	 *	Delete existing network in memory
+	 */
+	EraseAll();
+	SetFlag(Net.NetType);
+	/*
+	 * Create the layers ..
+	 */
+	for(unsigned int i = 0; i < iNmbLayers; i++) {
+		iNmbNeurons = Net.SizeOfLayer.at(i);
+		fType 		= Net.TypeOfLayer.at(i);
+		// Create layers
+		AddLayer( new HFLayer(iNmbNeurons, 1) );
+
+		// Set pointers to input and output layers
+		if(fType == ANLayerInput) {
+			SetIPLayer(i);
+		}
+		else if(fType == ANLayerOutput) {
+			SetOPLayer(i);
+		}
+		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
+			SetIPLayer(i);
+			SetOPLayer(i);
+		}
+	}
+
+	/*
+	 * For all nets necessary: Create Connections (Edges)
+	 */
+	AbsNet::CreateNet(Net);
 }
 
 void HFNet::Resize(const unsigned int &iW, const unsigned int &iH) {

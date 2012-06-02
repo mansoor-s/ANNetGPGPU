@@ -14,6 +14,8 @@
 #include <basic/ANExporter.h>
 #include <basic/ANImporter.h>
 
+#include <bzlib.h>
+
 namespace ANN {
 
 // containers
@@ -155,7 +157,7 @@ public:
 	 */
 	virtual void SetTransfFunction (const TransfFunction *pFCN);
 	/**
-	 * @return Return the kind of function the net has to use while back-/propagating.
+	 * @return The transfer function of the net.
 	 */
 	const TransfFunction *GetTransfFunction() const;
 
@@ -168,7 +170,17 @@ public:
 	 * Overload to define how the net has to act while propagating.
 	 * I. e. which neurons/edges to use for calculating the new value of the neuron
 	 */
-	virtual void CalcValue() 		= 0;
+	virtual void CalcValue() 	= 0;
+
+	/**
+	 * Save neuron's content to filesystem
+	 */
+	virtual void ExpToFS(BZFILE* bz2out, int iBZ2Error);
+	/**
+	 * Load neuron's content to filesystem
+	 * @return The connections table of this neuron.
+	 */
+	virtual void ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
 
 	/* QUASI STATIC:*/
 

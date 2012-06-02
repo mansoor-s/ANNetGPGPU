@@ -34,7 +34,7 @@ Exporter::~Exporter() {
 void Exporter::ExpToFS(std::string path) const {
 	int iBZ2Error;
 
-	NetTypeFlag 	fNetType = m_pNet->GetFlag();;
+	NetTypeFlag 	fNetType = m_pNet->GetFlag();
 	LayerTypeFlag 	fLayerType;
 	unsigned int iNmbDims 			= 0;
 	unsigned int iNmbOfNeurons 		= 0;
@@ -67,8 +67,8 @@ void Exporter::ExpToFS(std::string path) const {
 			bHasBias = true;
 		}
 		else bHasBias = false;
-		BZ2_bzWrite( &iBZ2Error, bz2out, &fLayerType, sizeof(LayerTypeFlag) );	// Type of layer
 		BZ2_bzWrite( &iBZ2Error, bz2out, &bHasBias, sizeof(bool) );				// Has layer bias neuron
+		BZ2_bzWrite( &iBZ2Error, bz2out, &fLayerType, sizeof(LayerTypeFlag) );	// Type of layer
 		BZ2_bzWrite( &iBZ2Error, bz2out, &iNmbOfNeurons, sizeof(int) );			// Number of neuron in this layer (except bias)
 		for(unsigned int j = 0; j < iNmbOfNeurons; j++) {
 			AbsNeuron *pCurNeur = pCurLayer->GetNeuron(j);

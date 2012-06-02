@@ -10,9 +10,10 @@
 
 #include <vector>
 #include <string>
+#include <bzlib.h>
 
-#include <basic/ANExporter.h>
-#include <basic/ANImporter.h>
+//#include <basic/ANExporter.h>
+//#include <basic/ANImporter.h>
 
 namespace ANN {
 
@@ -46,7 +47,8 @@ typedef uint32_t NetTypeFlag;
  *
  * @author Daniel "dgrat" Frenzel
  */
-class AbsNet : public Importer, public Exporter {
+class AbsNet //: public Importer, public Exporter
+{
 protected:
 	NetTypeFlag m_fTypeFlag;
 
@@ -219,6 +221,21 @@ public:
 	 * @return Returns the current net (activation) function.
 	 */
 	const TransfFunction *GetNetFunction() const;
+
+	/**
+	 * Save net's content to filesystem
+	 */
+	virtual void ExpToFS(std::string path);
+	/**
+	 * Load net's content to filesystem
+	 * @return The connections table of this net.
+	 */
+	virtual void ImpFromFS(std::string path);
+
+	/**
+	 *
+	 */
+	virtual void CreateNet(const ConTable &Net);
 
 	/**
 	 * Only usable if input/output layer was already set.

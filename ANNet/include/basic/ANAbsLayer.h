@@ -13,11 +13,14 @@
 #include <stdint.h>
 #include <containers/AN2DArray.h>
 
+#include <bzlib.h>
+
 namespace ANN {
 
 // own classes
 class AbsNeuron;
 class TransfFunction;
+class ConTable;
 
 
 enum {
@@ -117,6 +120,16 @@ public:
 	 * @return Returns the flag describing the type of the layer.
 	 */
 	LayerTypeFlag GetFlag() const;
+
+	/**
+	 * Save layer's content to filesystem
+	 */
+	virtual void ExpToFS(BZFILE* bz2out, int iBZ2Error);
+	/**
+	 * Load layer's content to filesystem
+	 * @return The ID of the current layer.
+	 */
+	virtual int ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
 
 	// FRIEND
 	friend void SetEdgesToValue(AbsLayer *pSrcLayer, AbsLayer *pDestLayer, const float &fVal, const bool &bAdaptState = false);

@@ -12,6 +12,8 @@
 #include <basic/ANAbsNeuron.h>
 #include <basic/ANAbsLayer.h>
 
+#include <containers/ANConTable.h>
+
 using namespace ANN;
 
 
@@ -80,6 +82,49 @@ void AbsLayer::AddFlag(const LayerTypeFlag &fType) {
 
 LayerTypeFlag AbsLayer::GetFlag() const {
 	return m_fTypeFlag;
+}
+
+void AbsLayer::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
+	int iLayerID 				= GetID();
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iLayerID, sizeof(int) );
+
+	std::cout<<"Save AbsLayer to FS()"<<std::endl;
+
+	LayerTypeFlag 	fLayerType 	= GetFlag();
+	unsigned int iNmbOfNeurons 	= GetNeurons().size();
+
+	BZ2_bzWrite( &iBZ2Error, bz2out, &fLayerType, sizeof(LayerTypeFlag) );	// Type of layer
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iNmbOfNeurons, sizeof(int) );			// Number of neuron in this layer (except bias)
+	for(unsigned int j = 0; j < iNmbOfNeurons; j++) {
+		AbsNeuron *pCurNeur = GetNeuron(j);
+		pCurNeur->ExpToFS(bz2out, iBZ2Error);
+	}
+}
+
+int AbsLayer::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table) {
+	int iLayerID 				= -1;
+	BZ2_bzRead( &iBZ2Error, bz2in, &iLayerID, sizeof(int) );
+
+	std::cout<<"Load AbsLayer from FS()"<<std::endl;
+
+	LayerTypeFlag 	fLayerType 	= 0;
+	unsigned int iNmbOfNeurons 	= 0;
+
+	BZ2_bzRead( &iBZ2Error, bz2in, &fLayerType, sizeof(LayerTypeFlag) );
+	BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfNeurons, sizeof(int) );
+	Table.TypeOfLayer.push_back(fLayerType);
+	Table.SizeOfLayer.push_back(iNmbOfNeurons);
+
+	for(unsigned int j = 0; j < iNmbOfNeurons; j++) {
+		NeurDescr 	cCurNeur;
+		cCurNeur.m_iLayerID = iLayerID;
+		Table.Neurons.push_back(cCurNeur);
+
+		AbsNeuron *pCurNeur = GetNeuron(j);           // TODO SEEMS to be CRITICAL
+		pCurNeur->ImpFromFS(bz2in, iBZ2Error, Table); // TODO SEEMS to be CRITICAL
+	}
+
+	return iLayerID;
 }
 
 /*FRIEND:*/

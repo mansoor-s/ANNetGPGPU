@@ -22,8 +22,8 @@
 //using namespace ANN;
 
 int main(int argc, char *argv[]) {
-
-    QApplication a(argc, argv);
+/*
+QApplication a(argc, argv);
 
 	//create a data set
 std::vector<float> red, green, blue, yellow, orange, purple, dk_green, dk_blue, black, white;
@@ -81,8 +81,8 @@ input.AddInput(black);
 input.AddInput(white);
 
 std::vector<float> vCol(3);
-int w1 = 128;
-int w2 = 2;
+int w1 = 40;
+int w2 = 4;
 SOMReader w(w1, w1, w2);
 
 ANN::SOMNet SOMap;
@@ -96,15 +96,15 @@ ANN::SOMNetGPU gpu(&SOMap);
 
 SOMap.Training(9);
 
-for(int x = 0; x < w1*w1; x++) {
-	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)SOMap.GetOPLayer())->GetNeuron(x);
-	vCol[0] = pNeur->GetConI(0)->GetValue();
-	vCol[1] = pNeur->GetConI(1)->GetValue();
-	vCol[2] = pNeur->GetConI(2)->GetValue();
+//for(int x = 0; x < w1*w1; x++) {
+//	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)SOMap.GetOPLayer())->GetNeuron(x);
+//	vCol[0] = pNeur->GetConI(0)->GetValue();
+//	vCol[1] = pNeur->GetConI(1)->GetValue();
+//	vCol[2] = pNeur->GetConI(2)->GetValue();
 
-	w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
-}
-w.Save("CPU.png");
+//	w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
+//}
+//w.Save("CPU.png");
 
 // GPU
 gpu.Training(1000);
@@ -118,7 +118,25 @@ for(int x = 0; x < w1*w1; x++) {
 	w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
 }
 
-w.Save("GPU.png");
+w.Save("GPU_1.png");
+
+//gpu.ExpToFS("foo1.bar");
+//gpu.ImpFromFS("foo1.bar");
+
+gpu.ExpToFS("foo2.bar");
+gpu.ImpFromFS("foo2.bar");
+
+for(int x = 0; x < w1*w1; x++) {
+	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);
+	vCol[0] = pNeur->GetConI(0)->GetValue();
+	vCol[1] = pNeur->GetConI(1)->GetValue();
+	vCol[2] = pNeur->GetConI(2)->GetValue();
+
+	w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
+}
+
+w.Save("GPU_2.png");
+*/
 
 /*
 float fInp1[3];
@@ -212,11 +230,8 @@ net.SetMomentum(0.9);
 net.SetWeightDecay(0);
 net.SetTrainingSet(input);
 
-long t1, t2;
-t1 = getTickCount();
-errors = net.TrainFromData(5000, 0.001);
-t2 = getTickCount();
-std::cout<<"TIME - CPU "<<t2-t1<<std::endl;
+
+//errors = net.TrainFromData(5000, 0.001);
 std::cout<< net <<std::endl;
 
 net.ExpToFS("TEST");
@@ -225,7 +240,7 @@ net.SetTrainingSet(input);
 std::cout<< net <<std::endl;
 */
 //////////////////////////////////////////////////////////////////
-/*
+
 float TR[16];
 TR[0] 	= -1;
 TR[1] 	= 1;
@@ -404,7 +419,7 @@ for(int k = 0; k < 1; k++) {
 	}
 	std::cout<<std::endl;
 }
-*/
+
 /*
     thrust::host_vector<float> h_vec(1024);
     thrust::sequence(h_vec.begin(), h_vec.end()); // values = indices

@@ -22,15 +22,9 @@ class AbsNet;
  * @author Daniel "dgrat" Frenzel
  */
 class Importer {
+public:
 	AbsNet *m_pNet;
 
-	/**
-	 * Functions uses the data from LoadNetwork() and creates the net.
-	 * I. e. has to create all objects (layers, neurons, edges).
-	 */
-	void CreateNet(const ConTable &); 	// TODO further testing for this function required
-
-public:
 	Importer(AbsNet *pNet);
 	virtual ~Importer();
 
@@ -38,12 +32,13 @@ public:
 	 * Loads the weights of a network from the filesystem
 	 * @param sPath Path of the filesystem with name of the file inheriting the weight values.
 	 */
-	void ImpFromFS(std::string sPath); 	// TODO further testing for this function required
+	void ImpFromFS(std::string sPath);
 
-	/*
-	 * TODO
-	 * 1) WRITE IMPORT for GPU-arrays
+	/**
+	 * Functions uses the data from LoadNetwork() and creates the net.
+	 * I. e. has to create all objects (layers, neurons, edges).
 	 */
+	void CreateNet(const ConTable &);
 };
 
 }

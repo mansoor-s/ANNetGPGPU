@@ -39,7 +39,7 @@ void Importer::ImpFromFS(std::string path) {
 	LayerTypeFlag 	fLayerType;
 	unsigned int iNmbDims 			= 0;
 	unsigned int iNmbLayers 		= 0;	// zahl der Layer im Netz
-	unsigned int iNmbNeurons 		= 0;	// zahl der Neuronen im Layer
+	unsigned int iNmbOfNeurons 		= 0;	// zahl der Neuronen im Layer
 	unsigned int iNmbOfConnects 	= 0;
 
 	std::vector<float> vNeuronPos;
@@ -65,13 +65,13 @@ void Importer::ImpFromFS(std::string path) {
 	BZ2_bzRead( &iBZ2Error, bz2in, &iNmbLayers, sizeof(int) );
 	Res.NrOfLayers = iNmbLayers;
 	for(unsigned int i = 0; i < iNmbLayers; i++) {
-		BZ2_bzRead( &iBZ2Error, bz2in, &fLayerType, sizeof(LayerTypeFlag) );
 		BZ2_bzRead( &iBZ2Error, bz2in, &bHasBias, sizeof(bool) );
-		BZ2_bzRead( &iBZ2Error, bz2in, &iNmbNeurons, sizeof(int) );
-		Res.SizeOfLayer.push_back(iNmbNeurons);
+		BZ2_bzRead( &iBZ2Error, bz2in, &fLayerType, sizeof(LayerTypeFlag) );
+		BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfNeurons, sizeof(int) );
 		Res.TypeOfLayer.push_back(fLayerType);
+		Res.SizeOfLayer.push_back(iNmbOfNeurons);
 
-		for(unsigned int j = 0; j < iNmbNeurons; j++) {
+		for(unsigned int j = 0; j < iNmbOfNeurons; j++) {
 			BZ2_bzRead( &iBZ2Error, bz2in, &iSrcNeurID, sizeof(int) );
 			/*
 			 * Save positions of the neurons
@@ -128,11 +128,9 @@ void Importer::ImpFromFS(std::string path) {
 	fclose(fin);
 }
 
-/*
- * TODO testing
- * TODO make it faster
- */
 void Importer::CreateNet(const ConTable &Net) {
+	std::cout<<"Create net"<<std::endl;
+
 	/*
 	 * Initialisiere Variablen
 	 */
@@ -151,7 +149,7 @@ void Importer::CreateNet(const ConTable &Net) {
 	AbsNeuron *pDstNeur 		= NULL;
 	AbsNeuron *pSrcNeur 		= NULL;
 
-	LayerTypeFlag fType;
+	LayerTypeFlag fType 		= 0;
 	/*
 	 *	Lösche Netz
 	 */
@@ -207,18 +205,10 @@ void Importer::CreateNet(const ConTable &Net) {
 		}
 		else {
 			fEdgeValue 	= Net.NeurCons.at(i).m_fVal;
-			if(Net.NetType == ANNetBP) {
-				pDstLayer 	= ( (BPLayer*)m_pNet->GetLayer(iDstLayerID) );
-				pSrcLayer 	= ( (BPLayer*)m_pNet->GetLayer(iSrcLayerID) );
-			}
-			else if(Net.NetType == ANNetSOM) {
-				pDstLayer 	= ( (SOMLayer*)m_pNet->GetLayer(iDstLayerID) );
-				pSrcLayer 	= ( (SOMLayer*)m_pNet->GetLayer(iSrcLayerID) );
-			}
-			else if(Net.NetType == ANNetHopfield) {
-				pDstLayer 	= ( (HFLayer*)m_pNet->GetLayer(iDstLayerID) );
-				pSrcLayer 	= ( (HFLayer*)m_pNet->GetLayer(iSrcLayerID) );
-			}
+
+			pDstLayer 	= ( m_pNet->GetLayer(iDstLayerID) );
+			pSrcLayer 	= ( m_pNet->GetLayer(iSrcLayerID) );
+
 			pDstNeur 	= pDstLayer->GetNeuron(iDstNeurID);
 			pSrcNeur 	= pSrcLayer->GetNeuron(iSrcNeurID);
 			Connect(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);

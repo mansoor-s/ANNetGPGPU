@@ -15,6 +15,7 @@
 #include <basic/ANAbsNeuron.h>
 #include <ANBPLayer.h>
 #include <containers/ANTrainingSet.h>
+#include <containers/ANConTable.h>
 
 using namespace ANN;
 
@@ -159,6 +160,81 @@ AbsNeuron::operator float() const {
 	return GetValue();
 }
 
+void AbsNeuron::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
+	unsigned int iNmbDims 		= GetPosition().size();
+	unsigned int iNmbOfConnects = GetConsO().size();
+	int iSrcNeurID 				= GetID();
+
+	float fEdgeValue 	= 0.f;
+	int iDstLayerID 	= -1;
+	int iDstNeurID 		= -1;
+
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iSrcNeurID, sizeof(int) );
+	/*
+	 * Save positions of the neurons
+	 * important for SOMs
+	 */
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iNmbDims, sizeof(int) );
+	for(unsigned int k = 0; k < iNmbDims; k++) {
+		float fPos = GetPosition().at(k);
+		BZ2_bzWrite( &iBZ2Error, bz2out, &fPos, sizeof(float) );
+	}
+	/*
+	 * Save data of connections
+	 */
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iNmbOfConnects, sizeof(int) );
+	for(unsigned int k = 0; k < iNmbOfConnects; k++) {
+		Edge *pCurEdge = GetConO(k);
+		iDstLayerID = pCurEdge->GetDestination(this)->GetParent()->GetID();
+		iDstNeurID 	= pCurEdge->GetDestinationID(this);
+		fEdgeValue 	= pCurEdge->GetValue();
+		BZ2_bzWrite( &iBZ2Error, bz2out, &iDstLayerID, sizeof(int) );
+		BZ2_bzWrite( &iBZ2Error, bz2out, &iDstNeurID, sizeof(int) );
+		BZ2_bzWrite( &iBZ2Error, bz2out, &fEdgeValue, sizeof(float) );
+	}
+}
+
+void AbsNeuron::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table) {
+	unsigned int 	iNmbDims 		= 0;
+	unsigned int 	iNmbOfConnects 	= 0;
+
+	std::vector<float> vNeuronPos;
+
+	float fEdgeValue 	= 0.0f;
+	int iDstLayerID 	= -1;
+	int iDstNeurID 		= -1;
+	int iSrcNeurID 		= -1;
+
+	BZ2_bzRead( &iBZ2Error, bz2in, &iSrcNeurID, sizeof(int) );
+	/*
+	 * Save positions of the neurons
+	 * important for SOMs
+	 */
+	BZ2_bzRead( &iBZ2Error, bz2in, &iNmbDims, sizeof(int) );
+	vNeuronPos.resize(iNmbDims);
+	for(unsigned int k = 0; k < iNmbDims; k++) {
+		BZ2_bzRead( &iBZ2Error, bz2in, &vNeuronPos[k], sizeof(float) );
+	}
+	Table.Neurons.back().m_iNeurID 		= iSrcNeurID;
+	Table.Neurons.back().m_vPos 		= vNeuronPos;
+	/*
+	 * Save data of connections
+	 */
+	BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfConnects, sizeof(int) );
+	for(unsigned int k = 0; k < iNmbOfConnects; k++) {
+		BZ2_bzRead( &iBZ2Error, bz2in, &iDstLayerID, sizeof(int) );
+		BZ2_bzRead( &iBZ2Error, bz2in, &iDstNeurID, sizeof(int) );
+		BZ2_bzRead( &iBZ2Error, bz2in, &fEdgeValue, sizeof(float) );
+		ConDescr cCurCon;
+		cCurCon.m_fVal 			= fEdgeValue;
+		cCurCon.m_iSrcNeurID 	= iSrcNeurID;
+		cCurCon.m_iDstNeurID 	= iDstNeurID;
+		cCurCon.m_iSrcLayerID 	= Table.Neurons.back().m_iLayerID;	// current array always equal to current index, so valid
+		cCurCon.m_iDstLayerID 	= iDstLayerID;						// last chge
+		Table.NeurCons.push_back(cCurCon);
+	}
+}
+
 namespace ANN {
 	/*
 	 * AUSGABEOPERATOR
@@ -208,10 +284,12 @@ namespace ANN {
 
 		for(int j = 0; j < static_cast<int>(iSize); j++) {
 			// Output
+			/*
 			if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
 				std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
 				iProgCount++;
 			}
+			*/
 			// Work job
 			Connect(pSrcNeuron, pDestLayer->GetNeuron(j), bAdaptState);
 		}
@@ -223,10 +301,12 @@ namespace ANN {
 
 		for(int j = 0; j < static_cast<int>(iSize); j++) {
 			// Output
+			/*
 			if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
 				std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
 				iProgCount++;
 			}
+			*/
 			// Work job
 			Connect(pSrcNeuron, pDestLayer->GetNeuron(j), vValues[j], vMomentums[j], bAdaptState);
 		}

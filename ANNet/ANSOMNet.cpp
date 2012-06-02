@@ -6,18 +6,24 @@
  */
 
 #include <vector>
-#include <omp.h>
 #include <algorithm>
 #include <cassert>
 #include <limits>
 #include <cmath>
+
+#include <omp.h>
+
 #include <basic/ANEdge.h>
+
 #include <ANSOMNet.h>
 #include <ANSOMLayer.h>
 #include <ANSOMNeuron.h>
+
 #include <math/ANFunctions.h>
 #include <math/ANRandom.h>
+
 #include <containers/ANTrainingSet.h>
+#include <containers/ANConTable.h>
 
 namespace ANN {
 
@@ -59,6 +65,58 @@ SOMNet::SOMNet(AbsNet *pNet) {
 	SetTrainingSet(pNet->GetTrainingSet() );
 
 	m_fTypeFlag 	= ANNetSOM;
+}
+
+void SOMNet::CreateNet(const ConTable &Net) {
+	std::cout<<"Create SOMNet"<<std::endl;
+
+	/*
+	 * Init
+	 */
+	unsigned int iNmbLayers 	= Net.NrOfLayers;	// zahl der Layer im Netz
+	unsigned int iNmbNeurons	= 0;
+
+	LayerTypeFlag fType 		= 0;
+	/*
+	 *	Delete existing network in memory
+	 */
+	EraseAll();
+	SetFlag(Net.NetType);
+	/*
+	 * Create the layers ..
+	 */
+	for(unsigned int i = 0; i < iNmbLayers; i++) {
+		iNmbNeurons = Net.SizeOfLayer.at(i);
+		fType 		= Net.TypeOfLayer.at(i);
+		// Create layers
+		AddLayer( new SOMLayer(iNmbNeurons, fType) );
+
+		// Set pointers to input and output layers
+		if(fType == ANLayerInput) {
+			SetIPLayer(i);
+		}
+		else if(fType == ANLayerOutput) {
+			SetOPLayer(i);
+		}
+		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
+			SetIPLayer(i);
+			SetOPLayer(i);
+		}
+	}
+	/*
+	 * Set Positions
+	 */
+	for(unsigned int i = 0; i < Net.Neurons.size(); i++) {
+		int iLayerID 	= Net.Neurons.at(i).m_iLayerID;
+		int iNeurID 	= Net.Neurons.at(i).m_iNeurID;
+		std::vector<float> vPos = Net.Neurons.at(i).m_vPos;
+		GetLayer(iLayerID)->GetNeuron(iNeurID)->SetPosition(vPos);
+	}
+
+	/*
+	 * For all nets necessary: Create Connections (Edges)
+	 */
+	AbsNet::CreateNet(Net);
 }
 
 SOMNet::~SOMNet() {

@@ -32,6 +32,12 @@ public:
 	 * @param pNet
 	 */
 	BPNet(AbsNet *pNet);
+
+	/*
+	 *
+	 */
+	virtual void CreateNet(const ConTable &Net);
+
 	virtual ~BPNet();
 
 	/**
@@ -104,7 +110,7 @@ public:
 	 * @param iStopID
 	 * @return Returns a pointer to the new sub-network.
 	 */
-	BPNet *GetSubNet(const unsigned int &iStartID, const unsigned int &iStopID);	// TODO test this function
+	BPNet *GetSubNet(const unsigned int &iStartID, const unsigned int &iStopID);
 
 	/**
 	 * Sets learning rate scalar of the network.

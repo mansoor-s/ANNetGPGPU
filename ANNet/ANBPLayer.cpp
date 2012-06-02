@@ -13,6 +13,8 @@
 #include <ANBPNeuron.h>
 #include <ANBPLayer.h>
 
+#include <containers/ANConTable.h>
+
 using namespace ANN;
 
 
@@ -132,6 +134,66 @@ void BPLayer::SetWeightDecay(const float &fVal) {
 	for(int j = 0; j < static_cast<int>( m_lNeurons.size() ); j++) {
 		((BPNeuron*)m_lNeurons[j])->SetWeightDecay(fVal);
 	}
+}
+
+void BPLayer::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
+	std::cout<<"Save BPLayer to FS()"<<std::endl;
+	AbsLayer::ExpToFS(bz2out, iBZ2Error);
+
+	unsigned int iNmbOfConnects 	= 0;
+	float fEdgeValue 	= 0.0f;
+	int iDstLayerID 	= -1;
+	int iDstNeurID 		= -1;
+
+	bool bHasBias = false;
+	(GetBiasNeuron() == NULL) ? bHasBias = false : bHasBias = true;
+	BZ2_bzWrite( &iBZ2Error, bz2out, &bHasBias, sizeof(bool) );
+
+	if(bHasBias) {
+		AbsNeuron *pCurNeur = GetBiasNeuron();
+		iNmbOfConnects = pCurNeur->GetConsO().size();
+		BZ2_bzWrite( &iBZ2Error, bz2out, &iNmbOfConnects, sizeof(int) );
+		for(unsigned int k = 0; k < iNmbOfConnects; k++) {
+			Edge *pCurEdge = pCurNeur->GetConO(k);
+			iDstLayerID = pCurEdge->GetDestination(pCurNeur)->GetParent()->GetID();
+			iDstNeurID = pCurEdge->GetDestinationID(pCurNeur);
+			fEdgeValue = pCurEdge->GetValue();
+			BZ2_bzWrite( &iBZ2Error, bz2out, &iDstLayerID, sizeof(int) );
+			BZ2_bzWrite( &iBZ2Error, bz2out, &iDstNeurID, sizeof(int) );
+			BZ2_bzWrite( &iBZ2Error, bz2out, &fEdgeValue, sizeof(float) );
+		}
+	}
+}
+
+int BPLayer::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table) {
+	std::cout<<"Load BPLayer from FS()"<<std::endl;
+	int iLayerID = AbsLayer::ImpFromFS(bz2in, iBZ2Error, Table);
+
+	unsigned int iNmbOfConnects 	= 0;
+	float fEdgeValue 	= 0.0f;
+	int iDstLayerID 	= -1;
+	int iDstNeurID 		= -1;
+
+	bool bHasBias = false;
+
+	BZ2_bzRead( &iBZ2Error, bz2in, &bHasBias, sizeof(bool) );
+
+	if(bHasBias) {
+		BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfConnects, sizeof(int) );
+		for(unsigned int j = 0; j < iNmbOfConnects; j++) {
+			BZ2_bzRead( &iBZ2Error, bz2in, &iDstLayerID, sizeof(int) );
+			BZ2_bzRead( &iBZ2Error, bz2in, &iDstNeurID, sizeof(int) );
+			BZ2_bzRead( &iBZ2Error, bz2in, &fEdgeValue, sizeof(float) );
+			ConDescr	cCurCon;
+			cCurCon.m_fVal 			= fEdgeValue;
+			cCurCon.m_iDstNeurID 	= iDstNeurID;
+			cCurCon.m_iSrcLayerID 	= iLayerID;
+			cCurCon.m_iDstLayerID 	= iDstLayerID;
+			Table.BiasCons.push_back(cCurCon);
+		}
+	}
+
+	return iLayerID;
 }
 
 /*

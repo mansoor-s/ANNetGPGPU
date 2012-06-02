@@ -70,6 +70,11 @@ public:
 	 */
 	virtual void PropagateBW();
 
+	/*
+	 *
+	 */
+	void CreateNet(const ConTable &Net);
+
 	/**
 	 * Set the value of neurons in the input layer to new values
 	 * @param pInputArray Inherits the values of the input layer. Array has to have the same size like the net.

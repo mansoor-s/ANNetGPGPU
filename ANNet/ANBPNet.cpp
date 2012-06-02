@@ -17,6 +17,7 @@
 #include <ANBPNeuron.h>
 #include <ANBPLayer.h>
 #include <ANBPNet.h>
+#include <containers/ANConTable.h>
 
 using namespace ANN;
 
@@ -30,6 +31,84 @@ BPNet::BPNet(AbsNet *pNet) : AbsNet(pNet) {
 	*this = *GetSubNet( 0, pNet->GetLayers().size()-1 );
 
 	m_fTypeFlag 	= ANNetBP;
+}
+
+void BPNet::CreateNet(const ConTable &Net) {
+	std::cout<<"Create BPNet"<<std::endl;
+
+	/*
+	 * Init
+	 */
+	unsigned int iNmbLayers 	= Net.NrOfLayers;	// zahl der Layer im Netz
+	unsigned int iNmbNeurons	= 0;
+
+	unsigned int iDstNeurID 	= 0;
+	unsigned int iDstLayerID 	= 0;
+	unsigned int iSrcLayerID 	= 0;
+
+	float fEdgeValue			= 0.f;
+
+	AbsLayer *pDstLayer 		= NULL;
+	AbsLayer *pSrcLayer 		= NULL;
+	AbsNeuron *pDstNeur 		= NULL;
+	AbsNeuron *pSrcNeur 		= NULL;
+
+	LayerTypeFlag fType 		= 0;
+	/*
+	 *	Delete existing network in memory
+	 */
+	EraseAll();
+	SetFlag(Net.NetType);
+	/*
+	 * Create the layers ..
+	 */
+	for(unsigned int i = 0; i < iNmbLayers; i++) {
+		iNmbNeurons = Net.SizeOfLayer.at(i);
+		fType 		= Net.TypeOfLayer.at(i);
+		// Create layers
+		AddLayer( new BPLayer(iNmbNeurons, fType) );
+
+		// Set pointers to input and output layers
+		if(fType == ANLayerInput) {
+			SetIPLayer(i);
+		}
+		else if(fType == ANLayerOutput) {
+			SetOPLayer(i);
+		}
+		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
+			SetIPLayer(i);
+			SetOPLayer(i);
+		}
+	}
+
+	/*
+	 * For all nets necessary: Create Connections (Edges)
+	 */
+	AbsNet::CreateNet(Net);
+
+	/*
+	 * Only for back propagation networks
+	 */
+	if(Net.NetType == ANNetBP) {
+		for(unsigned int i = 0; i < Net.BiasCons.size(); i++) {
+			iDstNeurID = Net.BiasCons.at(i).m_iDstNeurID;
+			iDstLayerID = Net.BiasCons.at(i).m_iDstLayerID;
+			iSrcLayerID = Net.BiasCons.at(i).m_iSrcLayerID;
+			if(iDstNeurID < 0 || iDstLayerID < 0 || GetLayers().size() < iDstLayerID || GetLayers().size() < iSrcLayerID) {
+				return;
+			}
+			else {
+				fEdgeValue 	= Net.BiasCons.at(i).m_fVal;
+
+				pDstLayer 	= ( (BPLayer*)GetLayer(iDstLayerID) );
+				pSrcLayer 	= ( (BPLayer*)GetLayer(iSrcLayerID) );
+				pSrcNeur 	= ( (BPLayer*)pSrcLayer)->GetBiasNeuron();
+
+				pDstNeur 	= pDstLayer->GetNeuron(iDstNeurID);
+				Connect(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
+			}
+		}
+	}
 }
 
 BPNet::~BPNet() {

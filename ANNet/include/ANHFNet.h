@@ -12,6 +12,7 @@
 #include <string>
 
 #include <basic/ANAbsNet.h>
+#include <basic/ANAbsLayer.h>
 
 namespace ANN {
 
@@ -26,11 +27,24 @@ private:
 
 	void CalculateMatrix();
 
+protected:
+	/**
+	 * Adds a layer to the network.
+	 * @param iSize Number of neurons of the layer.
+	 * @param flType Flag describing the type of the net.
+	 */
+	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
+
 public:
 	HFNet();
 	HFNet(const unsigned int &iW, const unsigned int &iH);
 	HFNet(AbsNet *pNet);
 	virtual ~HFNet();
+
+	/*
+	 *
+	 */
+	void CreateNet(const ConTable &Net);
 
 	/**
 	 * Creates a single layered network with iW * iH neurons.
@@ -69,11 +83,6 @@ public:
 	 * \f$
 	 */
 	virtual void PropagateBW();
-
-	/*
-	 *
-	 */
-	void CreateNet(const ConTable &Net);
 
 	/**
 	 * Set the value of neurons in the input layer to new values

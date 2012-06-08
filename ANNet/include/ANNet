@@ -8,8 +8,6 @@
 #ifndef NETTYPES_H_
 #define NETTYPES_H_
 
-#include <basic/ANExporter.h>
-#include <basic/ANImporter.h>
 
 #include <basic/ANEdge.h>
 

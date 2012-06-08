@@ -67,42 +67,18 @@ SOMNet::SOMNet(AbsNet *pNet) {
 	m_fTypeFlag 	= ANNetSOM;
 }
 
+void SOMNet::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
+	AbsNet::AddLayer( new SOMLayer(iSize, flType) );
+}
+
 void SOMNet::CreateNet(const ConTable &Net) {
 	std::cout<<"Create SOMNet"<<std::endl;
 
 	/*
-	 * Init
+	 * For all nets necessary: Create Connections (Edges)
 	 */
-	unsigned int iNmbLayers 	= Net.NrOfLayers;	// zahl der Layer im Netz
-	unsigned int iNmbNeurons	= 0;
+	AbsNet::CreateNet(Net);
 
-	LayerTypeFlag fType 		= 0;
-	/*
-	 *	Delete existing network in memory
-	 */
-	EraseAll();
-	SetFlag(Net.NetType);
-	/*
-	 * Create the layers ..
-	 */
-	for(unsigned int i = 0; i < iNmbLayers; i++) {
-		iNmbNeurons = Net.SizeOfLayer.at(i);
-		fType 		= Net.TypeOfLayer.at(i);
-		// Create layers
-		AddLayer( new SOMLayer(iNmbNeurons, fType) );
-
-		// Set pointers to input and output layers
-		if(fType == ANLayerInput) {
-			SetIPLayer(i);
-		}
-		else if(fType == ANLayerOutput) {
-			SetOPLayer(i);
-		}
-		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
-			SetIPLayer(i);
-			SetOPLayer(i);
-		}
-	}
 	/*
 	 * Set Positions
 	 */
@@ -112,11 +88,6 @@ void SOMNet::CreateNet(const ConTable &Net) {
 		std::vector<float> vPos = Net.Neurons.at(i).m_vPos;
 		GetLayer(iLayerID)->GetNeuron(iNeurID)->SetPosition(vPos);
 	}
-
-	/*
-	 * For all nets necessary: Create Connections (Edges)
-	 */
-	AbsNet::CreateNet(Net);
 }
 
 SOMNet::~SOMNet() {
@@ -134,7 +105,7 @@ SOMNet *SOMNet::GetNet() {
 	 */
 	for(unsigned int i = 0; i <= this->GetLayers().size(); i++) {
 		SOMLayer *pLayer = new SOMLayer( ( (SOMLayer*)GetLayer(i) ) );
-		pNet->AddLayer( pLayer );
+		pNet->AbsNet::AddLayer( pLayer );
 	}
 
 	SOMLayer 	*pCurLayer;
@@ -212,12 +183,12 @@ void SOMNet::CreateSOM(const std::vector<unsigned int> &vDimI, const std::vector
 	std::cout<< "Create input layer" <<std::endl;
 	m_pIPLayer = new SOMLayer(vDimI, ANLayerInput);
 	m_pIPLayer->SetID(0);
-	AddLayer(m_pIPLayer);
+	AbsNet::AddLayer(m_pIPLayer);
 
 	std::cout<< "Create output layer" <<std::endl;
 	m_pOPLayer = new SOMLayer(vDimO, ANLayerOutput);
 	m_pOPLayer->SetID(1);
-	AddLayer(m_pOPLayer);
+	AbsNet::AddLayer(m_pOPLayer);
 
 	std::cout<< "Connect layer .." <<std::endl;
 	((SOMLayer*)m_pIPLayer)->ConnectLayer(m_pOPLayer);
@@ -235,12 +206,12 @@ void SOMNet::CreateSOM(const std::vector<unsigned int> &vDimI, const std::vector
 	std::cout<< "Create input layer" <<std::endl;
 	m_pIPLayer = new SOMLayer(vDimI, ANLayerInput);
 	m_pIPLayer->SetID(0);
-	AddLayer(m_pIPLayer);
+	AbsNet::AddLayer(m_pIPLayer);
 
 	std::cout<< "Create output layer" <<std::endl;
 	m_pOPLayer = new SOMLayer(vDimO, ANLayerOutput);
 	m_pOPLayer->SetID(1);
-	AddLayer(m_pOPLayer);
+	AbsNet::AddLayer(m_pOPLayer);
 
 	std::cout<< "Connect layer .." <<std::endl;
 	((SOMLayer*)m_pIPLayer)->ConnectLayer(m_pOPLayer, f2dEdgeMat);
@@ -266,12 +237,12 @@ void SOMNet::CreateSOM(	const unsigned int &iWidthI, const unsigned int &iHeight
 	std::cout<< "Create input layer" <<std::endl;
 	m_pIPLayer = new SOMLayer(iWidthI, iHeightI, ANLayerInput);
 	m_pIPLayer->SetID(0);
-	AddLayer(m_pIPLayer);
+	AbsNet::AddLayer(m_pIPLayer);
 
 	std::cout<< "Create output layer" <<std::endl;
 	m_pOPLayer = new SOMLayer(iWidthO, iHeightO, ANLayerOutput);
 	m_pOPLayer->SetID(1);
-	AddLayer(m_pOPLayer);
+	AbsNet::AddLayer(m_pOPLayer);
 
 	std::cout<< "Connect layer .." <<std::endl;
 	((SOMLayer*)m_pIPLayer)->ConnectLayer(m_pOPLayer);
@@ -298,8 +269,7 @@ void SOMNet::Training(const unsigned int &iCycles) {
 				std::cout<<"Current training progress calculated by the CPU is: "<<iProgCount*10.f<<"%/Step="<<m_iCycle+1<<std::endl;
 				iProgCount++;
 			}
-		}
-		else {
+		} else {
 			std::cout<<"Current training progress calculated by the CPU is: "<<(float)(m_iCycle+1.f)/(float)m_iCycles*100.f<<"%/Step="<<m_iCycle+1<<std::endl;
 		}
 

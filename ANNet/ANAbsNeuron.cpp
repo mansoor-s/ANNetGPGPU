@@ -86,6 +86,26 @@ void AbsNeuron::SetConI(Edge *Edge, const unsigned int iID) {
 	m_lIncomingConnections[iID] = Edge;
 }
 
+/*
+void AbsNeuron::SetConO(Edge *Edge, const unsigned int iID) {
+	std::list<ANN::Edge*>::iterator it;
+	it = m_lOutgoingConnections.begin();
+	for(unsigned int i = 0; i < iID; i++) {
+		it++;
+	}
+	*it = Edge;
+}
+
+void AbsNeuron::SetConI(Edge *Edge, const unsigned int iID) {
+	std::list<ANN::Edge*>::iterator it;
+	it = m_lIncomingConnections.begin();
+	for(unsigned int i = 0; i < iID; i++) {
+		it++;
+	}
+	*it = Edge;
+}
+*/
+
 unsigned int AbsNeuron::GetID() const {
 	return m_iNeuronID;
 }
@@ -109,6 +129,25 @@ Edge* AbsNeuron::GetConO(const unsigned int &pos) const {
 	return m_lOutgoingConnections.at(pos);
 }
 
+/*
+Edge* AbsNeuron::GetConI(const unsigned int &iID) {
+	std::list<ANN::Edge*>::iterator it;
+	it = m_lIncomingConnections.begin();
+	for(unsigned int i = 0; i < iID; i++) {
+		it++;
+	}
+	return *it;
+}
+
+Edge* AbsNeuron::GetConO(const unsigned int &iID) {
+	std::list<ANN::Edge*>::iterator it;
+	it = m_lOutgoingConnections.begin();
+	for(unsigned int i = 0; i < iID; i++) {
+		it++;
+	}
+	return *it;
+}
+*/
 
 void AbsNeuron::SetValue(const float &value) {
 	m_fValue = value;
@@ -284,12 +323,14 @@ namespace ANN {
 
 		for(int j = 0; j < static_cast<int>(iSize); j++) {
 			// Output
-			/*
-			if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
-				std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
-				iProgCount++;
+			if(iSize >= 10) {
+				if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
+					std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
+					iProgCount++;
+				}
+			} else {
+				std::cout<<"Building connections.. Progress: "<<(float)(j+1)/(float)iSize*100.f<<"%/Step="<<j+1<<std::endl;
 			}
-			*/
 			// Work job
 			Connect(pSrcNeuron, pDestLayer->GetNeuron(j), bAdaptState);
 		}
@@ -301,12 +342,14 @@ namespace ANN {
 
 		for(int j = 0; j < static_cast<int>(iSize); j++) {
 			// Output
-			/*
-			if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
-				std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
-				iProgCount++;
+			if(iSize >= 10) {
+				if(((j+1) / (iSize/10)) == iProgCount && (j+1) % (iSize/10) == 0) {
+					std::cout<<"Building connections.. Progress: "<<iProgCount*10.f<<"%/Step="<<j+1<<std::endl;
+					iProgCount++;
+				}
+			} else {
+				std::cout<<"Building connections.. Progress: "<<(float)(j+1)/(float)iSize*100.f<<"%/Step="<<j+1<<std::endl;
 			}
-			*/
 			// Work job
 			Connect(pSrcNeuron, pDestLayer->GetNeuron(j), vValues[j], vMomentums[j], bAdaptState);
 		}

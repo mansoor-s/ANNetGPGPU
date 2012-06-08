@@ -22,7 +22,7 @@
 //using namespace ANN;
 
 int main(int argc, char *argv[]) {
-/*
+
 QApplication a(argc, argv);
 
 	//create a data set
@@ -81,21 +81,22 @@ input.AddInput(black);
 input.AddInput(white);
 
 std::vector<float> vCol(3);
-int w1 = 40;
+int w1 = 128;
 int w2 = 4;
-SOMReader w(w1, w1, w2);
 
 ANN::SOMNet SOMap;
 SOMap.SetTrainingSet(input);
 SOMap.CreateSOM(3, 1, w1,w1);
 
 ANN::SOMNetGPU gpu(&SOMap);
+ANN::SOMNetGPU gpu2(&SOMap);
 //	ANN::SOMNetGPU gpu;
 //	gpu.SetTrainingSet(input);
 //	gpu.CreateSOM(3, 1, w1,w1);
 
 SOMap.Training(9);
 
+SOMReader w(w1, w1, w2);
 //for(int x = 0; x < w1*w1; x++) {
 //	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)SOMap.GetOPLayer())->GetNeuron(x);
 //	vCol[0] = pNeur->GetConI(0)->GetValue();
@@ -125,9 +126,10 @@ w.Save("GPU_1.png");
 
 gpu.ExpToFS("foo2.bar");
 gpu.ImpFromFS("foo2.bar");
+gpu2.ImpFromFS("foo2.bar");
 
 for(int x = 0; x < w1*w1; x++) {
-	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);
+	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu2.GetOPLayer())->GetNeuron(x);
 	vCol[0] = pNeur->GetConI(0)->GetValue();
 	vCol[1] = pNeur->GetConI(1)->GetValue();
 	vCol[2] = pNeur->GetConI(2)->GetValue();
@@ -136,7 +138,7 @@ for(int x = 0; x < w1*w1; x++) {
 }
 
 w.Save("GPU_2.png");
-*/
+
 
 /*
 float fInp1[3];
@@ -240,7 +242,7 @@ net.SetTrainingSet(input);
 std::cout<< net <<std::endl;
 */
 //////////////////////////////////////////////////////////////////
-
+/*
 float TR[16];
 TR[0] 	= -1;
 TR[1] 	= 1;
@@ -419,7 +421,7 @@ for(int k = 0; k < 1; k++) {
 	}
 	std::cout<<std::endl;
 }
-
+*/
 /*
     thrust::host_vector<float> h_vec(1024);
     thrust::sequence(h_vec.begin(), h_vec.end()); // values = indices

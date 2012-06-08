@@ -42,16 +42,16 @@ struct NeurDescr {
  * @author Daniel "dgrat" Frenzel
  */
 struct ConTable {
-	NetTypeFlag NetType;
-	unsigned int NrOfLayers;
+	NetTypeFlag 				NetType;
+	unsigned int 				NrOfLayers;
 
-	std::vector<unsigned int> SizeOfLayer;
-	std::vector<LayerTypeFlag> TypeOfLayer;
+	std::vector<unsigned int> 	SizeOfLayer;
+	std::vector<LayerTypeFlag> 	TypeOfLayer;
 
-	std::vector<NeurDescr> Neurons;
+	std::vector<NeurDescr> 		Neurons;
 
-	std::vector<ConDescr> BiasCons;
-	std::vector<ConDescr> NeurCons;
+	std::vector<ConDescr> 		BiasCons;		// TODO not elegant
+	std::vector<ConDescr> 		NeurCons;
 };
 
 }

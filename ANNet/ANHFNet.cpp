@@ -41,42 +41,12 @@ HFNet::~HFNet() {
 
 }
 
+void HFNet::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
+	AbsNet::AddLayer( new HFLayer(iSize, 1) );
+}
+
 void HFNet::CreateNet(const ConTable &Net) {
 	std::cout<<"Create HFNet"<<std::endl;
-
-	/*
-	 * Init
-	 */
-	unsigned int iNmbLayers 	= Net.NrOfLayers;	// zahl der Layer im Netz
-	unsigned int iNmbNeurons	= 0;
-
-	LayerTypeFlag fType 		= 0;
-	/*
-	 *	Delete existing network in memory
-	 */
-	EraseAll();
-	SetFlag(Net.NetType);
-	/*
-	 * Create the layers ..
-	 */
-	for(unsigned int i = 0; i < iNmbLayers; i++) {
-		iNmbNeurons = Net.SizeOfLayer.at(i);
-		fType 		= Net.TypeOfLayer.at(i);
-		// Create layers
-		AddLayer( new HFLayer(iNmbNeurons, 1) );
-
-		// Set pointers to input and output layers
-		if(fType == ANLayerInput) {
-			SetIPLayer(i);
-		}
-		else if(fType == ANLayerOutput) {
-			SetOPLayer(i);
-		}
-		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
-			SetIPLayer(i);
-			SetOPLayer(i);
-		}
-	}
 
 	/*
 	 * For all nets necessary: Create Connections (Edges)
@@ -91,7 +61,7 @@ void HFNet::Resize(const unsigned int &iW, const unsigned int &iH) {
 	m_iHeight 	= iH;
 
 	HFLayer *pIOLayer = new HFLayer(iW, iH);
-	AddLayer(pIOLayer);
+	AbsNet::AddLayer(pIOLayer);
 
 	m_pIPLayer = pIOLayer;
 	m_pOPLayer = pIOLayer;

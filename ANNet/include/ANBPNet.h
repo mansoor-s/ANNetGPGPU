@@ -22,6 +22,14 @@ namespace ANN {
  */
 class BPNet : public AbsNet
 {
+protected:
+	/**
+	 * Adds a layer to the network.
+	 * @param iSize Number of neurons of the layer.
+	 * @param flType Flag describing the type of the net.
+	 */
+	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
+
 public:
 	/**
 	 * Standard constructor
@@ -33,12 +41,12 @@ public:
 	 */
 	BPNet(AbsNet *pNet);
 
+	virtual ~BPNet();
+
 	/*
 	 *
 	 */
 	virtual void CreateNet(const ConTable &Net);
-
-	virtual ~BPNet();
 
 	/**
 	 * Overloaded for extended functionality of BP-layers.

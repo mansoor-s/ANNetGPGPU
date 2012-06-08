@@ -51,6 +51,9 @@ void AbsNet::CreateNet(const ConTable &Net) {
 	/*
 	 * Initialisiere Variablen
 	 */
+	unsigned int iNmbLayers 	= Net.NrOfLayers;	// zahl der Layer im Netz
+	unsigned int iNmbNeurons	= 0;
+
 	unsigned int iDstNeurID 	= 0;
 	unsigned int iSrcNeurID 	= 0;
 	unsigned int iDstLayerID 	= 0;
@@ -62,6 +65,36 @@ void AbsNet::CreateNet(const ConTable &Net) {
 	AbsLayer *pSrcLayer 		= NULL;
 	AbsNeuron *pDstNeur 		= NULL;
 	AbsNeuron *pSrcNeur 		= NULL;
+
+	LayerTypeFlag fType 		= 0;
+
+	/*
+	 *	Delete existing network in memory
+	 */
+	EraseAll();
+	SetFlag(Net.NetType);
+
+	/*
+	 * Create the layers ..
+	 */
+	for(unsigned int i = 0; i < iNmbLayers; i++) {
+		iNmbNeurons = Net.SizeOfLayer.at(i);
+		fType 		= Net.TypeOfLayer.at(i);
+		// Create layers
+		AddLayer( new BPLayer(iNmbNeurons, fType) );
+
+		// Set pointers to input and output layers
+		if(fType == ANLayerInput) {
+			SetIPLayer(i);
+		}
+		else if(fType == ANLayerOutput) {
+			SetOPLayer(i);
+		}
+		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
+			SetIPLayer(i);
+			SetOPLayer(i);
+		}
+	}
 
 	/*
 	 * Basic information for ~all networks

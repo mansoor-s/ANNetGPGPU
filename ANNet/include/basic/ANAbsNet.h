@@ -12,6 +12,8 @@
 #include <string>
 #include <bzlib.h>
 
+#include <basic/ANAbsLayer.h>
+
 //#include <basic/ANExporter.h>
 //#include <basic/ANImporter.h>
 
@@ -65,10 +67,22 @@ protected:
 	AbsLayer *m_pIPLayer;				// pointer to input layer
 	AbsLayer *m_pOPLayer;				// pointer to output layer
 
+	/**
+	 * Adds a layer to the network.
+	 * @param iSize Number of neurons of the layer.
+	 * @param flType Flag describing the type of the net.
+	 */
+	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) = 0;
+
 public:
 	AbsNet();
 	AbsNet(AbsNet *pNet);
 	virtual ~AbsNet();
+
+	/**
+	 *
+	 */
+	virtual void CreateNet(const ConTable &Net);
 
 	/**
 	 * Implement to determine propagation behavior
@@ -231,11 +245,6 @@ public:
 	 * @return The connections table of this net.
 	 */
 	virtual void ImpFromFS(std::string path);
-
-	/**
-	 *
-	 */
-	virtual void CreateNet(const ConTable &Net);
 
 	/**
 	 * Only usable if input/output layer was already set.

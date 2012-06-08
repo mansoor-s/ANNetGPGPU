@@ -8,11 +8,9 @@
 #ifndef ABSNEURON_H_
 #define ABSNEURON_H_
 
+//#include <list>
 #include <vector>
 #include <string>
-
-#include <basic/ANExporter.h>
-#include <basic/ANImporter.h>
 
 #include <bzlib.h>
 
@@ -51,6 +49,9 @@ protected:
 	int m_iNeuronID;						// ID of this neuron in the layer
 
 	Edge *m_pBias;							// Pointer to the bias edge (or connection to bias neuron)
+
+//	std::list<Edge*> m_lOutgoingConnections;
+//	std::list<Edge*> m_lIncomingConnections;
 
 	std::vector<Edge*> m_lOutgoingConnections;
 	std::vector<Edge*> m_lIncomingConnections;

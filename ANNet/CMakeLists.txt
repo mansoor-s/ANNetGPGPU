@@ -30,12 +30,10 @@ set( ANSourceFiles
   ANBPNet.cpp
   ANBPNeuron.cpp
   ANEdge.cpp
-  ANExporter.cpp
   ANFunctions.cpp
   ANHFLayer.cpp
   ANHFNet.cpp
   ANHFNeuron.cpp
-  ANImporter.cpp
   ANSOMLayer.cpp
   ANSOMNet.cpp
   ANSOMNeuron.cpp

@@ -58,6 +58,13 @@ protected:
 	 */
 	virtual void PropagateFW();
 
+	/**
+	 * Adds a layer to the network.
+	 * @param iSize Number of neurons of the layer.
+	 * @param flType Flag describing the type of the net.
+	 */
+	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
+
 public:
 	/**
 	 * Creates a self organizing map object.
@@ -83,6 +90,11 @@ public:
 			const unsigned int &iWidthO, const unsigned int &iHeightO);
 
 	virtual ~SOMNet();
+
+	/*
+	 *
+	 */
+	virtual void CreateNet(const ConTable &Net);
 
 	SOMNet *GetNet();
 
@@ -137,11 +149,6 @@ public:
 	 * @return Return the kind of function the net has to use while back-/propagating.
 	 */
 	const DistFunction *GetDistFunction() const;
-
-	/*
-	 *
-	 */
-	virtual void CreateNet(const ConTable &Net);
 };
 
 }

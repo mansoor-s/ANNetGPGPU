@@ -33,15 +33,19 @@ BPNet::BPNet(AbsNet *pNet) : AbsNet(pNet) {
 	m_fTypeFlag 	= ANNetBP;
 }
 
+BPNet::~BPNet() {
+}
+
+void BPNet::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
+	AbsNet::AddLayer( new BPLayer(iSize, flType) );
+}
+
 void BPNet::CreateNet(const ConTable &Net) {
 	std::cout<<"Create BPNet"<<std::endl;
 
 	/*
 	 * Init
 	 */
-	unsigned int iNmbLayers 	= Net.NrOfLayers;	// zahl der Layer im Netz
-	unsigned int iNmbNeurons	= 0;
-
 	unsigned int iDstNeurID 	= 0;
 	unsigned int iDstLayerID 	= 0;
 	unsigned int iSrcLayerID 	= 0;
@@ -53,34 +57,6 @@ void BPNet::CreateNet(const ConTable &Net) {
 	AbsNeuron *pDstNeur 		= NULL;
 	AbsNeuron *pSrcNeur 		= NULL;
 
-	LayerTypeFlag fType 		= 0;
-	/*
-	 *	Delete existing network in memory
-	 */
-	EraseAll();
-	SetFlag(Net.NetType);
-	/*
-	 * Create the layers ..
-	 */
-	for(unsigned int i = 0; i < iNmbLayers; i++) {
-		iNmbNeurons = Net.SizeOfLayer.at(i);
-		fType 		= Net.TypeOfLayer.at(i);
-		// Create layers
-		AddLayer( new BPLayer(iNmbNeurons, fType) );
-
-		// Set pointers to input and output layers
-		if(fType == ANLayerInput) {
-			SetIPLayer(i);
-		}
-		else if(fType == ANLayerOutput) {
-			SetOPLayer(i);
-		}
-		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
-			SetIPLayer(i);
-			SetOPLayer(i);
-		}
-	}
-
 	/*
 	 * For all nets necessary: Create Connections (Edges)
 	 */
@@ -91,7 +67,7 @@ void BPNet::CreateNet(const ConTable &Net) {
 	 */
 	if(Net.NetType == ANNetBP) {
 		for(unsigned int i = 0; i < Net.BiasCons.size(); i++) {
-			iDstNeurID = Net.BiasCons.at(i).m_iDstNeurID;
+			iDstNeurID 	= Net.BiasCons.at(i).m_iDstNeurID;
 			iDstLayerID = Net.BiasCons.at(i).m_iDstLayerID;
 			iSrcLayerID = Net.BiasCons.at(i).m_iSrcLayerID;
 			if(iDstNeurID < 0 || iDstLayerID < 0 || GetLayers().size() < iDstLayerID || GetLayers().size() < iSrcLayerID) {
@@ -109,9 +85,6 @@ void BPNet::CreateNet(const ConTable &Net) {
 			}
 		}
 	}
-}
-
-BPNet::~BPNet() {
 }
 
 void BPNet::AddLayer(AbsLayer *pLayer) {
@@ -149,7 +122,7 @@ BPNet *BPNet::GetSubNet(const unsigned int &iStartID, const unsigned int &iStopI
 		if( i == iStopID && !(( (BPLayer*)GetLayer(i) )->GetFlag() & ANLayerOutput) )
 			pLayer->AddFlag( ANLayerOutput );
 
-		pNet->AddLayer( pLayer );
+		pNet->AbsNet::AddLayer( pLayer );
 	}
 
 	BPLayer 	*pCurLayer;

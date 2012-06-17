@@ -36,10 +36,17 @@ endif(DOXYGEN_FOUND)
 # Add executable called "ANNetGPU" that is built from the source file
 # "main.cpp". The extensions are automatically found.
 if (CUDA_FOUND)
-  cuda_add_executable (ANNetGPU main.cpp)
-elseif (NOT CUDA_FOUND)
-  add_executable (ANNetGPU main.cpp)
+  cuda_add_executable (SOMNet examples/SOMNet.cpp)
+  target_link_libraries (SOMNet ANNet) 
 endif(CUDA_FOUND)
 
-# Link the executable to the Hello library.
-target_link_libraries (ANNetGPU ANNet) 
+cuda_add_executable (BPNet examples/BPNet.cpp)
+target_link_libraries (BPNet ANNet) 
+
+cuda_add_executable (HFNet examples/HFNet.cpp)
+target_link_libraries (HFNet ANNet) 
+
+if (QT4_FOUND)
+  add_executable (ANNetDesigner ANNetDesigner.cpp)
+  target_link_libraries (ANNetDesigner ANNet) 
+endif(QT4_FOUND)

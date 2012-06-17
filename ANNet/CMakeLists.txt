@@ -41,7 +41,23 @@ set( ANSourceFiles
 )
 
 set( ANGUISourceFiles
-  QSOMReader.cpp 
+  QSOMReader.cpp
+  include/gui/QCustomPlot/qcustomplot.cpp
+  include/gui/utils/fancymainwindow.cpp
+  include/gui/utils/manhattanstyle.cpp
+  include/gui/utils/minisplitter.cpp
+  include/gui/utils/styleanimator.cpp
+  include/gui/utils/styledbar.cpp
+  include/gui/utils/stylehelper.cpp
+  include/gui/fancytabwidget.cpp
+  QInputdialog.cpp
+  QMainWindow.cpp
+  QEdge.cpp
+  QNode.cpp
+  QLayer.cpp
+  QLabel.cpp
+  QScene.cpp
+  QViewer.cpp
 )
 
 set( ANCUDASourceFiles
@@ -54,6 +70,22 @@ set( ANCUDASourceFiles
 
 set( QtHeaderFiles 
   include/gui/QSOMReader.h
+  include/gui/QCustomPlot/qcustomplot.h
+  include/gui/utils/fancymainwindow.h
+  include/gui/utils/manhattanstyle.h
+  include/gui/utils/minisplitter.h
+  include/gui/utils/styleanimator.h
+  include/gui/utils/styledbar.h
+  include/gui/utils/stylehelper.h
+  include/gui/fancytabwidget.h
+  include/gui/QInputdialog.h
+  include/gui/QMainWindow.h
+  include/gui/QEdge.h
+  include/gui/QNode.h
+  include/gui/QLayer.h
+  include/gui/QLabel.h
+  include/gui/QScene.h
+  include/gui/QViewer.h
 )
 
 if (QT4_FOUND)

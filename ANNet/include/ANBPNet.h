@@ -49,9 +49,19 @@ public:
 	virtual void CreateNet(const ConTable &Net);
 
 	/**
-	 * Overloaded for extended functionality of BP-layers.
+	 * Adds a new layer to the network. New layer will get appended to m_lLayers.
+	 * @param pLayer Pointer to the new layer.
 	 */
-	virtual void AddLayer(AbsLayer *pLayer);
+	virtual void AddLayer(BPLayer *pLayer);
+
+	/**
+	 * Cycles the input from m_pTrainingData
+	 * Checks total error of the output returned from SetExpectedOutputData()
+	 * @return Returns the total error of the net after every training step.
+	 * @param iCycles Maximum number of training cycles
+	 * @param fTolerance Maximum error value (working as a break condition for early break-off)
+	 */
+	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance = 0.005f);
 
 	/**
 	 * Propagates through all neurons of the net beginning from the input layer.

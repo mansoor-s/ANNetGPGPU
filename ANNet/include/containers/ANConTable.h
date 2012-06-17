@@ -46,6 +46,7 @@ struct ConTable {
 	unsigned int 				NrOfLayers;
 
 	std::vector<unsigned int> 	SizeOfLayer;
+	std::vector<int> 			ZValOfLayer;
 	std::vector<LayerTypeFlag> 	TypeOfLayer;
 
 	std::vector<NeurDescr> 		Neurons;

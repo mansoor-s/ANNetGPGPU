@@ -80,17 +80,19 @@ void AbsNet::CreateNet(const ConTable &Net) {
 	for(unsigned int i = 0; i < iNmbLayers; i++) {
 		iNmbNeurons = Net.SizeOfLayer.at(i);
 		fType 		= Net.TypeOfLayer.at(i);
+
+		std::cout<<"fTYPE: "<<fType<<std::endl;
 		// Create layers
-		AddLayer( new BPLayer(iNmbNeurons, fType) );
+		AddLayer(iNmbNeurons, fType);
 
 		// Set pointers to input and output layers
-		if(fType == ANLayerInput) {
+		if(fType & ANLayerInput) {
 			SetIPLayer(i);
 		}
-		else if(fType == ANLayerOutput) {
+		else if(fType & ANLayerOutput) {
 			SetOPLayer(i);
 		}
-		else if(fType == (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
+		else if(fType & (ANLayerInput | ANLayerOutput) ) {	// Hopfield networks
 			SetIPLayer(i);
 			SetOPLayer(i);
 		}

@@ -22,7 +22,7 @@
 //using namespace ANN;
 
 int main(int argc, char *argv[]) {
-
+/*
 QApplication a(argc, argv);
 
 	//create a data set
@@ -138,9 +138,8 @@ for(int x = 0; x < w1*w1; x++) {
 }
 
 w.Save("GPU_2.png");
+*/
 
-
-/*
 float fInp1[3];
 fInp1[0] = 0;
 fInp1[1] = 0;
@@ -233,14 +232,14 @@ net.SetWeightDecay(0);
 net.SetTrainingSet(input);
 
 
-//errors = net.TrainFromData(5000, 0.001);
+errors = net.TrainFromData(100, 0.001);
 std::cout<< net <<std::endl;
 
 net.ExpToFS("TEST");
 net.ImpFromFS("TEST");
 net.SetTrainingSet(input);
 std::cout<< net <<std::endl;
-*/
+
 //////////////////////////////////////////////////////////////////
 /*
 float TR[16];

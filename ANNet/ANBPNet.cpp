@@ -37,6 +37,7 @@ BPNet::~BPNet() {
 }
 
 void BPNet::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
+	std::cout<<"ADD BP LAYER "<<iSize<<std::endl;
 	AbsNet::AddLayer( new BPLayer(iSize, flType) );
 }
 
@@ -63,6 +64,14 @@ void BPNet::CreateNet(const ConTable &Net) {
 	AbsNet::CreateNet(Net);
 
 	/*
+	 * Support z-layers
+	 */
+	for(unsigned int i = 1; i < m_lLayers.size(); i++) {
+		BPLayer *curLayer = ( (BPLayer*)GetLayer(i) );
+		curLayer->SetZLayer(Net.ZValOfLayer[i]);
+	}
+
+	/*
 	 * Only for back propagation networks
 	 */
 	if(Net.NetType == ANNetBP) {
@@ -87,7 +96,7 @@ void BPNet::CreateNet(const ConTable &Net) {
 	}
 }
 
-void BPNet::AddLayer(AbsLayer *pLayer) {
+void BPNet::AddLayer(BPLayer *pLayer) {
 	AbsNet::AddLayer(pLayer);
 
 	if( ( (BPLayer*)pLayer)->GetFlag() & ANLayerInput ) {
@@ -200,7 +209,7 @@ void BPNet::PropagateFW() {
 
 void BPNet::PropagateBW() {
 	/*
-	 * Berechne  Hd der Abweichung vom Sollwert die Fehlerdeltas aller Neuronen
+	 * Calc error delta based on the difference of output from wished result
 	 */
 	for(int i = m_lLayers.size()-1; i >= 0; i--) {
 		BPLayer *curLayer = ( (BPLayer*)GetLayer(i) );
@@ -214,6 +223,18 @@ void BPNet::PropagateBW() {
 			curLayer->GetBiasNeuron()->AdaptEdges();
 		}
 	}
+}
+
+std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance) {
+	bool bZSort = false;
+	for(int i = m_lLayers.size()-1; i >= 0; i--) {
+		if(((BPLayer*)m_lLayers[i])->GetZLayer() > -1)
+			bZSort = true;
+	}
+	if(bZSort)
+		sort(m_lLayers.begin(), m_lLayers.end() );
+
+	return AbsNet::TrainFromData(iCycles, fTolerance);
 }
 
 void BPNet::SetLearningRate(const float &fVal)

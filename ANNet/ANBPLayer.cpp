@@ -18,23 +18,36 @@
 using namespace ANN;
 
 
-BPLayer::BPLayer() {
+BPLayer::BPLayer(int iZLayer) {
 	m_pBiasNeuron = NULL;
+	m_iZLayer = iZLayer;
 }
 
-BPLayer::BPLayer(const BPLayer *pLayer) {
+BPLayer::BPLayer(const BPLayer *pLayer, int iZLayer) {
 	int iNumber 			= pLayer->GetNeurons().size();
 	LayerTypeFlag fType 	= pLayer->GetFlag();
 	m_pBiasNeuron 			= NULL;
 
+	m_iZLayer = iZLayer;
+
 	Resize(iNumber);
 	SetFlag(fType);
 }
 
-BPLayer::BPLayer(const unsigned int &iNumber, LayerTypeFlag fType) {
+BPLayer::BPLayer(const unsigned int &iNumber, LayerTypeFlag fType, int iZLayer) {
 	Resize(iNumber);
 	m_pBiasNeuron = NULL;
 	SetFlag(fType);
+
+	m_iZLayer = iZLayer;
+}
+
+void BPLayer::SetZLayer(int iZLayer) {
+	m_iZLayer = iZLayer;
+}
+
+int BPLayer::GetZLayer() {
+	return m_iZLayer;
 }
 
 BPLayer::~BPLayer() {
@@ -145,9 +158,12 @@ void BPLayer::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
 	int iDstLayerID 	= -1;
 	int iDstNeurID 		= -1;
 
-	bool bHasBias = false;
+	bool bHasBias 		= false;
+	int iZLayer 		= m_iZLayer;
+
 	(GetBiasNeuron() == NULL) ? bHasBias = false : bHasBias = true;
 	BZ2_bzWrite( &iBZ2Error, bz2out, &bHasBias, sizeof(bool) );
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iZLayer, sizeof(int) );
 
 	if(bHasBias) {
 		AbsNeuron *pCurNeur = GetBiasNeuron();
@@ -174,9 +190,12 @@ int BPLayer::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table) {
 	int iDstLayerID 	= -1;
 	int iDstNeurID 		= -1;
 
-	bool bHasBias = false;
+	bool bHasBias 		= false;
+	int iZLayer 		= -1;
 
 	BZ2_bzRead( &iBZ2Error, bz2in, &bHasBias, sizeof(bool) );
+	BZ2_bzRead( &iBZ2Error, bz2in, &iZLayer, sizeof(int) );
+	Table.ZValOfLayer.push_back(iZLayer);
 
 	if(bHasBias) {
 		BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfConnects, sizeof(int) );

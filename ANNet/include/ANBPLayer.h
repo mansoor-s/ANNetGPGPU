@@ -34,26 +34,43 @@ class BPLayer : public AbsLayer {
 	 * Pointer to bias neuron.
 	 */
 	BPNeuron *m_pBiasNeuron;
+	int m_iZLayer;
 
 public:
 	/**
 	 * Creates a new layer
 	 */
-	BPLayer();
+	BPLayer(int iZLayer = -1);
 	/**
 	 * Copy constructor for creation of a new layer with the "same" properties like *pLayer
 	 * this constructor can't copy connections (edges), because they normally have dependencies to other layers.
 	 * @param pLayer object to copy properties from
 	 */
-	BPLayer(const BPLayer *pLayer);
+	BPLayer(const BPLayer *pLayer, int iZLayer = -1);
 	/**
 	 * Creates a new layer
 	 * @param iNumber Number of neurons of this layer.
 	 *
 	 * @param fType Flag describing the type of the layer.
 	 */
-	BPLayer(const unsigned int &iNumber, LayerTypeFlag fType);
+	BPLayer(const unsigned int &iNumber, LayerTypeFlag fType, int iZLayer = -1);
 	virtual ~BPLayer();
+
+	/**
+	 * Sets the z-layer of the layer. The z-layer defines, when a layer gets processed by the network.
+	 * If more than one layer shares the same z-layer the processing must happen at the same time or directly after one of got finished.
+	 *
+	 * @param iZLayer z-layer
+	 */
+	void SetZLayer(int iZLayer);
+
+	/**
+	 * Sets the z-layer of the layer. The z-layer defines, when a layer gets processed by the network.
+	 * If more than one layer shares the same z-layer the processing must happen at the same time or directly after one of got finished.
+	 *
+	 * @return z-layer
+	 */
+	int GetZLayer();
 
 	/**
 	 * Resizes the layer. Deletes old neurons and adds new ones (initialized with random values).
@@ -133,6 +150,13 @@ public:
 	 * standard output of the layer.
 	 */
 	friend std::ostream& operator << (std::ostream &os, BPLayer *op);
+
+	/**
+	 * Comparison operator
+	 */
+	bool operator() (BPLayer *i, BPLayer *j) {
+		return (i->GetZLayer() < j->GetZLayer() );
+	}
 };
 
 }

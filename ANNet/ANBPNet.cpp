@@ -37,7 +37,6 @@ BPNet::~BPNet() {
 }
 
 void BPNet::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
-	std::cout<<"ADD BP LAYER "<<iSize<<std::endl;
 	AbsNet::AddLayer( new BPLayer(iSize, flType) );
 }
 

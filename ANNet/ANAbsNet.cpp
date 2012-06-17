@@ -81,7 +81,6 @@ void AbsNet::CreateNet(const ConTable &Net) {
 		iNmbNeurons = Net.SizeOfLayer.at(i);
 		fType 		= Net.TypeOfLayer.at(i);
 
-		std::cout<<"fTYPE: "<<fType<<std::endl;
 		// Create layers
 		AddLayer(iNmbNeurons, fType);
 

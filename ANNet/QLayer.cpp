@@ -2,6 +2,7 @@
 #include <gui/QNode.h>
 #include <gui/QEdge.h>
 #include <gui/QLabel.h>
+#include <gui/QZLabel.h>
 #include <gui/QScene.h>
 #include <iostream>
 
@@ -36,14 +37,28 @@ void Layer::adjust() {
     m_BoundingRect = boundingRect();
 
     float   fTextBoxHeight = 24.f;
-    m_LabelRect = QRectF(m_BoundingRect.x(), m_BoundingRect.y()+m_BoundingRect.height(), m_BoundingRect.width(), fTextBoxHeight);
+    m_LabelRect = QRectF(	m_BoundingRect.x(),
+							m_BoundingRect.y()+m_BoundingRect.height(),
+							m_BoundingRect.width(),
+							fTextBoxHeight);
 
-    if(m_pLabel != NULL)
+    m_ZLabelRect = QRectF(	m_BoundingRect.x()+m_BoundingRect.width(),
+							m_BoundingRect.y()+m_BoundingRect.height(),
+							fTextBoxHeight*1.5,
+							fTextBoxHeight);
+
+    if(m_pLabel != NULL) {
         m_pLabel->setBRect(m_LabelRect);
+        m_pZLabel->setBRect(m_ZLabelRect);
+    }
 }
 
 QRectF Layer::getLabelRect() {
     return m_LabelRect;
+}
+
+QRectF Layer::getZLabelRect() {
+    return m_ZLabelRect;
 }
 
 void Layer::setLabel(Label *pLabel) {
@@ -59,6 +74,21 @@ Label *Layer::addLabel(QString sName) {
     pLabel->SetName(sName);
     setLabel(pLabel);
     return pLabel;
+}
+
+ZLabel *Layer::addZLabel(const int &iNumber) {
+    ZLabel *pLabel = new ZLabel;
+    pLabel->setZLayer(iNumber);
+    setZLabel(pLabel);
+    return pLabel;
+}
+
+void Layer::setZLabel(ZLabel *pLabel) {
+    m_pZLabel = pLabel;
+}
+
+ZLabel* Layer::getZLabel() {
+	return m_pZLabel;
 }
 
 void Layer::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {

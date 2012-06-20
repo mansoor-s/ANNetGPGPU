@@ -3,11 +3,73 @@
 #include <gui/QEdge.h>
 #include <gui/QLayer.h>
 #include <gui/QLabel.h>
+#include <gui/QZLabel.h>
 #include <iostream>
 
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent)
 {
+}
+
+ANN::BPNet *Scene::getANNet() {
+
+	m_pANNet = new ANN::BPNet;
+
+	int LayerTypeFlag 	= -1;
+	int iSize 			= -1;
+
+	/**
+	 * Create layers for neural net
+	 */
+	QList<ANN::BPLayer*> lLayers;
+	foreach(Layer *pLayer, m_lLayers) {
+		LayerTypeFlag = pLayer->getLabel()->getType();
+		iSize = pLayer->nodes().size();
+
+		assert(LayerTypeFlag > 0);
+		assert(iSize > 0);
+
+		int iZ = pLayer->getZLabel()->getZLayer();
+		if(iZ < 0) {
+			QMessageBox msgBox;
+			msgBox.setText("Z-values must be set for all layers.");
+			msgBox.exec();
+
+			return NULL;
+		}
+
+		ANN::BPLayer *pBPLayer = new ANN::BPLayer(iSize, LayerTypeFlag);
+		pBPLayer->SetZLayer(iZ);
+
+		lLayers << pBPLayer;
+	}
+
+	/**
+	 * Build connections
+	 */
+	std::vector<std::vector<int> > vIndices;
+	foreach(Layer *pLayer, m_lLayers) {
+		foreach(Node *pNode, pLayer->nodes() ) {
+
+		}
+	}
+
+	/**
+	 * Check z-layers
+	 */
+
+	/**
+	 * Add layers to neural net
+	 */
+	foreach(ANN::BPLayer *pLayer, lLayers) {
+		m_pANNet->AddLayer(pLayer);
+	}
+
+	return m_pANNet;
+}
+
+void Scene::setANNet(ANN::BPNet &) {
+
 }
 
 void Scene::adjust() {
@@ -30,6 +92,7 @@ Layer* Scene::addLayer(const unsigned int &iNodes, const QString &sName) {
     }
     addItem(pLayer);
     addItem(pLayer->addLabel(sName));
+    addItem(pLayer->addZLabel(-1));
     m_lLayers << pLayer;
     pLayer->adjust();
 

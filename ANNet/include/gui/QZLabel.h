@@ -11,33 +11,31 @@
 #-------------------------------------------------------------------------------
 */
 
-#ifndef ANSOMNETGPU_H_
-#define ANSOMNETGPU_H_
 
-#include <ANSOMNet.h>
-#include <gpgpu/ANKernels.h>
-#include <gpgpu/ANMatrix.h>
+#ifndef QZLABEL_H_
+#define QZLABEL_H_
+
+#include <Qt/QtGui>
 
 
-namespace ANN {
-
-class SOMNetGPU : public SOMNet {
+class ZLabel  : public QGraphicsItem {
 private:
-	ANN::Matrix m_EdgeMat;
-	ANN::Matrix m_PosiMat;
+	int m_iZLayer;
+	QRectF m_BRect;
 
 public:
-	SOMNetGPU();
-	SOMNetGPU(AbsNet *pNet);
-	virtual ~SOMNetGPU();
+	ZLabel();
 
-	/**
-	 * Trains the network with given input until iCycles is reached.
-	 * @param iCycles Maximum number of training cycles.
-	 */
-	virtual void Training(const unsigned int &iCycles = 1000);
+	void setZLayer(const int &iVal);
+	int getZLayer();
+
+    void setBRect(QRectF rect);
+
+protected:
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);
+    QRectF boundingRect() const;
+
+    virtual void mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event );
 };
 
-}
-
-#endif /* ANSOMNETGPU_H_ */
+#endif /* QZLABEL_H_ */

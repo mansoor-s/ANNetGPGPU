@@ -1,11 +1,11 @@
 #include <gui/QLabel.h>
 #include <Qt/QtCore>
+#include <ANNet>
 
 
 Label::Label() {
     m_sName = "";
     setFlag(QGraphicsItem::ItemIsSelectable);
-
     setZValue(2);
 }
 
@@ -15,6 +15,21 @@ void Label::setBRect(QRectF rect) {
 
 void Label::SetName(QString sName) {
     m_sName = sName;
+}
+
+uint32_t Label::getType() {
+	if(GetName() == "Input layer") {
+		return ANN::ANLayerInput;
+	}
+	else if(GetName() == "Hidden layer") {
+		return ANN::ANLayerHidden;
+	}
+	else if(GetName() == "Output layer") {
+		return ANN::ANLayerOutput;
+	}
+	else {
+		return -1;
+	}
 }
 
 void Label::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
@@ -41,7 +56,7 @@ QRectF Label::boundingRect() const {
     return m_BRect;
 }
 
-QString Label::GetName(){
+QString Label::GetName() {
     return m_sName;
 }
 

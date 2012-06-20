@@ -96,6 +96,6 @@ void Edge::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
                                               cos(angle - Pi + Pi / 3) * m_ArrowSize);
 
     painter->setBrush(m_Color);
-    painter->drawPolygon(QPolygonF() << line.p1() << sourceArrowP1 << sourceArrowP2);
+    //painter->drawPolygon(QPolygonF() << line.p1() << sourceArrowP1 << sourceArrowP2);
     painter->drawPolygon(QPolygonF() << line.p2() << destArrowP1 << destArrowP2);
 }

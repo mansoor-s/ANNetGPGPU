@@ -1,3 +1,16 @@
+/*
+#-------------------------------------------------------------------------------
+# Copyright (c) 2012 Daniel <dgrat> Frenzel.
+# All rights reserved. This program and the accompanying materials
+# are made available under the terms of the GNU Lesser Public License v2.1
+# which accompanies this distribution, and is available at
+# http://www.gnu.org/licenses/old-licenses/gpl-2.0.html
+# 
+# Contributors:
+#     Daniel <dgrat> Frenzel - initial API and implementation
+#-------------------------------------------------------------------------------
+*/
+
 #ifndef LAYER_H
 #define LAYER_H
 
@@ -8,6 +21,7 @@ class Scene;
 class Viewer;
 class Edge;
 class Label;
+class ZLabel;
 
 
 class Layer : public QGraphicsItem
@@ -16,8 +30,13 @@ private:
     Viewer *m_pGraph;
     QList<Node *> m_NodeList;
     QRectF m_BoundingRect;
+
     QRectF m_LabelRect;
+    QRectF m_ZLabelRect;
+
     Label *m_pLabel;
+    ZLabel *m_pZLabel;
+
     Scene *m_pScene;
 
 public:
@@ -37,10 +56,15 @@ public:
 
     QList<Edge*> Connect(Layer*);
     QRectF getLabelRect();
-    void setLabel(Label *pLabel);
-    Label* getLabel();
+    QRectF getZLabelRect();
 
+    void setLabel(Label *pLabel);
+	Label* getLabel();
     Label *addLabel(QString sName);
+
+    ZLabel *addZLabel(const int &iNumber);
+    void setZLabel(ZLabel *pLabel);
+	ZLabel* getZLabel();
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

@@ -23,10 +23,11 @@ class Layer;
 
 class Node : public QGraphicsItem
 {
-private:
-    int iWidth;
+private: 
+    int m_iID;			// index of neuron in layer
 
-    bool m_bSelectedAsGroup;
+    int m_iWidth;		// diameter of neuron in QGraphicsView
+    bool m_bSelectedAsGroup;	// state variable for QGraphicsView
 
     QList<Edge *> m_EdgeList;
     Viewer *m_pGraph;
@@ -36,6 +37,9 @@ public:
     Node(Viewer *parent = NULL);
     virtual ~Node();
 
+    void setID(const int &iID);
+    int getID() const;
+    
     void addEdge(Edge *edge);
     QList<Edge *> edges() const;
 

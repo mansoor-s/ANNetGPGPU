@@ -20,14 +20,14 @@
 
 class ZLabel  : public QGraphicsItem {
 private:
-	int m_iZLayer;
-	QRectF m_BRect;
+    int m_iZLayer;
+    QRectF m_BRect;
 
 public:
-	ZLabel();
+    ZLabel();
 
-	void setZLayer(const int &iVal);
-	int getZLayer();
+    void setZLayer(const int &iVal);
+    int getZLayer();
 
     void setBRect(QRectF rect);
 

@@ -5,6 +5,7 @@
 #include <gui/QLabel.h>
 #include <gui/QZLabel.h>
 #include <iostream>
+#include <cassert>
 
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent)
@@ -40,19 +41,13 @@ ANN::BPNet *Scene::getANNet() {
 
 		ANN::BPLayer *pBPLayer = new ANN::BPLayer(iSize, LayerTypeFlag);
 		pBPLayer->SetZLayer(iZ);
-
 		lLayers << pBPLayer;
 	}
-
-	/**
-	 * Build connections
-	 */
-	std::vector<std::vector<int> > vIndices;
-	foreach(Layer *pLayer, m_lLayers) {
-		foreach(Node *pNode, pLayer->nodes() ) {
-
-		}
-	}
+	
+       /**
+	* Build connections
+	*/
+       
 
 	/**
 	 * Check z-layers
@@ -94,6 +89,7 @@ Layer* Scene::addLayer(const unsigned int &iNodes, const QString &sName) {
     addItem(pLayer->addLabel(sName));
     addItem(pLayer->addZLabel(-1));
     m_lLayers << pLayer;
+    pLayer->setID(m_lLayers.size()-1);
     pLayer->adjust();
 
     return pLayer;

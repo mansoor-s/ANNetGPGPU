@@ -9,7 +9,7 @@
 #include <string.h>
 // own classes
 #include <containers/AN2DArray.h>
-#include <thrust/host_vector.h>
+
 
 using namespace ANN;
 
@@ -23,6 +23,12 @@ F2DArray::F2DArray() {
 	m_bAllocated = false;
 }
 
+#ifdef CUDA
+/**
+  * CUDA THRUST compatibility
+  * host_vector<float>: Contains one row of the matrix
+  * host_vector< host_vector<float> >: Contains all rows  of the matrix
+  */
 F2DArray::F2DArray(const Matrix &mat) {
 	unsigned int iHeight 	= mat.GetH();
 	unsigned int iWidth 	= mat.GetW();
@@ -35,6 +41,19 @@ F2DArray::F2DArray(const Matrix &mat) {
 		}
 	}
 }
+
+F2DArray::operator Matrix () {
+	Matrix dmRes(GetW(), GetH(), 0.f);
+
+	for(int y = 0; y < GetH(); y++) {
+		for(int x = 0; x < GetW(); x++) {
+			dmRes[y*GetW()+x] = m_pArray[y*GetW()+x];
+		}
+	}
+
+	return dmRes;
+}
+#endif
 
 F2DArray::F2DArray(float *pArray, const int &iSizeX, const int &iSizeY) {
 	SetArray(pArray, iSizeX, iSizeY);
@@ -171,18 +190,6 @@ F2DArray::operator float*() {
 
 float *F2DArray::operator[] (const int &iY) const {
 	return &m_pArray[iY*m_iX];
-}
-
-F2DArray::operator Matrix () {
-	Matrix dmRes(GetW(), GetH(), 0.f);
-
-	for(int y = 0; y < GetH(); y++) {
-		for(int x = 0; x < GetW(); x++) {
-			dmRes[y*GetW()+x] = m_pArray[y*GetW()+x];
-		}
-	}
-
-	return dmRes;
 }
 
 void F2DArray::GetOutput() {

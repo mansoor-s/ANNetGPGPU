@@ -15,7 +15,10 @@
 #define NEURONARRAY_H_
 
 #include <iostream>
+#include <vector>
+#ifdef CUDA
 #include <gpgpu/ANMatrix.h>
+#endif
 
 namespace ANN {
 
@@ -46,7 +49,6 @@ public:
 
 	// Standard C++ "conventions"
 	F2DArray();
-	F2DArray(const Matrix &);
 	F2DArray(float *pArray, const int &iSizeX, const int &iSizeY);
 	virtual ~F2DArray();
 
@@ -78,12 +80,15 @@ public:
 	operator float*();
 	float *operator[] (const int &iY) const;
 
+#ifdef CUDA
 	/**
 	 * CUDA THRUST compatibility
 	 * host_vector<float>: Contains one row of the matrix
 	 * host_vector< host_vector<float> >: Contains all rows  of the matrix
 	 */
+	F2DArray(const Matrix &);
 	operator Matrix ();
+#endif
 };
 
 }

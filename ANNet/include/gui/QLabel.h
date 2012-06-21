@@ -29,7 +29,7 @@ public:
     void SetName(QString sName);
     QString GetName();
 
-    uint32_t getType();
+    int getType();
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

@@ -20,13 +20,13 @@ if(OPENMP_FOUND)
 endif()
 
 # Make sure the compiler can find include files from our ANNet library.
-#include_directories (${ANNetGPU_SOURCE_DIR})
-include_directories (${ANNetGPU_SOURCE_DIR}/include)
-include_directories (${ANNetGPU_SOURCE_DIR}/include/basic)
-include_directories (${ANNetGPU_SOURCE_DIR}/include/math)
-include_directories (${ANNetGPU_SOURCE_DIR}/include/gui)
-include_directories (${ANNetGPU_SOURCE_DIR}/include/containers)
-include_directories (${ANNetGPU_SOURCE_DIR}/include/gpgpu)
+#include_directories (${ANNetGPGPU_SOURCE_DIR})
+include_directories (${ANNetGPGPU_SOURCE_DIR}/include)
+include_directories (${ANNetGPGPU_SOURCE_DIR}/include/basic)
+include_directories (${ANNetGPGPU_SOURCE_DIR}/include/math)
+include_directories (${ANNetGPGPU_SOURCE_DIR}/include/gui)
+include_directories (${ANNetGPGPU_SOURCE_DIR}/include/containers)
+include_directories (${ANNetGPGPU_SOURCE_DIR}/include/gpgpu)
 
 set( ANSourceFiles 
   AN2DArray.cpp
@@ -72,6 +72,7 @@ set( ANGUISourceFiles
   QNode.cpp
   QLayer.cpp
   QLabel.cpp
+  QZLabel.cpp
   QScene.cpp
   QViewer.cpp
 )
@@ -92,6 +93,7 @@ set( ANGUIHeaderFiles
   include/gui/QNode.h
   include/gui/QLayer.h
   include/gui/QLabel.h
+  include/gui/QZLabel.h
   include/gui/QScene.h
   include/gui/QViewer.h
 )
@@ -110,6 +112,8 @@ if (CUDA_FOUND)
   if (CUDATHRUST_FOUND)
     include_directories (${CUDATHRUST_INCLUDE_DIR})
   endif (CUDATHRUST_FOUND)
+  
+  ADD_DEFINITIONS("-DCUDA") # needed for conditional compilation of some files
 endif (CUDA_FOUND)
 
 # Create a library called "ANNet" which includes the source files listed in "ANSourceFiles".

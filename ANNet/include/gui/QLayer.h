@@ -27,6 +27,8 @@ class ZLabel;
 class Layer : public QGraphicsItem
 {
 private:
+    int m_iID;	// ID of the layer
+    
     Viewer *m_pGraph;
     QList<Node *> m_NodeList;
     QRectF m_BoundingRect;
@@ -42,6 +44,9 @@ private:
 public:
     Layer(Viewer *parent = NULL);
 
+    void setID(const int &iID);
+    int getID() const;
+    
     void addNode(Node *node);
     void addNodes(int iNeur);
     void removeNode(Node* pDelNode);
@@ -59,12 +64,12 @@ public:
     QRectF getZLabelRect();
 
     void setLabel(Label *pLabel);
-	Label* getLabel();
+    Label* getLabel();
     Label *addLabel(QString sName);
 
     ZLabel *addZLabel(const int &iNumber);
     void setZLabel(ZLabel *pLabel);
-	ZLabel* getZLabel();
+    ZLabel* getZLabel();
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

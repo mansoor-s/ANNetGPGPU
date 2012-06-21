@@ -8,18 +8,11 @@
 #include <ANNet>
 #include <ANContainers>
 #include <ANMath>
-#include <ANGPGPU>
-#include <ANGUI>
 #include <math/ANRandom.h>
-
-#include <gpgpu/ANKernels.h>
 
 #include <ctime>
 #include <iostream>
 
-//#include <gpgpu/ANSOMKernel.cu>
-
-//using namespace ANN;
 
 int main(int argc, char *argv[]) {
   float TR[16];

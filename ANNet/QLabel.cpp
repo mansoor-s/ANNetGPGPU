@@ -17,7 +17,7 @@ void Label::SetName(QString sName) {
     m_sName = sName;
 }
 
-uint32_t Label::getType() {
+int Label::getType() {
 	if(GetName() == "Input layer") {
 		return ANN::ANLayerInput;
 	}

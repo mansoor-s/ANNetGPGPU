@@ -9,6 +9,7 @@
 
 Layer::Layer(Viewer *parent) {
 //    setFlag(QGraphicsItem::ItemIsSelectable);
+    m_iID = -1;
 
     m_pLabel = NULL;
     m_pScene = NULL;
@@ -16,8 +17,18 @@ Layer::Layer(Viewer *parent) {
     setZValue(-1);
 }
 
+void Layer::setID(const int &iID) {
+    m_iID = iID;
+}
+  
+int Layer::getID() const {
+    return m_iID;
+}
+      
+
 void Layer::addNode(Node *node) {
     m_NodeList << node;
+    node->setID(nodes().size()-1);
 }
 
 QList<Node *> &Layer::nodes() {

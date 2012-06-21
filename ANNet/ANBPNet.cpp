@@ -7,6 +7,7 @@
 
 #include <iostream>
 #include <cassert>
+#include <algorithm>
 #include <omp.h>
 //own classes
 #include <math/ANRandom.h>
@@ -231,7 +232,7 @@ std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float
 			bZSort = true;
 	}
 	if(bZSort)
-		sort(m_lLayers.begin(), m_lLayers.end() );
+        std::sort(m_lLayers.begin(), m_lLayers.end() );
 
 	return AbsNet::TrainFromData(iCycles, fTolerance);
 }

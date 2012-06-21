@@ -4,15 +4,16 @@
 #include <gui/QLayer.h>
 
 
-Node::Node(Viewer *parent)
-{
+Node::Node(Viewer *parent) {
+    m_iID = -1;
+    
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
 
     m_bSelectedAsGroup = false;
 
     m_pGraph = parent;
-    iWidth = 20;
+    m_iWidth = 20;
     m_pLayer = NULL;
 
     setZValue(2);
@@ -20,6 +21,10 @@ Node::Node(Viewer *parent)
 
 Node::~Node()
 {
+}
+
+int Node::getID() const {
+    return m_iID;
 }
 
 void Node::setSelectedAsGroup(bool b) {
@@ -30,8 +35,12 @@ bool Node::selectedAsGroup() {
     return m_bSelectedAsGroup;
 }
 
+void Node::setID(const int &iID) {
+    m_iWidth = iID;
+}
+
 float Node::getWidth() {
-    return iWidth;
+    return m_iWidth;
 }
 
 void Node::addEdge(Edge *edge)
@@ -54,12 +63,12 @@ Layer* Node::getLayer() const {
 }
 
 void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
-    QRadialGradient gradient(-3, -3, iWidth/2);
+    QRadialGradient gradient(-3, -3, m_iWidth/2);
     if (option->state & QStyle::State_Sunken) {
         gradient.setCenter(3, 3);
         gradient.setFocalPoint(3, 3);
-        gradient.setColorAt(1, QColor(Qt::yellow).light(iWidth));
-        gradient.setColorAt(0, QColor(Qt::darkYellow).light(iWidth));
+        gradient.setColorAt(1, QColor(Qt::yellow).light(m_iWidth));
+        gradient.setColorAt(0, QColor(Qt::darkYellow).light(m_iWidth));
     }
     else if(option->state & QStyle::State_Selected) {
         gradient.setColorAt(0, Qt::white);
@@ -87,19 +96,19 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
     painter->setBrush(gradient);
 
     painter->setPen(QPen(Qt::black, 0));
-    painter->drawEllipse(-iWidth/2, -iWidth/2, iWidth, iWidth);
+    painter->drawEllipse(-m_iWidth/2, -m_iWidth/2, m_iWidth, m_iWidth);
 }
 
 QPainterPath Node::shape() const
 {
     QPainterPath path;
-    path.addEllipse(-iWidth/2, -iWidth/2, iWidth, iWidth);
+    path.addEllipse(-m_iWidth/2, -m_iWidth/2, m_iWidth, m_iWidth);
     return path;
 }
 
 QRectF Node::boundingRect() const {
     qreal adjust = 2;
-    return QRectF( -iWidth/2 - adjust, -iWidth/2 - adjust, iWidth+3 + adjust, iWidth+3 + adjust);
+    return QRectF( -m_iWidth/2 - adjust, -m_iWidth/2 - adjust, m_iWidth+3 + adjust, m_iWidth+3 + adjust);
 }
 
 void Node::mousePressEvent(QGraphicsSceneMouseEvent *event)

@@ -10,7 +10,7 @@ FIND_PACKAGE(CUDA)
 
 add_subdirectory (ANNet)
 
-include_directories (${ANNetGPU_SOURCE_DIR}/include)
+include_directories (${ANNetGPGPU_SOURCE_DIR}/include)
 link_directories (${ANNetGPU_SOURCE_DIR}/ANNet) 
 
 if (QT4_FOUND)

@@ -86,6 +86,11 @@ public:
 	virtual void Resize(const unsigned int &iSize);
 
 	/**
+	 *
+	 */
+	virtual void AddNeurons(const unsigned int &iSize);
+
+	/**
 	 * Sets the type of the layer (input, hidden or output layer)
 	 * @param fType Flag describing the type of the layer.
 	 * Flag: "ANBiasNeuron" will automatically add a bias neuron.

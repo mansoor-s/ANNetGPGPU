@@ -35,11 +35,8 @@ HFLayer::~HFLayer() {
 }
 
 void HFLayer::Resize(const unsigned int &iSize) {
-	for(unsigned int x = 0; x < iSize; x++) {			// Width
-		HFNeuron *pNeuron = new HFNeuron(this);
-		pNeuron->SetID(x);
-		m_lNeurons.push_back(pNeuron);
-	}
+	EraseAll();
+	AddNeurons(iSize);
 }
 
 void HFLayer::Resize(const unsigned int &iWidth, const unsigned int &iHeight) {
@@ -54,6 +51,14 @@ void HFLayer::Resize(const unsigned int &iWidth, const unsigned int &iHeight) {
 			pNeuron->SetID(y*iWidth + x);
 			m_lNeurons.push_back(pNeuron);
 		}
+	}
+}
+
+void HFLayer::AddNeurons(const unsigned int &iSize) {
+	for(unsigned int x = 0; x < iSize; x++) {			// Width
+		HFNeuron *pNeuron = new HFNeuron(this);
+		m_lNeurons.push_back(pNeuron);
+		pNeuron->SetID(m_lNeurons.size()-1);
 	}
 }
 

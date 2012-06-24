@@ -104,6 +104,11 @@ public:
 	const std::vector<AbsNeuron *> &GetNeurons() const;
 
 	/**
+	 *
+	 */
+	virtual void AddNeurons(const unsigned int &iSize) = 0;
+
+	/**
 	 * Defines the type of "activation" function the net has to use for back-/propagation.
 	 * @param pFunction New "activation" function
 	 */

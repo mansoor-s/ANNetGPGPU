@@ -29,10 +29,12 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_ActionsBar    = new QToolBar;
     m_pTabBar       = new FancyTabWidget;
+    m_pActionBar 	= new FancyActionBar;
 
-    m_pViewer       = new Viewer(0);
+    m_pViewer       = new Viewer;
     m_pCustomPlot   = new QCustomPlot;
-    m_pInputDial    = new InputDialog;
+    m_pInputDial    = new IOForm;
+    m_pTrainingDial = new TrainingForm;
 
     m_pNew          = new QAction(tr("New project"), 0);
     m_pSave         = new QAction(tr("Save project"), 0);
@@ -52,14 +54,17 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::createTabs() {
-    m_pTabBar->insertTab(0, m_pInputDial, QIcon("gfx/training_icon.png"),"Training set" );
+    m_pTabBar->insertTab(0, m_pViewer, QIcon("gfx/monitor_icon.png"),"Network designer" );
     m_pTabBar->setTabEnabled(0, true);
-    m_pTabBar->insertTab(1, m_pViewer, QIcon("gfx/monitor_icon.png"),"Network designer" );
+    m_pTabBar->insertTab(1, m_pInputDial, QIcon("gfx/training_icon.png"),"Input/Output data" );
     m_pTabBar->setTabEnabled(1, true);
-    m_pTabBar->insertTab(2, m_pCustomPlot, QIcon("gfx/graph_icon.png"),"Learning curve" );
+    m_pTabBar->insertTab(2, m_pTrainingDial, QIcon("gfx/QuestionMark.png"),"Training procedure" );
     m_pTabBar->setTabEnabled(2, true);
+    m_pTabBar->insertTab(3, m_pCustomPlot, QIcon("gfx/graph_icon.png"),"Learning curve" );
+    m_pTabBar->setTabEnabled(3, true);
 
     m_pTabBar->setCurrentIndex(0);
+    m_pTabBar->addCornerWidget(m_pActionBar);
 }
 
 void MainWindow::createMenus() {
@@ -80,6 +85,19 @@ void MainWindow::createActions() {
     QIcon iconRemEdge("gfx/rem_edge.png");
     QIcon iconRemEdges("gfx/rem_edges.png");
 
+    QIcon iconStartTraining("gfx/arrow.png");
+
+    /*
+     * Fancy action bar
+     */
+    m_pStartTraining = new QAction(iconStartTraining, "Start Training", 0);
+    m_pActionBar->insertAction(0, m_pStartTraining);
+
+    connect(m_pStartTraining, SIGNAL(triggered ()), this, SLOT(sl_startTraining()) );
+
+    /*
+     * Regular tool bar
+     */
     m_pAddLayer = m_ActionsBar->addAction(iconLayer, "Add a layer");
     m_pRemoveLayers = m_ActionsBar->addAction(iconRemLayer, "Remove selected layers");
     m_ActionsBar->addSeparator();
@@ -100,6 +118,10 @@ void MainWindow::createActions() {
 
     connect(m_pRemoveEdges, SIGNAL(triggered ()), m_pViewer, SLOT(sl_removeConnections()) );
     connect(m_pRemoveAllEdges, SIGNAL(triggered() ), m_pViewer, SLOT(sl_removeAllConnections()) );
+}
+
+void MainWindow::sl_startTraining() {
+
 }
 
 void MainWindow::sl_createLayer() {

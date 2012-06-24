@@ -14,6 +14,7 @@
 #ifndef NETCONNECTIONTABLE_H_
 #define NETCONNECTIONTABLE_H_
 
+#include <string>
 #include <stdint.h>
 
 namespace ANN {
@@ -39,6 +40,10 @@ struct ConDescr {
 struct NeurDescr {
 	int m_iLayerID;
 	int m_iNeurID;
+
+	std::string m_sTransFunction;	// TODO implement
+	std::string m_sDistFunction;	// TODO .. as well
+
 	std::vector<float> m_vPos;
 };
 

@@ -58,10 +58,14 @@ BPLayer::~BPLayer() {
 
 void BPLayer::Resize(const unsigned int &iSize) {
 	EraseAll();
+	AddNeurons(iSize);
+}
+
+void BPLayer::AddNeurons(const unsigned int &iSize) {
 	for(unsigned int i = 0; i < iSize; i++) {
 		AbsNeuron *pNeuron = new BPNeuron(this);
-		pNeuron->SetID(i);
 		m_lNeurons.push_back(pNeuron);
+		pNeuron->SetID(m_lNeurons.size()-1);
 	}
 }
 

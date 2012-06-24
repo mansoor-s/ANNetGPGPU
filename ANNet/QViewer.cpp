@@ -13,10 +13,10 @@ Viewer::Viewer(QWidget *parent) : QGraphicsView(parent)
     m_pScene->setItemIndexMethod(QGraphicsScene::NoIndex);
     setScene(m_pScene);
 
-    setCacheMode(QGraphicsView::CacheBackground);
+//    setCacheMode(QGraphicsView::CacheBackground);
     setViewportUpdateMode(QGraphicsView::FullViewportUpdate);
     setRenderHints(QPainter::Antialiasing | QPainter::NonCosmeticDefaultPen);
-    setTransformationAnchor(AnchorUnderMouse);
+//    setTransformationAnchor(AnchorUnderMouse);
 
     //setRubberBandSelectionMode(Qt::ContainsItemShape);
     setDragMode(QGraphicsView::RubberBandDrag);

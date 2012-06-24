@@ -2647,6 +2647,9 @@
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.optimization.level.106630351" name="Optimization Level" superClass="ai3.tool.cuda_qt.cpp_compiler.option.optimization.level" value="ai3.tool.cuda_qt.cpp_compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.debugging.level.509457328" name="Debug Level" superClass="ai3.tool.cuda_qt.cpp_compiler.option.debugging.level" value="ai3.tool.cuda_qt.cpp_compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.other.other.1793634045" name="Other flags" superClass="ai3.tool.cuda_qt.cpp_compiler.option.other.other" value="-c -fmessage-length=0 -fopenmp" valueType="string"/>
+								<option id="ai3.tool.cuda_qt.cpp_compiler.option.preprocessor.def.106953890" superClass="ai3.tool.cuda_qt.cpp_compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="CUDA"/>
+								</option>
 								<inputType id="ai3.tool.cuda_qt.cpp_compiler.input.1559386991" superClass="ai3.tool.cuda_qt.cpp_compiler.input"/>
 							</tool>
 							<tool id="ai3.tool.cuda_qt.c_compiler.499007355" name="C Compiler" superClass="ai3.tool.cuda_qt.c_compiler">

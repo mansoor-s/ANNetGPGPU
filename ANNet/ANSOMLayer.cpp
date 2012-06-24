@@ -44,19 +44,35 @@ SOMLayer::~SOMLayer() {
 	// TODO Auto-generated destructor stub
 }
 
-void SOMLayer::Resize(const unsigned int &iSize) {
+void SOMLayer::AddNeurons(const unsigned int &iSize) {
 	std::vector<float> vPos(1);
 	for(unsigned int x = 0; x < iSize; x++) {
 		SOMNeuron *pNeuron = new SOMNeuron(this);
-		pNeuron->SetID(x);
 		m_lNeurons.push_back(pNeuron);
+		pNeuron->SetID(m_lNeurons.size()-1);
 
-		vPos[0] = x;
+		vPos[0] = m_lNeurons.size()-1;
+		pNeuron->SetPosition(vPos);
+	}
+}
+
+void SOMLayer::Resize(const unsigned int &iSize) {
+	EraseAll();
+
+	std::vector<float> vPos(1);
+	for(unsigned int x = 0; x < iSize; x++) {
+		SOMNeuron *pNeuron = new SOMNeuron(this);
+		m_lNeurons.push_back(pNeuron);
+		pNeuron->SetID(m_lNeurons.size()-1);
+
+		vPos[0] = m_lNeurons.size()-1;
 		pNeuron->SetPosition(vPos);
 	}
 }
 
 void SOMLayer::Resize(const unsigned int &iWidth, const unsigned int &iHeight) {
+	EraseAll();
+
 	// Set m_vDim properly
 	m_vDim.clear();
 	m_vDim.push_back(iWidth);
@@ -76,6 +92,8 @@ void SOMLayer::Resize(const unsigned int &iWidth, const unsigned int &iHeight) {
 }
 
 void SOMLayer::Resize(const std::vector<unsigned int> &vDim) {
+	EraseAll();
+
 	assert(vDim.size() > 0);
 
 	m_vDim = vDim;

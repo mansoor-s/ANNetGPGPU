@@ -20,13 +20,12 @@ if(OPENMP_FOUND)
 endif()
 
 # Make sure the compiler can find include files from our ANNet library.
-#include_directories (${ANNetGPGPU_SOURCE_DIR})
-include_directories (${ANNetGPGPU_SOURCE_DIR}/include)
-include_directories (${ANNetGPGPU_SOURCE_DIR}/include/basic)
-include_directories (${ANNetGPGPU_SOURCE_DIR}/include/math)
-include_directories (${ANNetGPGPU_SOURCE_DIR}/include/gui)
-include_directories (${ANNetGPGPU_SOURCE_DIR}/include/containers)
-include_directories (${ANNetGPGPU_SOURCE_DIR}/include/gpgpu)
+INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/basic)
+INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/math)
+INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gui)
+INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/containers)
+INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gpgpu)
 
 set( ANSourceFiles 
   AN2DArray.cpp
@@ -56,8 +55,12 @@ set( ANCUDASourceFiles
   ANMatrix.cu
 )
 
-set( ANGUISourceFiles
-  QSOMReader.cpp
+SET(ANGUIFormularFiles
+  QTrainingForm.ui
+  QIOForm.ui
+)
+
+set( 3rdPartySourceFiles
   include/gui/QCustomPlot/qcustomplot.cpp
   include/gui/utils/fancymainwindow.cpp
   include/gui/utils/manhattanstyle.cpp
@@ -65,20 +68,12 @@ set( ANGUISourceFiles
   include/gui/utils/styleanimator.cpp
   include/gui/utils/styledbar.cpp
   include/gui/utils/stylehelper.cpp
+  include/gui/utils/stringutils.cpp
   include/gui/fancytabwidget.cpp
-  QInputdialog.cpp
-  QMainWindow.cpp
-  QEdge.cpp
-  QNode.cpp
-  QLayer.cpp
-  QLabel.cpp
-  QZLabel.cpp
-  QScene.cpp
-  QViewer.cpp
+  include/gui/fancyactionbar.cpp
 )
 
-set( ANGUIHeaderFiles 
-  include/gui/QSOMReader.h
+set( 3rdPartyHeaderFiles
   include/gui/QCustomPlot/qcustomplot.h
   include/gui/utils/fancymainwindow.h
   include/gui/utils/manhattanstyle.h
@@ -86,8 +81,28 @@ set( ANGUIHeaderFiles
   include/gui/utils/styleanimator.h
   include/gui/utils/styledbar.h
   include/gui/utils/stylehelper.h
+  include/gui/utils/stringutils.h
+  include/gui/coreplugin/coreconstants.h
   include/gui/fancytabwidget.h
-  include/gui/QInputdialog.h
+  include/gui/fancyactionbar.h
+)
+
+set( ANGUISourceFiles
+  QSOMReader.cpp
+  QMainWindow.cpp
+  QEdge.cpp
+  QNode.cpp
+  QLayer.cpp
+  QLabel.cpp
+  QZLabel.cpp
+  QScene.cpp
+  QTrainingForm.cpp
+  QIOForm.cpp
+  QViewer.cpp
+)
+
+set( ANGUIHeaderFiles 
+  include/gui/QSOMReader.h
   include/gui/QMainWindow.h
   include/gui/QEdge.h
   include/gui/QNode.h
@@ -95,12 +110,18 @@ set( ANGUIHeaderFiles
   include/gui/QLabel.h
   include/gui/QZLabel.h
   include/gui/QScene.h
+  include/gui/QTrainingForm.h
+  include/gui/QIOForm.h
   include/gui/QViewer.h
 )
 
 if (QT4_FOUND)
-  QT4_WRAP_CPP(ANGUIHeaderFiles_MOC ${ANGUIHeaderFiles})
+  QT4_WRAP_CPP(ANGUIHeaderFiles_MOC ${ANGUIHeaderFiles} ${3rdPartyHeaderFiles})
+  QT4_WRAP_UI(ANGUIHeaderFiles_MOC ${ANGUIFormularFiles})
   INCLUDE(${QT_USE_FILE})
+
+  INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
+
   ADD_DEFINITIONS(${QT_DEFINITIONS})
 endif(QT4_FOUND)
 
@@ -125,7 +146,7 @@ elseif (NOT CUDA_FOUND)
 endif(CUDA_FOUND)
 
 if (QT4_FOUND)
-  add_library (ANNetGUI SHARED ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles})
+  add_library (ANNetGUI SHARED ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
   target_link_libraries (ANNetGUI ${QT_LIBRARIES})
 endif (QT4_FOUND)
 

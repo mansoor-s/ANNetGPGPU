@@ -382,7 +382,7 @@ void AbsNet::ImpFromFS(std::string path) {
 	BZFILE* bz2in;
 	bz2in = BZ2_bzReadOpen(&iBZ2Error, fin, 0, 0, NULL, 0);
 
-	if (iBZ2Error != BZ_OK) {														// ABBRUCHBEDINGUNG
+	if (iBZ2Error != BZ_OK) {
 		std::cout<<"return: "<<"LoadNetwork()"<<std::endl;
 		return;
 	}
@@ -394,7 +394,9 @@ void AbsNet::ImpFromFS(std::string path) {
 	Table.NrOfLayers = iNmbOfLayers;
 
 	for(unsigned int i = 0; i < iNmbOfLayers; i++) {
-		GetLayer(i)->ImpFromFS(bz2in, iBZ2Error, Table); // TODO SEEMS to be CRITICAL
+		AddLayer(0, 0); // Create dummy layer; more layers than needed don't disturb, but are necessary if using empty nets
+
+		GetLayer(i)->ImpFromFS(bz2in, iBZ2Error, Table);
 	}
 
 	CreateNet( Table );

@@ -116,12 +116,13 @@ int AbsLayer::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table) {
 	Table.SizeOfLayer.push_back(iNmbOfNeurons);
 
 	for(unsigned int j = 0; j < iNmbOfNeurons; j++) {
+		AddNeurons(1);	// Create dummy neuron; more neurons than needed don't disturb, but are necessary if using empty nets
+
 		NeurDescr 	cCurNeur;
 		cCurNeur.m_iLayerID = iLayerID;
 		Table.Neurons.push_back(cCurNeur);
-
-		AbsNeuron *pCurNeur = GetNeuron(j);           // TODO SEEMS to be CRITICAL
-		pCurNeur->ImpFromFS(bz2in, iBZ2Error, Table); // TODO SEEMS to be CRITICAL
+		AbsNeuron *pCurNeur = GetNeuron(j);
+		pCurNeur->ImpFromFS(bz2in, iBZ2Error, Table);
 	}
 
 	return iLayerID;

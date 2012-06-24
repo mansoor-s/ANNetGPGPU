@@ -4,6 +4,7 @@
 #include <gui/QLayer.h>
 #include <gui/QLabel.h>
 #include <gui/QZLabel.h>
+#include <containers/ANConTable.h>
 #include <iostream>
 #include <cassert>
 
@@ -44,10 +45,42 @@ ANN::BPNet *Scene::getANNet() {
 		lLayers << pBPLayer;
 	}
 	
-       /**
+   /**
 	* Build connections
 	*/
-       
+	ANN::ConTable Net;
+	Net.NetType = ANN::ANNetBP;
+	Net.NrOfLayers = m_lLayers.size();
+
+	foreach(Layer *pLayer, m_lLayers) {
+		Net.SizeOfLayer.push_back(pLayer->nodes().size() );
+		Net.ZValOfLayer.push_back(pLayer->getZLabel()->getZLayer() );
+		Net.TypeOfLayer.push_back(pLayer->getLabel()->getType() );
+
+		std::vector<ANN::NeurDescr> vNeurons;
+		std::vector<ANN::ConDescr> vConnections;
+
+		foreach(Node *pNode, pLayer->nodes() ) {
+			ANN::NeurDescr neuron;
+			neuron.m_iLayerID = pLayer->getID();
+			neuron.m_iNeurID = pNode->getID();
+			vNeurons.push_back(neuron);
+
+			foreach(Edge *pEdge, pNode->edges() ) {
+				ANN::ConDescr edge;
+				edge.m_iSrcLayerID = pEdge->sourceNode()->getLayer()->getID();
+				edge.m_iDstLayerID = pEdge->destNode()->getLayer()->getID();
+
+				edge.m_iSrcNeurID = pEdge->sourceNode()->getID();
+				edge.m_iDstNeurID = pEdge->destNode()->getID();
+
+				edge.m_fVal = 0; // TODO IMPLEMENT
+				vConnections.push_back(edge);
+			}
+		}
+		Net.Neurons = vNeurons;
+	}
+	m_pANNet->CreateNet(Net);
 
 	/**
 	 * Check z-layers
@@ -82,6 +115,7 @@ Layer* Scene::addLayer(const unsigned int &iNodes, const QString &sName) {
         Node *pNode = new Node;
         pNode->setPos(i*(pNode->getWidth()+8), 0);
         pLayer->addNode(pNode);
+
         pNode->setLayer(pLayer);
         addItem(pNode);
     }

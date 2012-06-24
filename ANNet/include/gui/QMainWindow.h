@@ -15,11 +15,16 @@
 #define MAINWINDOW_H
 
 #include <Qt/QtGui>
+// own classes
 #include <gui/QViewer.h>
 #include <gui/QScene.h>
-#include <gui/fancytabwidget.h>
-#include <gui/QInputdialog.h>
+#include <gui/QTrainingForm.h>
+#include <gui/QIOForm.h>
+
+//3rd party classes
 #include <gui/QCustomPlot/qcustomplot.h>
+#include <gui/fancytabwidget.h>
+#include <gui/fancyactionbar.h>
 
 using namespace Core;
 using namespace Core::Internal;
@@ -29,7 +34,11 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
-    FancyTabWidget *m_pTabBar;
+    FancyActionBar *m_pActionBar;
+
+    QAction *m_pStartTraining;
+
+    /////////////////////////////////////////
     QToolBar *m_ActionsBar;
 
     QAction *m_pAddLayer;
@@ -42,17 +51,24 @@ private:
     QAction *m_pRemoveEdges;
     QAction *m_pRemoveAllEdges;
 
+    /////////////////////////////////////////
+    FancyTabWidget *m_pTabBar;
+
     Viewer *m_pViewer;
     QCustomPlot *m_pCustomPlot;
-    InputDialog *m_pInputDial;
+    IOForm *m_pInputDial;
+    TrainingForm *m_pTrainingDial;
 
+    /////////////////////////////////////////
     QMenu *m_pFileMenu;
+
     QAction *m_pSave;
     QAction *m_pLoad;
     QAction *m_pNew;
     
 public slots:
     void sl_createLayer();
+    void sl_startTraining();
 
 public:
     MainWindow(QWidget *parent = 0);

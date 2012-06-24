@@ -38,6 +38,11 @@ public:
 	 */
 	virtual void Resize(const unsigned int &iSize);
 	/**
+	 *
+	 */
+	virtual void AddNeurons(const unsigned int &iSize);
+
+	/**
 	 * Resizes the layer. Deletes old neurons and adds new ones (initialized with random values).
 	 * @param iWidth Width of map.
 	 * @param iHeight Height of map.

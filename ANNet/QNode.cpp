@@ -6,6 +6,7 @@
 
 Node::Node(Viewer *parent) {
     m_iID = -1;
+    m_sTransFunction = "Zen";
     
     setFlag(QGraphicsItem::ItemIsMovable);
     setFlag(QGraphicsItem::ItemIsSelectable);
@@ -23,6 +24,14 @@ Node::~Node()
 {
 }
 
+void Node::setTransFunction(const QString &sFunction) {
+	m_sTransFunction = sFunction;
+}
+
+QString Node::getTransFunction() const {
+	return m_sTransFunction;
+}
+
 int Node::getID() const {
     return m_iID;
 }
@@ -36,7 +45,7 @@ bool Node::selectedAsGroup() {
 }
 
 void Node::setID(const int &iID) {
-    m_iWidth = iID;
+	m_iID = iID;
 }
 
 float Node::getWidth() {

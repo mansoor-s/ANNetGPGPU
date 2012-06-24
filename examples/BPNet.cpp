@@ -112,7 +112,16 @@ int main(int argc, char *argv[]) {
 
   net.ExpToFS("TEST");
   net.ImpFromFS("TEST");
+
   net.SetTrainingSet(input);
   std::cout<< net <<std::endl;
+
+  std::cout<<"CREATE OTHER INSTANCE"<<std::endl;
+
+  ANN::BPNet net2;
+  net2.ImpFromFS("TEST");
+  net2.SetTrainingSet(input);
+  std::cout<< net2 <<std::endl;
+
   return 0;
 }

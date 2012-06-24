@@ -14,6 +14,7 @@
 #ifndef LABEL_H
 #define LABEL_H
 
+#include <stdint.h>
 #include <Qt/QtGui>
 
 
@@ -29,7 +30,7 @@ public:
     void SetName(QString sName);
     QString GetName();
 
-    int getType();
+    uint32_t getType();
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

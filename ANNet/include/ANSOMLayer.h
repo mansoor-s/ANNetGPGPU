@@ -42,6 +42,11 @@ public:
 	virtual void Resize(const std::vector<unsigned int> &vDim);
 
 	/**
+	 *
+	 */
+	virtual void AddNeurons(const unsigned int &iSize);
+
+	/**
 	 * Connects this layer with another one.
 	 * Each neuron of this layer with each of the destination layer.
 	 * @param pDestLayer pointer to layer to connect with.

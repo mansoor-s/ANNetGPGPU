@@ -25,6 +25,7 @@ class Node : public QGraphicsItem
 {
 private: 
     int m_iID;			// index of neuron in layer
+    QString m_sTransFunction;
 
     int m_iWidth;		// diameter of neuron in QGraphicsView
     bool m_bSelectedAsGroup;	// state variable for QGraphicsView
@@ -40,6 +41,9 @@ public:
     void setID(const int &iID);
     int getID() const;
     
+    void setTransFunction(const QString &sFunction);
+    QString getTransFunction() const;
+
     void addEdge(Edge *edge);
     QList<Edge *> edges() const;
 

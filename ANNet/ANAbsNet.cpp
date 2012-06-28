@@ -27,7 +27,7 @@ AbsNet::AbsNet() //: Importer(this),  Exporter(this)
 	m_fLearningRate = 0.0f;
 	m_fMomentum 	= 0.f;
 	m_fWeightDecay 	= 0.f;
-	m_ActFunction 	= NULL;
+	m_pTransfFunction 	= NULL;
 	m_pTrainingData = NULL;
 
 	m_pIPLayer 		= NULL;
@@ -122,7 +122,7 @@ void AbsNet::CreateNet(const ConTable &Net) {
 }
 
 AbsNet::~AbsNet() {
-	this->EraseAll();
+	EraseAll();
 }
 
 void AbsNet::SetFlag(const NetTypeFlag &fType) {
@@ -176,6 +176,7 @@ std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const floa
 			fCurError += SetOutput( m_pTrainingData->GetOutput(i) );
 			PropagateBW();
 		}
+		std::cout<<"error: "<<fCurError<<std::endl;
 		pErrors.push_back(fCurError);
 	}
 	std::cout<<"Break\nLast total error: "<<fCurError<<"\nLearning rate: "<<m_fLearningRate<<std::endl;
@@ -334,17 +335,17 @@ std::vector<float> AbsNet::GetOutput() {
 	return vResult;
 }
 
-void AbsNet::SetNetFunction(const TransfFunction *pFunction) {
+void AbsNet::SetTransfFunction(const TransfFunction *pFunction) {
 	assert( pFunction != 0 );
 
-	m_ActFunction = pFunction;
+	m_pTransfFunction = pFunction;
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
-		GetLayer(i)->SetNetFunction(m_ActFunction);
+		GetLayer(i)->SetNetFunction(m_pTransfFunction);
 	}
 }
 
-const TransfFunction *AbsNet::GetNetFunction() const {
-	return m_ActFunction;
+const TransfFunction *AbsNet::GetTransfFunction() const {
+	return m_pTransfFunction;
 }
 
 void AbsNet::ExpToFS(std::string path) {
@@ -389,9 +390,9 @@ void AbsNet::ImpFromFS(std::string path) {
 
 	std::cout<<"Load network.."<<std::endl;
 	BZ2_bzRead( &iBZ2Error, bz2in, &fNetType, sizeof(int) );
-	Table.NetType = fNetType;
+	Table.NetType 		= fNetType;
 	BZ2_bzRead( &iBZ2Error, bz2in, &iNmbOfLayers, sizeof(int) );
-	Table.NrOfLayers = iNmbOfLayers;
+	Table.NrOfLayers 	= iNmbOfLayers;
 
 	for(unsigned int i = 0; i < iNmbOfLayers; i++) {
 		AddLayer(0, 0); // Create dummy layer; more layers than needed don't disturb, but are necessary if using empty nets

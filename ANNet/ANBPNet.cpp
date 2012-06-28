@@ -23,6 +23,10 @@
 using namespace ANN;
 
 
+bool smallestFunctor(BPLayer *i, BPLayer *j) {
+	return (i->GetZLayer() < j->GetZLayer() );
+}
+
 BPNet::BPNet() {
 	m_fTypeFlag 	= ANNetBP;
 }
@@ -66,7 +70,7 @@ void BPNet::CreateNet(const ConTable &Net) {
 	/*
 	 * Support z-layers
 	 */
-	for(unsigned int i = 1; i < m_lLayers.size(); i++) {
+	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		BPLayer *curLayer = ( (BPLayer*)GetLayer(i) );
 		curLayer->SetZLayer(Net.ZValOfLayer[i]);
 	}
@@ -186,8 +190,8 @@ BPNet *BPNet::GetSubNet(const unsigned int &iStartID, const unsigned int &iStopI
 	}
 
 	// Import further properties
-	if( GetNetFunction() )
-		pNet->SetNetFunction( pNet->GetNetFunction() );
+	if( GetTransfFunction() )
+		pNet->SetTransfFunction( pNet->GetTransfFunction() );
 	if( GetTrainingSet() )
 		pNet->SetTrainingSet( this->GetTrainingSet() );
 	pNet->SetLearningRate( this->GetLearningRate() );
@@ -227,12 +231,29 @@ void BPNet::PropagateBW() {
 
 std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance) {
 	bool bZSort = false;
-	for(int i = m_lLayers.size()-1; i >= 0; i--) {
+	for(int i = 0; i < m_lLayers.size(); i++) {
+		std::cout<<"Z-layer: "<<((BPLayer*)m_lLayers[i])->GetZLayer()<<std::endl;
 		if(((BPLayer*)m_lLayers[i])->GetZLayer() > -1)
 			bZSort = true;
+		else {
+			bZSort = false;
+			break;
+		}
 	}
-	if(bZSort)
-        std::sort(m_lLayers.begin(), m_lLayers.end() );
+	if(bZSort) {
+		std::cout<<"Z-layers were set."<<std::endl;
+
+		std::vector<ANN::BPLayer*> vBPLayers;
+		for(int i = 0; i < m_lLayers.size(); i++) {
+			vBPLayers.push_back((ANN::BPLayer*)m_lLayers.at(i));
+		}
+
+        std::sort(vBPLayers.begin(), vBPLayers.end(), smallestFunctor);
+
+		for(int i = 0; i < m_lLayers.size(); i++) {
+			m_lLayers[i] = vBPLayers[i];
+		}
+	}
 
 	return AbsNet::TrainFromData(iCycles, fTolerance);
 }

@@ -255,3 +255,4 @@ void Layer::mouseDoubleClickEvent ( QGraphicsSceneMouseEvent * event ) {
 
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
+

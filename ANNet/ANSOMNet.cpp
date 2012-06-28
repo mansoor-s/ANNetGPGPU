@@ -137,8 +137,8 @@ SOMNet *SOMNet::GetNet() {
 	}
 
 	// Import further properties
-	if( GetNetFunction() )
-		pNet->SetNetFunction( pNet->GetNetFunction() );
+	if( GetTransfFunction() )
+		pNet->SetTransfFunction( pNet->GetTransfFunction() );
 	if( GetTrainingSet() )
 		pNet->SetTrainingSet( this->GetTrainingSet() );
 	pNet->SetLearningRate( this->GetLearningRate() );

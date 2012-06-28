@@ -23,6 +23,6 @@ float TrainingForm::getMaxError() const {
 	return ((float)ui->m_SBError->value())/fVal;
 }
 
-std::string TrainingForm::getTransfFunct() {
+std::string TrainingForm::getTransfFunct() const {
 	return ui->m_CBTransferFunction->currentText().toStdString();
 }

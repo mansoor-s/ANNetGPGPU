@@ -66,6 +66,9 @@ private:
     QAction *m_pLoad;
     QAction *m_pNew;
     
+    /////////////////////////////////////////
+    std::vector<float> m_vErrors;
+
 public slots:
     void sl_createLayer();
     void sl_startTraining();
@@ -74,6 +77,7 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void createGraph();
     void createMenus();
     void createTabs();
     void createActions();

@@ -12,8 +12,8 @@ Edge::Edge(Node *pSourceNode, Node *pDestNode) : m_ArrowSize(10)
     setAcceptedMouseButtons(0);
     m_pSource = pSourceNode;
     m_pDest = pDestNode;
-    m_pSource->addEdge(this);
-    m_pDest->addEdge(this);
+    m_pSource->addEdgeO(this);
+    m_pDest->addEdgeI(this);
     adjust();
     setZValue(0);
 }

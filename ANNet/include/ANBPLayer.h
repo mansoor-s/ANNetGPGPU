@@ -161,13 +161,6 @@ public:
 	 * standard output of the layer.
 	 */
 	friend std::ostream& operator << (std::ostream &os, BPLayer *op);
-
-	/**
-	 * Comparison operator
-	 */
-	bool operator() (BPLayer *i, BPLayer *j) {
-		return (i->GetZLayer() < j->GetZLayer() );
-	}
 };
 
 }

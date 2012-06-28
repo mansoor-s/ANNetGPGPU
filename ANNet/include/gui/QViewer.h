@@ -31,6 +31,8 @@ private:
 
     bool m_bStartConnect;
 
+    void removeSCons();
+
 private slots:
     void sl_waitForDest();
 

@@ -30,7 +30,8 @@ private:
     int m_iWidth;		// diameter of neuron in QGraphicsView
     bool m_bSelectedAsGroup;	// state variable for QGraphicsView
 
-    QList<Edge *> m_EdgeList;
+    QList<Edge *> m_EdgeListI;
+    QList<Edge *> m_EdgeListO;
     Viewer *m_pGraph;
     Layer *m_pLayer;
 
@@ -44,8 +45,12 @@ public:
     void setTransFunction(const QString &sFunction);
     QString getTransFunction() const;
 
-    void addEdge(Edge *edge);
-    QList<Edge *> edges() const;
+    void addEdgeI(Edge *edge);
+    QList<Edge *> edgesI() const;
+    void addEdgeO(Edge *edge);
+    QList<Edge *> edgesO() const;
+
+    void removeEdge(Edge* pDelEdge);
 
     void setLayer(Layer *layer);
     Layer* getLayer() const;

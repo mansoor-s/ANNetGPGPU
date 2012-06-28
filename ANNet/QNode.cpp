@@ -52,15 +52,38 @@ float Node::getWidth() {
     return m_iWidth;
 }
 
-void Node::addEdge(Edge *edge)
-{
-    m_EdgeList << edge;
+void Node::addEdgeI(Edge *edge) {
+    m_EdgeListI << edge;
     edge->adjust();
 }
 
-QList<Edge *> Node::edges() const
-{
-    return m_EdgeList;
+QList<Edge *> Node::edgesI() const {
+    return m_EdgeListI;
+}
+
+void Node::addEdgeO(Edge *edge) {
+    m_EdgeListO << edge;
+    edge->adjust();
+}
+
+void Node::removeEdge(Edge* pDelEdge) {
+    QList<Edge*> pNewListI;
+    foreach(Edge *pEdge, m_EdgeListI) {
+        if(pEdge != pDelEdge)
+        	pNewListI << pEdge;
+    }
+    m_EdgeListI = pNewListI;
+
+    QList<Edge*> pNewListO;
+    foreach(Edge *pEdge, m_EdgeListO) {
+        if(pEdge != pDelEdge)
+        	pNewListO << pEdge;
+    }
+    m_EdgeListO = pNewListO;
+}
+
+QList<Edge *> Node::edgesO() const {
+    return m_EdgeListO;
 }
 
 void Node::setLayer(Layer *layer) {
@@ -73,35 +96,49 @@ Layer* Node::getLayer() const {
 
 void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     QRadialGradient gradient(-3, -3, m_iWidth/2);
+
     if (option->state & QStyle::State_Sunken) {
         gradient.setCenter(3, 3);
         gradient.setFocalPoint(3, 3);
         gradient.setColorAt(1, QColor(Qt::yellow).light(m_iWidth));
         gradient.setColorAt(0, QColor(Qt::darkYellow).light(m_iWidth));
     }
-    else if(option->state & QStyle::State_Selected) {
+    if(option->state & QStyle::State_Selected || option->state & QStyle::State_Sunken) {
         gradient.setColorAt(0, Qt::white);
         gradient.setColorAt(1, Qt::red);
 
-        foreach (Edge *edge, m_EdgeList) {
+        foreach (Edge *edge, m_EdgeListI) {
+            edge->setColor(Qt::yellow);
+            edge->setZValue(1);
+            edge->adjust();
+        }
+        foreach (Edge *edge, m_EdgeListO) {
             edge->setColor(Qt::red);
             edge->setZValue(1);
+            edge->adjust();
         }
-    }
-    else if(m_bSelectedAsGroup) {
-        gradient.setColorAt(0, Qt::white);
-        QColor orange(255, 128, 0);
-        gradient.setColorAt(1, orange);
     }
     else {
         gradient.setColorAt(0, Qt::yellow);
         gradient.setColorAt(1, Qt::darkYellow);
 
-        foreach (Edge *edge, m_EdgeList) {
+        foreach (Edge *edge, m_EdgeListI) {
             edge->setColor(Qt::black);
             edge->setZValue(0);
+            edge->adjust();
+        }
+        foreach (Edge *edge, m_EdgeListO) {
+            edge->setColor(Qt::black);
+            edge->setZValue(0);
+            edge->adjust();
         }
     }
+    if(m_bSelectedAsGroup) {
+        gradient.setColorAt(0, Qt::white);
+        QColor orange(255, 128, 0);
+        gradient.setColorAt(1, orange);
+    }
+
     painter->setBrush(gradient);
 
     painter->setPen(QPen(Qt::black, 0));
@@ -122,7 +159,9 @@ QRectF Node::boundingRect() const {
 
 void Node::mousePressEvent(QGraphicsSceneMouseEvent *event)
 {
-    foreach (Edge *edge, m_EdgeList)
+    foreach (Edge *edge, m_EdgeListI)
+        edge->adjust();
+    foreach (Edge *edge, m_EdgeListO)
         edge->adjust();
 
     if(m_pLayer != NULL)
@@ -134,7 +173,9 @@ void Node::mousePressEvent(QGraphicsSceneMouseEvent *event)
 
 void Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 {
-    foreach (Edge *edge, m_EdgeList)
+    foreach (Edge *edge, m_EdgeListI)
+        edge->adjust();
+    foreach (Edge *edge, m_EdgeListO)
         edge->adjust();
 
     if(m_pLayer != NULL)
@@ -146,7 +187,9 @@ void Node::mouseReleaseEvent(QGraphicsSceneMouseEvent *event)
 
 void Node::mouseMoveEvent(QGraphicsSceneMouseEvent *event)
 {
-    foreach (Edge *edge, m_EdgeList)
+    foreach (Edge *edge, m_EdgeListI)
+        edge->adjust();
+    foreach (Edge *edge, m_EdgeListO)
         edge->adjust();
 
     if(m_pLayer != NULL)

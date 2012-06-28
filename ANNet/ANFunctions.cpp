@@ -56,23 +56,36 @@
 
 	const TransfFunction*
 	Functions::ResolveTransfFByName (const char *name) {
-		if (strcmp (name, "tanh") == 0)
+		if (strcmp (name, "tanh") == 0) {
+			std::cout<<"fcn_tanh"<<std::endl;
 			return (&fcn_tanh);
-		if (strcmp (name, "log") == 0)
+		}
+		if (strcmp (name, "log") == 0) {
+			std::cout<<"fcn_log"<<std::endl;
 			return (&fcn_log);
-		if (strcmp (name, "linear") == 0)
+		}
+		if (strcmp (name, "linear") == 0) {
+			std::cout<<"fcn_linear"<<std::endl;
 			return (&fcn_linear);
-		if (strcmp (name, "binary") == 0)
+		}
+		if (strcmp (name, "binary") == 0) {
+			std::cout<<"fcn_binary"<<std::endl;
 			return (&fcn_binary);
+		}
+		std::cout<<"NULL"<<std::endl;
 		return (NULL);
 	}
 
 	const DistFunction*
 	Functions::ResolveDistFByName (const char *name) {
-		if (strcmp (name, "gaussian") == 0)
+		if (strcmp (name, "gaussian") == 0) {
+			std::cout<<"fcn_gaussian"<<std::endl;
 			return (&fcn_gaussian);
-		if (strcmp (name, "mexican") == 0)
+		}
+		if (strcmp (name, "mexican") == 0) {
+			std::cout<<"fcn_mexican"<<std::endl;
 			return (&fcn_mexican);
+		}
 		return (NULL);
 	}
 #endif

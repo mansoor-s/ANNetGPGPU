@@ -20,7 +20,7 @@ public:
     int getMaxCycles() const;
     float getMaxError() const;
 
-    std::string getTransfFunct();
+    std::string getTransfFunct() const;
 
 private:
     Ui::TrainingForm *ui;

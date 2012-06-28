@@ -15,6 +15,7 @@
 #define LAYER_H
 
 #include <Qt/QtGui>
+#include <gui/QZLabel.h>
 
 class Node;
 class Scene;

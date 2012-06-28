@@ -5,17 +5,18 @@
 #include <gui/QLabel.h>
 #include <gui/QZLabel.h>
 #include <containers/ANConTable.h>
+#include <math/ANRandom.h>
 #include <iostream>
 #include <cassert>
 
 
 Scene::Scene(QObject *parent) : QGraphicsScene(parent)
 {
+	m_pANNet = new ANN::BPNet;
 }
 
 ANN::BPNet *Scene::getANNet() {
-
-	m_pANNet = new ANN::BPNet;
+	m_pANNet->EraseAll();
 
 	int LayerTypeFlag 	= -1;
 	int iSize 			= -1;
@@ -28,10 +29,10 @@ ANN::BPNet *Scene::getANNet() {
 		LayerTypeFlag = pLayer->getLabel()->getType();
 		iSize = pLayer->nodes().size();
 
-		assert(LayerTypeFlag > 0);
-		assert(iSize > 0);
+		assert(iSize > 0);	// shouldn't happen
 
 		int iZ = pLayer->getZLabel()->getZLayer();
+		/*
 		if(iZ < 0) {
 			QMessageBox msgBox;
 			msgBox.setText("Z-values must be set for all layers.");
@@ -40,51 +41,56 @@ ANN::BPNet *Scene::getANNet() {
 			return NULL;
 		}
 
+		if(LayerTypeFlag < 0) {
+			QMessageBox msgBox;
+			msgBox.setText("Type of layer must be set for all layers.");
+			msgBox.exec();
+
+			return NULL;
+		}*/
+/*
 		ANN::BPLayer *pBPLayer = new ANN::BPLayer(iSize, LayerTypeFlag);
 		pBPLayer->SetZLayer(iZ);
 		lLayers << pBPLayer;
+*/
 	}
 	
    /**
 	* Build connections
 	*/
 	ANN::ConTable Net;
-	Net.NetType = ANN::ANNetBP;
-	Net.NrOfLayers = m_lLayers.size();
+	Net.NetType 	= ANN::ANNetBP;
+	Net.NrOfLayers 	= m_lLayers.size();
 
+	//std::cout<<"number of layers: "<<m_lLayers.size()<<std::endl;
 	foreach(Layer *pLayer, m_lLayers) {
 		Net.SizeOfLayer.push_back(pLayer->nodes().size() );
 		Net.ZValOfLayer.push_back(pLayer->getZLabel()->getZLayer() );
 		Net.TypeOfLayer.push_back(pLayer->getLabel()->getType() );
 
-		std::vector<ANN::NeurDescr> vNeurons;
-		std::vector<ANN::ConDescr> vConnections;
+		std::cout<<"zlayer: "<<pLayer->getZLabel()->getZLayer()<<std::endl;
 
+		//std::cout<<"number of neurons: "<<pLayer->nodes().size()<<std::endl;
 		foreach(Node *pNode, pLayer->nodes() ) {
 			ANN::NeurDescr neuron;
 			neuron.m_iLayerID = pLayer->getID();
 			neuron.m_iNeurID = pNode->getID();
-			vNeurons.push_back(neuron);
+			Net.Neurons.push_back(neuron);
 
-			foreach(Edge *pEdge, pNode->edges() ) {
+			//std::cout<<"number of edges O: "<<pNode->edgesO().size()<<std::endl;
+			foreach(Edge *pEdge, pNode->edgesO() ) {
 				ANN::ConDescr edge;
-				edge.m_iSrcLayerID = pEdge->sourceNode()->getLayer()->getID();
-				edge.m_iDstLayerID = pEdge->destNode()->getLayer()->getID();
+				edge.m_iSrcLayerID 	= pEdge->sourceNode()->getLayer()->getID();
+				edge.m_iDstLayerID 	= pEdge->destNode()->getLayer()->getID();
+				edge.m_iSrcNeurID 	= pEdge->sourceNode()->getID();
+				edge.m_iDstNeurID 	= pEdge->destNode()->getID();
+				edge.m_fVal 		= ANN::RandFloat(-0.5f, 0.5f);
 
-				edge.m_iSrcNeurID = pEdge->sourceNode()->getID();
-				edge.m_iDstNeurID = pEdge->destNode()->getID();
-
-				edge.m_fVal = 0; // TODO IMPLEMENT
-				vConnections.push_back(edge);
+				Net.NeurCons.push_back(edge);
 			}
 		}
-		Net.Neurons = vNeurons;
 	}
 	m_pANNet->CreateNet(Net);
-
-	/**
-	 * Check z-layers
-	 */
 
 	/**
 	 * Add layers to neural net
@@ -163,6 +169,7 @@ void Scene::removeNode(Node* pDelNode) {
 }
 
 void Scene::removeLayer(Layer* pDelLayer) {
+	removeItem(pDelLayer->getZLabel());
     removeItem(pDelLayer->getLabel());
     removeItem(pDelLayer);
 

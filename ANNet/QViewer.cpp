@@ -120,18 +120,38 @@ void Viewer::sl_waitForDest() {
     }
 
     // create edges now
+    int i = 0;
     foreach(Node *pSrc, m_lNodesSrc) {
         foreach(Node *pDest, m_lNodesDest) {
             Edge *pEdge = new Edge(pSrc, pDest);
-            pSrc->addEdge(pEdge);
-            pDest->addEdge(pEdge);
             m_pScene->addEdge(pEdge);
+            i++;
         }
     }
 
     // disconnect to avoid any problems with event handling
     m_lNodesSrc.clear();
     m_lNodesDest.clear();
+}
+
+void Viewer::removeSCons() {
+    foreach(Layer *pLayer, getScene()->layers() ) {
+        foreach(Node *pNode, pLayer->nodes() ) {
+            if(pNode->isSelected()) {
+            	// remove edges
+                foreach(Edge *pEdge, pNode->edgesI() ) {
+                    pEdge->sourceNode()->removeEdge(pEdge);
+                    pEdge->destNode()->removeEdge(pEdge);
+                    m_pScene->removeEdge(pEdge);
+                }
+                foreach(Edge *pEdge, pNode->edgesO() ) {
+                    pEdge->sourceNode()->removeEdge(pEdge);
+                    pEdge->destNode()->removeEdge(pEdge);
+                    m_pScene->removeEdge(pEdge);
+                }
+            }
+        }
+    }
 }
 
 void Viewer::sl_removeLayers() {
@@ -153,6 +173,9 @@ void Viewer::sl_removeLayers() {
     if(!pLayers.size()) // if nothing selected
         return;         // return
 
+    // remove edges
+    removeSCons();
+
     QSet<Layer*>::const_iterator i = pLayers.constBegin();
     while (i != pLayers.constEnd()) {
         m_pScene->removeLayer(*i);
@@ -165,16 +188,11 @@ void Viewer::sl_removeLayers() {
 void Viewer::sl_removeNeurons() {
     m_bStartConnect = false;
 
-    foreach(Layer *pLayer, getScene()->layers() ) {
-        foreach(Node *pNode, pLayer->nodes() ) {
-            if(pNode->isSelected()) {
-                m_pScene->removeNode(pNode);
-            }
-        }
-    }
+    // remove edges
+    removeSCons();
+
     foreach(Layer *pLayer, getScene()->layers() ) {
         if(!pLayer->nodes().count()) {
-            m_pScene->removeItem(pLayer->getLabel());
             m_pScene->removeLayer(pLayer);
         }
     }
@@ -186,22 +204,13 @@ void Viewer::sl_removeConnections() {
     m_bStartConnect = false;
 
     // remove edges
-    foreach(Layer *pLayer, getScene()->layers() ) {
-       foreach(Node *pNode, pLayer->nodes() ) {
-            if(pNode->isSelected()) {
-                foreach(Edge *pEdge, pNode->edges() ) {
-                    m_pScene->removeEdge(pEdge);
-                }
-                pNode->edges().clear();
-            }
-       }
-    }
+    removeSCons();
 
     // reset selection
     foreach(Layer *pLayer, getScene()->layers() ) {
        foreach(Node *pNode, pLayer->nodes() ) {
-               pNode->setSelected(false);
-               pNode->setSelectedAsGroup(false);
+		   pNode->setSelected(false);
+		   pNode->setSelectedAsGroup(false);
        }
     }
     update();
@@ -213,18 +222,25 @@ void Viewer::sl_removeAllConnections() {
     // reset selection
     foreach(Layer *pLayer, getScene()->layers() ) {
        foreach(Node *pNode, pLayer->nodes() ) {
-               pNode->setSelected(false);
-               pNode->setSelectedAsGroup(false);
+		   pNode->setSelected(false);
+		   pNode->setSelectedAsGroup(false);
        }
     }
 
     // remove edges
     foreach(Layer *pLayer, getScene()->layers() ) {
         foreach(Node *pNode, pLayer->nodes() ) {
-            foreach(Edge *pEdge, pNode->edges() ) {
+        	// remove edges
+            foreach(Edge *pEdge, pNode->edgesI() ) {
+                pEdge->sourceNode()->removeEdge(pEdge);
+                pEdge->destNode()->removeEdge(pEdge);
                 m_pScene->removeEdge(pEdge);
             }
-            pNode->edges().clear();
+            foreach(Edge *pEdge, pNode->edgesO() ) {
+                pEdge->sourceNode()->removeEdge(pEdge);
+                pEdge->destNode()->removeEdge(pEdge);
+                m_pScene->removeEdge(pEdge);
+            }
         }
     }
     update();

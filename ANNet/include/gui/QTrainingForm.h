@@ -19,6 +19,9 @@ public:
     
     int getMaxCycles() const;
     float getMaxError() const;
+    float getLearningRate() const;
+    float getMomentum() const;
+    float getWeightDecay() const;
 
     std::string getTransfFunct() const;
 

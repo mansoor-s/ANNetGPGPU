@@ -16,6 +16,7 @@
 
 #include <Qt/QtGui>
 // own classes
+#include <ANNet>
 #include <gui/QViewer.h>
 #include <gui/QScene.h>
 #include <gui/QTrainingForm.h>
@@ -34,6 +35,9 @@ class MainWindow : public QMainWindow
 {
     Q_OBJECT
 private:
+    ANN::BPNet *m_pANNet;
+
+    /////////////////////////////////////////
     FancyActionBar *m_pActionBar;
 
     QAction *m_pStartTraining;
@@ -65,6 +69,7 @@ private:
     QAction *m_pSave;
     QAction *m_pLoad;
     QAction *m_pNew;
+    QAction *m_pQuit;
     
     /////////////////////////////////////////
     std::vector<float> m_vErrors;
@@ -72,6 +77,10 @@ private:
 public slots:
     void sl_createLayer();
     void sl_startTraining();
+
+    void sl_newProject();
+    void sl_saveANNet();
+    void sl_loadANNet();
 
 public:
     MainWindow(QWidget *parent = 0);

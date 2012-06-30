@@ -26,6 +26,8 @@ MainWindow::MainWindow(QWidget *parent)
             baseName = QLatin1String("cleanlooks");
     }
 #endif
+    m_pANNet 		= NULL;
+
     qApp->setStyle(new ManhattanStyle(baseName));
     Utils::StyleHelper::setBaseColor(Qt::darkGray);
 
@@ -40,7 +42,9 @@ MainWindow::MainWindow(QWidget *parent)
 
     m_pNew          = new QAction(tr("New project"), 0);
     m_pSave         = new QAction(tr("Save project"), 0);
+    m_pSave->setDisabled(true);
     m_pLoad         = new QAction(tr("Load project"), 0);
+    m_pQuit         = new QAction(tr("Close project"), 0);
 
     setCentralWidget(m_pTabBar);
     addToolBar(m_ActionsBar);
@@ -82,8 +86,43 @@ void MainWindow::createTabs() {
 void MainWindow::createMenus() {
     m_pFileMenu = menuBar()->addMenu(tr("&File"));
     m_pFileMenu->addAction(m_pNew);
+    m_pFileMenu->addSeparator();
     m_pFileMenu->addAction(m_pSave);
     m_pFileMenu->addAction(m_pLoad);
+    m_pFileMenu->addSeparator();
+    m_pFileMenu->addAction(m_pQuit);
+
+    connect(m_pNew, SIGNAL(triggered ()), this, SLOT(sl_newProject()) );
+    connect(m_pSave, SIGNAL(triggered ()), this, SLOT(sl_saveANNet()) );
+    connect(m_pLoad, SIGNAL(triggered ()), this, SLOT(sl_loadANNet()) );
+    connect(m_pQuit, SIGNAL(triggered ()), this, SLOT(close()) );
+}
+
+void MainWindow::sl_newProject() {
+    m_pSave->setDisabled(true);
+    m_pANNet = NULL;
+
+    m_pViewer->getScene()->clearAll();
+}
+
+void MainWindow::sl_saveANNet() {
+	if(m_pANNet) {
+		QString fileName = QFileDialog::getSaveFileName(this, QObject::tr("Save file"), "/home/", QObject::tr("ANNet Files (*.annet)") );
+		m_pANNet->ExpToFS(fileName.toStdString() );
+	}
+}
+
+void MainWindow::sl_loadANNet() {
+	QString fileName = QFileDialog::getOpenFileName(this, QObject::tr("Open file"), "/home/", QObject::tr("ANNet Files (*.annet)") );
+	if(fileName != "" && fileName.contains(".annet")) {
+		// Remove all of the old content from screen
+		m_pViewer->getScene()->clearAll();
+		// Create a new net in memory
+		m_pANNet = new ANN::BPNet;
+		m_pANNet->ImpFromFS(fileName.toStdString());
+		// Load content from net to the screen
+		m_pViewer->getScene()->setANNet(*m_pANNet);
+	}
 }
 
 void MainWindow::createActions() {
@@ -133,6 +172,7 @@ void MainWindow::createActions() {
 }
 
 void MainWindow::sl_startTraining() {
+/*TEST SAMPLES FOR DEBUGGING*/
 	  float fInp1[3];
 	  fInp1[0] = 0;
 	  fInp1[1] = 0;
@@ -198,25 +238,32 @@ void MainWindow::sl_startTraining() {
 
 	int iCycles 			= m_pTrainingDial->getMaxCycles();
 	float fMaxError 		= m_pTrainingDial->getMaxError();
-	std::string sTFunct 	= m_pTrainingDial->getTransfFunct().data();
+	float fLearningRate 	= m_pTrainingDial->getLearningRate();
+	float fMomentum 		= m_pTrainingDial->getMomentum();
+	float fWeightDecay 		= m_pTrainingDial->getWeightDecay();
+ 	std::string sTFunct 	= m_pTrainingDial->getTransfFunct().data();
 
-	std::cout<<"soft coded: "<<std::endl;
+ 	m_pANNet 				= m_pViewer->getScene()->getANNet();
 
-	ANN::BPNet *pNet = m_pViewer->getScene()->getANNet();
-	pNet->SetLearningRate(0.2);
-	pNet->SetMomentum(0.9);
-	pNet->SetWeightDecay(0);
-	pNet->SetTransfFunction(ANN::Functions::ResolveTransfFByName(sTFunct.data()));
-
-	pNet->SetTrainingSet(input);
-	m_vErrors = pNet->TrainFromData(iCycles, 0.001);
-	std::cout<<pNet<<std::endl;
-
-	iCycles = m_vErrors.size();
-	if(pNet == NULL || iCycles == 0)
+	if(m_pANNet == NULL) {
+		m_pSave->setDisabled(true);
 		return;
+	}
 	else {
-		// generate some data:
+		m_pSave->setDisabled(false);
+
+		m_pANNet->SetLearningRate(fLearningRate);
+		m_pANNet->SetMomentum(fMomentum);
+		m_pANNet->SetWeightDecay(fWeightDecay);
+		m_pANNet->SetTransfFunction(ANN::Functions::ResolveTransfFByName(sTFunct.data()));
+
+		m_pANNet->SetTrainingSet(input);
+		m_vErrors = m_pANNet->TrainFromData(iCycles, 0.001);
+		iCycles = m_vErrors.size();
+
+		std::cout<<m_pANNet<<std::endl;
+
+		// generate some data to plot:
 		float fGreatest = m_vErrors[0];
 		QVector<double> x(iCycles), y(iCycles); // initialize with entries 0..100
 		for (int i=0; i < iCycles; i++) {

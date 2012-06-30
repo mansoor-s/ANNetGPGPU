@@ -23,8 +23,8 @@
 using namespace ANN;
 
 
-bool smallestFunctor(BPLayer *i, BPLayer *j) {
-	return (i->GetZLayer() < j->GetZLayer() );
+bool smallestFunctor(AbsLayer *i, AbsLayer *j) {
+	return ( ((ANN::BPLayer*)i)->GetZLayer() < ((ANN::BPLayer*)j)->GetZLayer() );
 }
 
 BPNet::BPNet() {
@@ -242,16 +242,10 @@ std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float
 	}
 	if(bZSort) {
 		std::cout<<"Z-layers were set."<<std::endl;
-
-		std::vector<ANN::BPLayer*> vBPLayers;
+		std::sort(m_lLayers.begin(), m_lLayers.end(), smallestFunctor);
+		// The IDs of the layers must be set according to Z-Value
 		for(int i = 0; i < m_lLayers.size(); i++) {
-			vBPLayers.push_back((ANN::BPLayer*)m_lLayers.at(i));
-		}
-
-        std::sort(vBPLayers.begin(), vBPLayers.end(), smallestFunctor);
-
-		for(int i = 0; i < m_lLayers.size(); i++) {
-			m_lLayers[i] = vBPLayers[i];
+			m_lLayers.at(i)->SetID(i);
 		}
 	}
 

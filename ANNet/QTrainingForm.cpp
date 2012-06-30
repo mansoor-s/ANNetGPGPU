@@ -19,10 +19,21 @@ int TrainingForm::getMaxCycles() const {
 }
 
 float TrainingForm::getMaxError() const {
-	float fVal = 10000.0;
-	return ((float)ui->m_SBError->value())/fVal;
+	return (float)ui->m_SBError->value();
 }
 
 std::string TrainingForm::getTransfFunct() const {
 	return ui->m_CBTransferFunction->currentText().toStdString();
+}
+
+float TrainingForm::getLearningRate() const {
+	return (float)ui->m_SBLearningRate->value();
+}
+
+float TrainingForm::getMomentum() const {
+	return (float)ui->m_SBMomentum->value();
+}
+
+float TrainingForm::getWeightDecay() const {
+	return (float)ui->m_SBWeightDecay->value();
 }

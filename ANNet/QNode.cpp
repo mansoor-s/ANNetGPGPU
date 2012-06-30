@@ -107,11 +107,11 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         gradient.setColorAt(0, Qt::white);
         gradient.setColorAt(1, Qt::red);
 
-        foreach (Edge *edge, m_EdgeListI) {
+        /*foreach (Edge *edge, m_EdgeListI) {
             edge->setColor(Qt::yellow);
             edge->setZValue(1);
             edge->adjust();
-        }
+        }*/
         foreach (Edge *edge, m_EdgeListO) {
             edge->setColor(Qt::red);
             edge->setZValue(1);
@@ -122,11 +122,11 @@ void Node::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWid
         gradient.setColorAt(0, Qt::yellow);
         gradient.setColorAt(1, Qt::darkYellow);
 
-        foreach (Edge *edge, m_EdgeListI) {
+        /*foreach (Edge *edge, m_EdgeListI) {
             edge->setColor(Qt::black);
             edge->setZValue(0);
             edge->adjust();
-        }
+        }*/
         foreach (Edge *edge, m_EdgeListO) {
             edge->setColor(Qt::black);
             edge->setZValue(0);

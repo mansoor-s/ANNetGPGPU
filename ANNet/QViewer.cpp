@@ -191,10 +191,13 @@ void Viewer::sl_removeNeurons() {
     // remove edges
     removeSCons();
 
+    QList<Layer*> lRawLayers;
     foreach(Layer *pLayer, getScene()->layers() ) {
-        if(!pLayer->nodes().count()) {
-            m_pScene->removeLayer(pLayer);
-        }
+       foreach(Node *pNode, pLayer->nodes() ) {
+           if(pNode->isSelected())  {
+        	   getScene()->removeNode(pNode);
+           }
+       }
     }
 
     m_pScene->adjust();

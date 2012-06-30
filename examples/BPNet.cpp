@@ -73,21 +73,21 @@ int main(int argc, char *argv[]) {
   //layer1.AddFlag(ANN::ANBiasNeuron);
   ANN::BPLayer layer2(64, ANN::ANLayerHidden);
   //layer2.AddFlag(ANN::ANBiasNeuron);
-  ANN::BPLayer layer3(64, ANN::ANLayerHidden);
+//  ANN::BPLayer layer3(64, ANN::ANLayerHidden);
   //layer3.AddFlag(ANN::ANBiasNeuron);
-  ANN::BPLayer layer4(64, ANN::ANLayerHidden);
+//  ANN::BPLayer layer4(64, ANN::ANLayerHidden);
   //layer4.AddFlag(ANN::ANBiasNeuron);
   ANN::BPLayer layer5(6, ANN::ANLayerOutput);
 
   layer1.ConnectLayer(&layer2);
-  layer2.ConnectLayer(&layer3);
-  layer3.ConnectLayer(&layer4);
-  layer4.ConnectLayer(&layer5);
+  layer2.ConnectLayer(&layer5);
+//  layer3.ConnectLayer(&layer4);
+//  layer4.ConnectLayer(&layer5);
 
   net.AddLayer(&layer1);
   net.AddLayer(&layer2);
-  net.AddLayer(&layer3);
-  net.AddLayer(&layer4);
+//  net.AddLayer(&layer3);
+//  net.AddLayer(&layer4);
   net.AddLayer(&layer5);
 
   ANN::TrainingSet input;

@@ -34,6 +34,8 @@ private:
 public:
     Scene(QObject *parent = 0);
 
+    void clearAll();
+
     ANN::BPNet *getANNet();
     void setANNet(ANN::BPNet &);
 

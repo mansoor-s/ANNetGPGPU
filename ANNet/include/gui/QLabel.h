@@ -31,6 +31,7 @@ public:
     QString GetName();
 
     uint32_t getType();
+    void setType(uint32_t);
 
 protected:
     void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget);

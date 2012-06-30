@@ -77,6 +77,7 @@ void AbsNet::CreateNet(const ConTable &Net) {
 	/*
 	 * Create the layers ..
 	 */
+	std::cout<<"Adding layers ";
 	for(unsigned int i = 0; i < iNmbLayers; i++) {
 		iNmbNeurons = Net.SizeOfLayer.at(i);
 		fType 		= Net.TypeOfLayer.at(i);
@@ -96,15 +97,18 @@ void AbsNet::CreateNet(const ConTable &Net) {
 			SetOPLayer(i);
 		}
 	}
+	std::cout<<".. finished!"<<std::endl;
 
 	/*
 	 * Basic information for ~all networks
 	 */
+	std::cout<<"Adding edges ";
 	for(unsigned int i = 0; i < Net.NeurCons.size(); i++) {
-		iDstNeurID = Net.NeurCons.at(i).m_iDstNeurID;
-		iSrcNeurID = Net.NeurCons.at(i).m_iSrcNeurID;
+		iDstNeurID 	= Net.NeurCons.at(i).m_iDstNeurID;
+		iSrcNeurID 	= Net.NeurCons.at(i).m_iSrcNeurID;
 		iDstLayerID = Net.NeurCons.at(i).m_iDstLayerID;
 		iSrcLayerID = Net.NeurCons.at(i).m_iSrcLayerID;
+
 		if(iDstNeurID < 0 || iSrcNeurID < 0 || iDstLayerID < 0 || iSrcLayerID < 0) {
 			return;
 		}
@@ -116,9 +120,11 @@ void AbsNet::CreateNet(const ConTable &Net) {
 
 			pDstNeur 	= pDstLayer->GetNeuron(iDstNeurID);
 			pSrcNeur 	= pSrcLayer->GetNeuron(iSrcNeurID);
+
 			Connect(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
 		}
 	}
+	std::cout<<".. finished!"<<std::endl;
 }
 
 AbsNet::~AbsNet() {
@@ -161,22 +167,14 @@ std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const floa
 			std::cout<<"Break after: "<<j<<" cycles.\nLast total error: "<<fCurError<<"\nLearning rate: "<<m_fLearningRate<<std::endl;
 			return pErrors;
 		}
-/*
-		if(fCurError >= fLastError)
-			SetLearningRate(m_fLearningRate + fStepSize);
-		else {
-			if(m_fLearningRate - fStepSize > 0)
-				SetLearningRate(m_fLearningRate - fStepSize);
-		}
-		fLastError 	= fCurError;
-*/
+
 		fCurError 	= 0.f;
 		for( unsigned int i = 0; i < m_pTrainingData->GetNrElements(); i++ ) {
 			SetInput( m_pTrainingData->GetInput(i) );
 			fCurError += SetOutput( m_pTrainingData->GetOutput(i) );
 			PropagateBW();
 		}
-		std::cout<<"error: "<<fCurError<<std::endl;
+
 		pErrors.push_back(fCurError);
 	}
 	std::cout<<"Break\nLast total error: "<<fCurError<<"\nLearning rate: "<<m_fLearningRate<<std::endl;

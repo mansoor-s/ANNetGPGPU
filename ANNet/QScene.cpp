@@ -32,7 +32,7 @@ ANN::BPNet *Scene::getANNet() {
 		assert(iSize > 0);	// shouldn't happen
 
 		int iZ = pLayer->getZLabel()->getZLayer();
-		/*
+
 		if(iZ < 0) {
 			QMessageBox msgBox;
 			msgBox.setText("Z-values must be set for all layers.");
@@ -40,19 +40,13 @@ ANN::BPNet *Scene::getANNet() {
 
 			return NULL;
 		}
-
 		if(LayerTypeFlag < 0) {
 			QMessageBox msgBox;
 			msgBox.setText("Type of layer must be set for all layers.");
 			msgBox.exec();
 
 			return NULL;
-		}*/
-/*
-		ANN::BPLayer *pBPLayer = new ANN::BPLayer(iSize, LayerTypeFlag);
-		pBPLayer->SetZLayer(iZ);
-		lLayers << pBPLayer;
-*/
+		}
 	}
 	
    /**
@@ -102,8 +96,15 @@ ANN::BPNet *Scene::getANNet() {
 	return m_pANNet;
 }
 
-void Scene::setANNet(ANN::BPNet &) {
-
+void Scene::setANNet(ANN::BPNet &Net) {
+	m_pANNet = &Net;
+	int iZLayer = 0;
+	foreach(ANN::AbsLayer *pLayer, m_pANNet->GetLayers()) {
+		Layer *pSceneLayer = addLayer(pLayer->GetNeurons().size() );
+		pSceneLayer->getLabel()->setType(pLayer->GetFlag());
+		pSceneLayer->getZLabel()->setZLayer(iZLayer);
+		iZLayer++;
+	}
 }
 
 void Scene::adjust() {
@@ -145,6 +146,12 @@ void Scene::addEdge(Edge* pEdge) {
     addItem(pEdge);
 }
 
+void Scene::clearAll() {
+	foreach(Layer *pLayer, m_lLayers) {
+		removeLayer(pLayer);
+	}
+}
+
 void Scene::removeEdge(Edge* pDelEdge) {
     removeItem(pDelEdge);
 
@@ -159,6 +166,13 @@ void Scene::removeEdge(Edge* pDelEdge) {
 void Scene::removeNode(Node* pDelNode) {
     removeItem(pDelNode);
     pDelNode->getLayer()->removeNode(pDelNode);
+
+	foreach(Edge* pEdge, pDelNode->edgesI() ) {
+		removeEdge(pEdge);
+	}
+	foreach(Edge* pEdge, pDelNode->edgesO() ) {
+		removeEdge(pEdge);
+	}
 
     QList<Node*> pNewList;
     foreach(Node *pNode, m_lNodes) {

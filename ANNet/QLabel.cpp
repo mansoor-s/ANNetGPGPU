@@ -32,6 +32,21 @@ uint32_t Label::getType() {
 	}
 }
 
+void Label::setType(uint32_t type) {
+	if(type == ANN::ANLayerInput) {
+		m_sName = "Input layer";
+	}
+	else if(type == ANN::ANLayerHidden) {
+		m_sName = "Hidden layer";
+	}
+	else if(type == ANN::ANLayerOutput) {
+		m_sName = "Output layer";
+	}
+	else {
+		m_sName = "error";
+	}
+}
+
 void Label::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) {
     if(option->state & QStyle::State_Selected) {
         painter->setPen(Qt::NoPen);

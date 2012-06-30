@@ -60,7 +60,7 @@ AbsNeuron *Edge::GetDestination(AbsNeuron *source) const {
 		return m_pNeuronSecond;
 	}
 	else if(m_pNeuronFirst != source && m_pNeuronSecond != source) {
-		std::cout<<"FEHLER: Quellneuron gehört nicht zur Kte"<<std::endl;
+		std::cout<<"FEHLER: Quellneuron gehört nicht zur Kette"<<std::endl;
 		return NULL;
 	}
 	else {

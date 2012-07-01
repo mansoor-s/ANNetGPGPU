@@ -99,6 +99,7 @@ set( ANGUISourceFiles
   QTrainingForm.cpp
   QIOForm.cpp
   QViewer.cpp
+  QOutput.cpp
 )
 
 set( ANGUIHeaderFiles 
@@ -113,6 +114,7 @@ set( ANGUIHeaderFiles
   include/gui/QTrainingForm.h
   include/gui/QIOForm.h
   include/gui/QViewer.h
+  include/gui/QOutput.h
 )
 
 if (QT4_FOUND)

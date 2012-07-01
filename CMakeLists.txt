@@ -32,6 +32,9 @@ if (CUDA_FOUND)
   target_link_libraries (SOMNet ANNet ANNetGUI) 
 endif(CUDA_FOUND)
 
+add_executable (LoadBPNet examples/LoadBPNet.cpp)
+target_link_libraries (LoadBPNet ANNet) 
+
 add_executable (BPNet examples/BPNet.cpp)
 target_link_libraries (BPNet ANNet) 
 

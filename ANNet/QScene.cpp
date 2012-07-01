@@ -67,8 +67,8 @@ ANN::BPNet *Scene::getANNet() {
 		//std::cout<<"number of neurons: "<<pLayer->nodes().size()<<std::endl;
 		foreach(Node *pNode, pLayer->nodes() ) {
 			ANN::NeurDescr neuron;
-			neuron.m_iLayerID = pLayer->getID();
-			neuron.m_iNeurID = pNode->getID();
+			neuron.m_iLayerID 		= pLayer->getID();
+			neuron.m_iNeurID 		= pNode->getID();
 			Net.Neurons.push_back(neuron);
 
 			//std::cout<<"number of edges O: "<<pNode->edgesO().size()<<std::endl;
@@ -99,11 +99,54 @@ ANN::BPNet *Scene::getANNet() {
 void Scene::setANNet(ANN::BPNet &Net) {
 	m_pANNet = &Net;
 	int iZLayer = 0;
+
+	// Add layers to the scene
 	foreach(ANN::AbsLayer *pLayer, m_pANNet->GetLayers()) {
-		Layer *pSceneLayer = addLayer(pLayer->GetNeurons().size() );
+		Layer *pSceneLayer = addLayer(	pLayer->GetNeurons().size(),
+										QPointF(5000+ANN::RandFloat(-250, 250), 5000+ANN::RandFloat(-250, 250)),
+										"Type not set!");
+
 		pSceneLayer->getLabel()->setType(pLayer->GetFlag());
 		pSceneLayer->getZLabel()->setZLayer(iZLayer);
+
 		iZLayer++;
+	}
+
+	// Bruteforce free positions to avoid collisions
+	foreach(Layer *pSceneOne, m_lLayers) {
+		foreach(Layer *pSceneOther, m_lLayers) {
+			if(pSceneOne == pSceneOther) {
+				continue;
+			}
+			else {
+				while(pSceneOne->collidesWithItem(pSceneOther) ) {
+					pSceneOther->shift(ANN::RandFloat(-250, 250), ANN::RandFloat(-250, 250));
+				}
+			}
+		}
+	}
+
+	// Setup edges
+	foreach(ANN::AbsLayer *pLayer, m_pANNet->GetLayers() ) {
+		foreach(ANN::AbsNeuron *pNeuron, pLayer->GetNeurons() ) {
+			int iLayerID 	= pLayer->GetID();
+			int iNeurID 	= pNeuron->GetID();
+
+			foreach(ANN::Edge *pEdge, pNeuron->GetConsO() ) {
+				int iSrcLayerID 	= iLayerID;
+				int iDstLayerID 	= pEdge->GetDestination(pNeuron)->GetParent()->GetID();
+				int iSrcNeurID 		= iNeurID;
+				int iDstNeurID 		= pEdge->GetDestination(pNeuron)->GetID();
+
+				Layer *pSrcLayer 	= m_lLayers.at(iSrcLayerID);
+				Layer *pDstLayer 	= m_lLayers.at(iDstLayerID);
+				Node *pSrcNode 		= pSrcLayer->nodes().at(iSrcNeurID);
+				Node *pDstNode 		= pDstLayer->nodes().at(iDstNeurID);
+
+	            Edge *pEdge = new Edge(pSrcNode, pDstNode);
+	            addEdge(pEdge);
+			}
+		}
 	}
 }
 
@@ -114,23 +157,26 @@ void Scene::adjust() {
         layer->adjust();
 }
 
-Layer* Scene::addLayer(const unsigned int &iNodes, const QString &sName) {
+Layer* Scene::addLayer(const unsigned int &iNodes, const QPointF &fPos, const QString &sName) {
     Layer *pLayer = new Layer;
     pLayer->setScene(this);
 
-    for(unsigned int i = 0; i < iNodes; i++) {
-        Node *pNode = new Node;
-        pNode->setPos(i*(pNode->getWidth()+8), 0);
-        pLayer->addNode(pNode);
+    // Add one node only on the given position
+    Node *pNode = new Node;
+    pNode->setPos(fPos.x(), fPos.y());
+    pLayer->addNode(pNode);
+    pNode->setLayer(pLayer);
+    addNode(pNode);
 
-        pNode->setLayer(pLayer);
-        addItem(pNode);
-    }
+    // Add the layer to the scene
     addItem(pLayer);
     addItem(pLayer->addLabel(sName));
     addItem(pLayer->addZLabel(-1));
     m_lLayers << pLayer;
     pLayer->setID(m_lLayers.size()-1);
+
+    // Add the rest of the nodes to the layer
+    pLayer->addNodes(iNodes-1);
     pLayer->adjust();
 
     return pLayer;

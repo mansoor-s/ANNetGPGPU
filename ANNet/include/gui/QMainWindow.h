@@ -17,10 +17,12 @@
 #include <Qt/QtGui>
 // own classes
 #include <ANNet>
+#include <containers/ANTrainingSet.h>
 #include <gui/QViewer.h>
 #include <gui/QScene.h>
 #include <gui/QTrainingForm.h>
 #include <gui/QIOForm.h>
+#include <gui/QOutput.h>
 
 //3rd party classes
 #include <gui/QCustomPlot/qcustomplot.h>
@@ -36,11 +38,13 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 private:
     ANN::BPNet *m_pANNet;
+    ANN::TrainingSet m_TrainingSet;
 
     /////////////////////////////////////////
     FancyActionBar *m_pActionBar;
 
     QAction *m_pStartTraining;
+    QAction *m_pRunInput;
 
     /////////////////////////////////////////
     QToolBar *m_ActionsBar;
@@ -62,6 +66,7 @@ private:
     QCustomPlot *m_pCustomPlot;
     IOForm *m_pInputDial;
     TrainingForm *m_pTrainingDial;
+    Output *m_pOutputTable;
 
     /////////////////////////////////////////
     QMenu *m_pFileMenu;
@@ -71,16 +76,31 @@ private:
     QAction *m_pNew;
     QAction *m_pQuit;
     
+    QMenu *m_pViewMenu;
+    QAction *m_pZoomIn;
+    QAction *m_pZoomOut;
+    QAction *m_pShowEdges;
+    QAction *m_pShowNodes;
+
     /////////////////////////////////////////
     std::vector<float> m_vErrors;
 
 public slots:
     void sl_createLayer();
     void sl_startTraining();
+    void sl_run();
+    void sl_setTrainingSet();
 
+    // File menu
     void sl_newProject();
     void sl_saveANNet();
     void sl_loadANNet();
+
+    // View menu
+    void sl_zoomIn();
+    void sl_zoomOut();
+    void sl_ShowEdges(bool);
+    void sl_ShowNodes(bool);
 
 public:
     MainWindow(QWidget *parent = 0);

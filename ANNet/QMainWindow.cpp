@@ -1,4 +1,6 @@
 #include <iostream>
+#include <QEdge.h>
+#include <QNode.h>
 #include <gui/QLayer.h>
 #include <gui/QMainWindow.h>
 #include <gui/utils/stylehelper.h>
@@ -39,15 +41,27 @@ MainWindow::MainWindow(QWidget *parent)
     m_pCustomPlot   = new QCustomPlot;
     m_pInputDial    = new IOForm;
     m_pTrainingDial = new TrainingForm;
+    m_pOutputTable 	= new Output;
 
-    m_pNew          = new QAction(tr("New project"), 0);
-    m_pSave         = new QAction(tr("Save project"), 0);
+    m_pNew          = new QAction(QObject::tr("New project"), 0);
+    m_pSave         = new QAction(QObject::tr("Save project"), 0);
     m_pSave->setDisabled(true);
-    m_pLoad         = new QAction(tr("Load project"), 0);
-    m_pQuit         = new QAction(tr("Close project"), 0);
+    m_pLoad         = new QAction(QObject::tr("Load project"), 0);
+    m_pQuit         = new QAction(QObject::tr("Close project"), 0);
+
+    m_pZoomIn 		= new QAction(QObject::tr("Zoom in"), 0);
+    m_pZoomOut 		= new QAction(QObject::tr("Zoom out"), 0);
+    m_pShowEdges 	= new QAction(QObject::tr("Show edges"), 0);
+    m_pShowEdges->setCheckable(true);
+    m_pShowEdges->setChecked(true);
+    m_pShowEdges->setDisabled(true);
+    m_pShowNodes 	= new QAction(tr("Show nodes"), 0);
+    m_pShowNodes->setCheckable(true);
+    m_pShowNodes->setChecked(true);
+    m_pShowNodes->setDisabled(true);
 
     setCentralWidget(m_pTabBar);
-    addToolBar(m_ActionsBar);
+    addToolBar(Qt::RightToolBarArea, m_ActionsBar);
 
     createTabs();
     createMenus();
@@ -62,22 +76,24 @@ MainWindow::~MainWindow()
 
 void MainWindow::createGraph() {
 	// give the axes some labels:
-	m_pCustomPlot->xAxis->setLabel("Training cycle (t)");
-	m_pCustomPlot->yAxis->setLabel("Standard deviation (SE)");
+	m_pCustomPlot->xAxis->setLabel(QObject::tr("Training cycle (t)") );
+	m_pCustomPlot->yAxis->setLabel(QObject::tr("Standard Deviation (SE)") );
 	// set axes ranges, so we see all data:
 	m_pCustomPlot->xAxis->setRange(0, 1);
 	m_pCustomPlot->yAxis->setRange(0, 10);
 }
 
 void MainWindow::createTabs() {
-    m_pTabBar->insertTab(0, m_pViewer, QIcon("gfx/monitor_icon.png"),"Network designer" );
+    m_pTabBar->insertTab(0, m_pViewer, QIcon("gfx/monitor_icon.png"), QObject::tr("Designer") );
     m_pTabBar->setTabEnabled(0, true);
-    m_pTabBar->insertTab(1, m_pInputDial, QIcon("gfx/training_icon.png"),"Input/Output data" );
+    m_pTabBar->insertTab(1, m_pInputDial, QIcon("gfx/training_icon.png"), QObject::tr("Input/Output") );
     m_pTabBar->setTabEnabled(1, true);
-    m_pTabBar->insertTab(2, m_pTrainingDial, QIcon("gfx/QuestionMark.png"),"Training procedure" );
+    m_pTabBar->insertTab(2, m_pTrainingDial, QIcon("gfx/QuestionMark.png"), QObject::tr("Configuration") );
     m_pTabBar->setTabEnabled(2, true);
-    m_pTabBar->insertTab(3, m_pCustomPlot, QIcon("gfx/graph_icon.png"),"Learning curve" );
+    m_pTabBar->insertTab(3, m_pCustomPlot, QIcon("gfx/graph_icon.png"), QObject::tr("Learning curve") );
     m_pTabBar->setTabEnabled(3, true);
+    m_pTabBar->insertTab(4, m_pOutputTable, QIcon("gfx/output_icon.png"), QObject::tr("Output data") );
+    m_pTabBar->setTabEnabled(4, true);
 
     m_pTabBar->setCurrentIndex(0);
     m_pTabBar->addCornerWidget(m_pActionBar);
@@ -92,13 +108,58 @@ void MainWindow::createMenus() {
     m_pFileMenu->addSeparator();
     m_pFileMenu->addAction(m_pQuit);
 
+    m_pViewMenu = menuBar()->addMenu(tr("&View"));
+    m_pViewMenu->addAction(m_pZoomIn);
+    m_pViewMenu->addAction(m_pZoomOut);
+    m_pViewMenu->addSeparator();
+    m_pViewMenu->addAction(m_pShowEdges);
+    m_pViewMenu->addAction(m_pShowNodes);
+
     connect(m_pNew, SIGNAL(triggered ()), this, SLOT(sl_newProject()) );
     connect(m_pSave, SIGNAL(triggered ()), this, SLOT(sl_saveANNet()) );
     connect(m_pLoad, SIGNAL(triggered ()), this, SLOT(sl_loadANNet()) );
     connect(m_pQuit, SIGNAL(triggered ()), this, SLOT(close()) );
+
+    connect(m_pZoomIn, SIGNAL(triggered ()), this, SLOT(sl_zoomIn()) );
+    connect(m_pZoomOut, SIGNAL(triggered ()), this, SLOT(sl_zoomOut()) );
+    connect(m_pShowEdges, SIGNAL(toggled (bool)), this, SLOT(sl_ShowEdges(bool)) );
+    connect(m_pShowNodes, SIGNAL(toggled (bool)), this, SLOT(sl_ShowNodes(bool)) );
+}
+
+void MainWindow::sl_zoomIn() {
+	double scaleFactor = 1.15; //How fast we zoom
+	m_pViewer->scale(scaleFactor, scaleFactor);
+}
+
+void MainWindow::sl_zoomOut() {
+	double scaleFactor = 1.15; //How fast we zoom
+	m_pViewer->scale(1.f/scaleFactor, 1.f/scaleFactor);
+}
+
+void MainWindow::sl_ShowEdges(bool bState) {
+	foreach(Edge *pEdge, m_pViewer->getScene()->edges() ) {
+		pEdge->setVisible(bState);
+	}
+}
+
+void MainWindow::sl_ShowNodes(bool bState) {
+	foreach(Node *pNode, m_pViewer->getScene()->nodes() ) {
+		pNode->setVisible(bState);
+	}
 }
 
 void MainWindow::sl_newProject() {
+	m_pRunInput->setDisabled(true);
+	//TODO m_pStartTraining->setDisabled(true);
+
+    m_pShowEdges->setCheckable(true);
+    m_pShowEdges->setChecked(true);
+    m_pShowEdges->setDisabled(true);
+
+    m_pShowNodes->setCheckable(true);
+    m_pShowNodes->setChecked(true);
+    m_pShowNodes->setDisabled(true);
+
     m_pSave->setDisabled(true);
     m_pANNet = NULL;
 
@@ -113,6 +174,17 @@ void MainWindow::sl_saveANNet() {
 }
 
 void MainWindow::sl_loadANNet() {
+	m_pRunInput->setDisabled(true);
+	//TODO m_pStartTraining->setDisabled(true);
+
+    m_pShowEdges->setCheckable(true);
+    m_pShowEdges->setChecked(true);
+    m_pShowEdges->setDisabled(false);
+
+    m_pShowNodes->setCheckable(true);
+    m_pShowNodes->setChecked(true);
+    m_pShowNodes->setDisabled(false);
+
 	QString fileName = QFileDialog::getOpenFileName(this, QObject::tr("Open file"), "/home/", QObject::tr("ANNet Files (*.annet)") );
 	if(fileName != "" && fileName.contains(".annet")) {
 		// Remove all of the old content from screen
@@ -136,15 +208,22 @@ void MainWindow::createActions() {
     QIcon iconRemEdge("gfx/rem_edge.png");
     QIcon iconRemEdges("gfx/rem_edges.png");
 
-    QIcon iconStartTraining("gfx/arrow.png");
+    QIcon iconStartTraining("gfx/train.png");
+    QIcon iconRun("gfx/run.png");
 
     /*
      * Fancy action bar
      */
-    m_pStartTraining = new QAction(iconStartTraining, "Start Training", 0);
+    m_pStartTraining = new QAction(iconStartTraining, QObject::tr("Start Training"), 0);
     m_pActionBar->insertAction(0, m_pStartTraining);
+    //TODO m_pStartTraining->setDisabled(true);
+
+    m_pRunInput = new QAction(iconRun, QObject::tr("Run through input"), 0);
+    m_pActionBar->insertAction(1, m_pRunInput);
+    m_pRunInput->setDisabled(true);
 
     connect(m_pStartTraining, SIGNAL(triggered ()), this, SLOT(sl_startTraining()) );
+    connect(m_pRunInput, SIGNAL(triggered ()), this, SLOT(sl_run()) );
 
     /*
      * Regular tool bar
@@ -169,6 +248,16 @@ void MainWindow::createActions() {
 
     connect(m_pRemoveEdges, SIGNAL(triggered ()), m_pViewer, SLOT(sl_removeConnections()) );
     connect(m_pRemoveAllEdges, SIGNAL(triggered() ), m_pViewer, SLOT(sl_removeAllConnections()) );
+}
+
+void MainWindow::sl_run() {
+	if(m_pANNet)
+		m_pOutputTable->Display(m_pANNet);
+}
+
+void MainWindow::sl_setTrainingSet() {
+	m_pRunInput->setDisabled(false);
+	m_pStartTraining->setDisabled(false);
 }
 
 void MainWindow::sl_startTraining() {
@@ -234,6 +323,7 @@ void MainWindow::sl_startTraining() {
 	  input.AddOutput(fOut3, 6);
 	  input.AddInput(fInp4, 3);
 	  input.AddOutput(fOut4, 6);
+	  m_TrainingSet = input;
 /////////////////////////////////////////////
 
 	int iCycles 			= m_pTrainingDial->getMaxCycles();
@@ -250,6 +340,7 @@ void MainWindow::sl_startTraining() {
 		return;
 	}
 	else {
+		m_vErrors.clear();
 		m_pSave->setDisabled(false);
 
 		m_pANNet->SetLearningRate(fLearningRate);
@@ -257,10 +348,11 @@ void MainWindow::sl_startTraining() {
 		m_pANNet->SetWeightDecay(fWeightDecay);
 		m_pANNet->SetTransfFunction(ANN::Functions::ResolveTransfFByName(sTFunct.data()));
 
-		m_pANNet->SetTrainingSet(input);
+		m_pANNet->SetTrainingSet(m_TrainingSet);
 		m_vErrors = m_pANNet->TrainFromData(iCycles, 0.001);
 		iCycles = m_vErrors.size();
 
+		sl_run();
 		std::cout<<m_pANNet<<std::endl;
 
 		// generate some data to plot:
@@ -285,7 +377,9 @@ void MainWindow::sl_startTraining() {
 }
 
 void MainWindow::sl_createLayer() {
-    Layer *pLayer = m_pViewer->getScene()->addLayer(1, "no type");
+    m_pShowEdges->setDisabled(false);
+    m_pShowNodes->setDisabled(false);
+
     QPointF pCenter = m_pViewer->getScene()->sceneRect().center();
-    pLayer->shift(pCenter.x(), pCenter.y());
+    Layer *pLayer = m_pViewer->getScene()->addLayer(1, pCenter, "no type");
 }

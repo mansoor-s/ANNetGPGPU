@@ -239,7 +239,7 @@ void Layer::addNodes(int iNumber) {
 
             pNode->setPos(pos.x()+(iRow*(8+pNode->getWidth())), pos.y()+(iLine*(8+pNode->getWidth())) );
             addNode(pNode);
-            m_pScene->addItem(pNode);
+            m_pScene->addNode(pNode);
         }
         adjust();
     }

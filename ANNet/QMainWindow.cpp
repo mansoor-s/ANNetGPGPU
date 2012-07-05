@@ -251,6 +251,8 @@ void MainWindow::createActions() {
     QIcon iconRemEdge("gfx/rem_edge.png");
     QIcon iconRemEdges("gfx/rem_edges.png");
 
+    QIcon iconSetNrPairs("gfx/plus_icon.png");
+
     QIcon iconStartTraining("gfx/train.png");
     QIcon iconRun("gfx/run.png");
     QIcon iconBuild("gfx/build.png");
@@ -288,7 +290,7 @@ void MainWindow::createActions() {
     m_ActionsBar->addSeparator();
     m_pRemoveAllEdges = m_ActionsBar->addAction(iconRemEdges, "Remove all edges");
     m_ActionsBar->addSeparator();
-    m_pSetTrainingPairs = m_ActionsBar->addAction(iconRemEdges, "Set number of training pairs");
+    m_pSetTrainingPairs = m_ActionsBar->addAction(iconSetNrPairs, "Set number of training pairs");
 
     connect(m_pAddLayer, SIGNAL(triggered ()), this, SLOT(sl_createLayer()) );
     connect(m_pAddNeuron, SIGNAL(triggered ()), m_pViewer, SLOT(sl_addNeurons()) );

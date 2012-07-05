@@ -15,7 +15,7 @@ Scene::Scene(QObject *parent) : QGraphicsScene(parent)
 	m_pANNet = new ANN::BPNet;
 }
 
-ANN::BPNet *Scene::getANNet() {
+ANN::BPNet *Scene::getANNet(bool bDial) {
 	m_pANNet->EraseAll();
 
 	int LayerTypeFlag 	= -1;
@@ -33,14 +33,14 @@ ANN::BPNet *Scene::getANNet() {
 
 		int iZ = pLayer->getZLabel()->getZLayer();
 
-		if(iZ < 0) {
+		if(iZ < 0 && bDial) {
 			QMessageBox msgBox;
 			msgBox.setText("Z-values must be set for all layers.");
 			msgBox.exec();
 
 			return NULL;
 		}
-		if(LayerTypeFlag < 0) {
+		if(LayerTypeFlag < 0 && bDial) {
 			QMessageBox msgBox;
 			msgBox.setText("Type of layer must be set for all layers.");
 			msgBox.exec();
@@ -92,6 +92,9 @@ ANN::BPNet *Scene::getANNet() {
 	foreach(ANN::BPLayer *pLayer, lLayers) {
 		m_pANNet->AddLayer(pLayer);
 	}
+
+    // Update ANN::BPNet
+    emit(si_netChanged(m_pANNet));
 
 	return m_pANNet;
 }
@@ -179,12 +182,20 @@ Layer* Scene::addLayer(const unsigned int &iNodes, const QPointF &fPos, const QS
     pLayer->addNodes(iNodes-1);
     pLayer->adjust();
 
+    // Update ANN::BPNet
+//    getANNet(false);
+//    emit(si_netChanged(m_pANNet));
+
     return pLayer;
 }
 
 void Scene::addNode(Node* pNode) {
     m_lNodes << pNode;
     addItem(pNode);
+
+    // Update ANN::BPNet
+//    getANNet(false);
+//    emit(si_netChanged(m_pANNet));
 }
 
 void Scene::addEdge(Edge* pEdge) {
@@ -226,6 +237,10 @@ void Scene::removeNode(Node* pDelNode) {
             pNewList << pNode;
     }
     m_lNodes = pNewList;
+
+    // Update ANN::BPNet
+//    getANNet(false);
+//    emit(si_netChanged(m_pANNet));
 }
 
 void Scene::removeLayer(Layer* pDelLayer) {
@@ -243,6 +258,10 @@ void Scene::removeLayer(Layer* pDelLayer) {
             pNewList << pLayer;
     }
     m_lLayers = pNewList;
+
+    // Update ANN::BPNet
+//    getANNet(false);
+//    emit(si_netChanged(m_pANNet));
 }
 
 QList<Edge*> Scene::edges() {

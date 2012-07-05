@@ -57,7 +57,6 @@ set( ANCUDASourceFiles
 
 SET(ANGUIFormularFiles
   QTrainingForm.ui
-  QIOForm.ui
 )
 
 set( 3rdPartySourceFiles
@@ -71,6 +70,7 @@ set( 3rdPartySourceFiles
   include/gui/utils/stringutils.cpp
   include/gui/fancytabwidget.cpp
   include/gui/fancyactionbar.cpp
+  include/gui/delegate/spinboxdelegate.cpp
 )
 
 set( 3rdPartyHeaderFiles
@@ -85,6 +85,7 @@ set( 3rdPartyHeaderFiles
   include/gui/coreplugin/coreconstants.h
   include/gui/fancytabwidget.h
   include/gui/fancyactionbar.h
+  include/gui/delegate/spinboxdelegate.h
 )
 
 set( ANGUISourceFiles

@@ -12,12 +12,16 @@
 #include <ANNet>
 
 
-class Output: public QTableWidget {
+class Output: public QWidget {
+private:
+	QTableWidget *m_pTableWidget;
+
 public:
 	Output(QWidget *parent = NULL);
 	virtual ~Output();
 
-	void Display(ANN::BPNet *pNet);
+	void display(ANN::BPNet *pNet);
+	void reset();
 };
 
 #endif /* QOUTPUT_H_ */

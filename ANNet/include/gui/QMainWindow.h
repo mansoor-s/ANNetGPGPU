@@ -38,13 +38,14 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 private:
     ANN::BPNet *m_pANNet;
-    ANN::TrainingSet m_TrainingSet;
+    ANN::TrainingSet *m_pTrainingSet;
 
     /////////////////////////////////////////
     FancyActionBar *m_pActionBar;
 
     QAction *m_pStartTraining;
     QAction *m_pRunInput;
+    QAction *m_pBuildNet;
 
     /////////////////////////////////////////
     QToolBar *m_ActionsBar;
@@ -58,6 +59,8 @@ private:
 
     QAction *m_pRemoveEdges;
     QAction *m_pRemoveAllEdges;
+
+    QAction *m_pSetTrainingPairs;
 
     /////////////////////////////////////////
     FancyTabWidget *m_pTabBar;
@@ -90,6 +93,7 @@ public slots:
     void sl_startTraining();
     void sl_run();
     void sl_setTrainingSet();
+    void sl_build();
 
     // File menu
     void sl_newProject();
@@ -101,6 +105,8 @@ public slots:
     void sl_zoomOut();
     void sl_ShowEdges(bool);
     void sl_ShowNodes(bool);
+
+    void sl_tabChanged(int);
 
 public:
     MainWindow(QWidget *parent = 0);

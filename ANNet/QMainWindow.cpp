@@ -29,6 +29,7 @@ MainWindow::MainWindow(QWidget *parent)
     }
 #endif
     m_pANNet 		= NULL;
+    m_pTrainingSet 	= NULL;
 
     qApp->setStyle(new ManhattanStyle(baseName));
     Utils::StyleHelper::setBaseColor(Qt::darkGray);
@@ -67,6 +68,19 @@ MainWindow::MainWindow(QWidget *parent)
     createMenus();
     createActions();
     createGraph();
+
+    connect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
+    connect(m_pTabBar, SIGNAL(currentChanged(int)), this, SLOT(sl_tabChanged(int)) );
+    connect(m_pInputDial, SIGNAL(si_contentChanged()), this, SLOT(sl_setTrainingSet()) );
+}
+
+void MainWindow::sl_tabChanged(int iTab) {
+	if(iTab == 1) {
+		// Resize table widgets
+		m_pInputDial->sl_createTables(m_pANNet);
+	 	// Reload the IO widget
+		m_pInputDial->setTrainingSet(m_pTrainingSet);
+	}
 }
 
 MainWindow::~MainWindow()
@@ -149,9 +163,6 @@ void MainWindow::sl_ShowNodes(bool bState) {
 }
 
 void MainWindow::sl_newProject() {
-	m_pRunInput->setDisabled(true);
-	//TODO m_pStartTraining->setDisabled(true);
-
     m_pShowEdges->setCheckable(true);
     m_pShowEdges->setChecked(true);
     m_pShowEdges->setDisabled(true);
@@ -161,9 +172,17 @@ void MainWindow::sl_newProject() {
     m_pShowNodes->setDisabled(true);
 
     m_pSave->setDisabled(true);
-    m_pANNet = NULL;
+    m_pANNet 		= NULL;
+    m_pTrainingSet 	= NULL;
 
     m_pViewer->getScene()->clearAll();
+
+	m_pRunInput->setDisabled(true);
+	m_pStartTraining->setDisabled(true);
+
+	// Reset tables
+	m_pOutputTable->reset();
+	m_pInputDial->reset();
 }
 
 void MainWindow::sl_saveANNet() {
@@ -174,9 +193,6 @@ void MainWindow::sl_saveANNet() {
 }
 
 void MainWindow::sl_loadANNet() {
-	m_pRunInput->setDisabled(true);
-	//TODO m_pStartTraining->setDisabled(true);
-
     m_pShowEdges->setCheckable(true);
     m_pShowEdges->setChecked(true);
     m_pShowEdges->setDisabled(false);
@@ -194,6 +210,33 @@ void MainWindow::sl_loadANNet() {
 		m_pANNet->ImpFromFS(fileName.toStdString());
 		// Load content from net to the screen
 		m_pViewer->getScene()->setANNet(*m_pANNet);
+
+		/*
+		 * Load current Training set of the net
+		 */
+		if(m_pANNet == NULL) {
+			std::cout<<"STRANGE error occurred"<<std::endl;
+			assert(m_pANNet != NULL);
+			return;
+		}
+
+		m_pOutputTable->reset();
+
+		m_pTrainingSet = m_pANNet->GetTrainingSet();
+		if(m_pTrainingSet) {
+			m_pRunInput->setDisabled(false);
+			// Resize table widgets
+			m_pInputDial->sl_createTables(m_pANNet);
+		 	// Reload the IO widget
+			m_pInputDial->setTrainingSet(m_pTrainingSet);
+		}
+		else {
+			m_pRunInput->setDisabled(true);
+			// Reset tables
+			m_pInputDial->reset();
+			// Resize table widgets
+			m_pInputDial->sl_createTables(m_pANNet);
+		}
 	}
 }
 
@@ -210,20 +253,26 @@ void MainWindow::createActions() {
 
     QIcon iconStartTraining("gfx/train.png");
     QIcon iconRun("gfx/run.png");
+    QIcon iconBuild("gfx/build.png");
 
     /*
      * Fancy action bar
      */
+    m_pBuildNet = new QAction(iconBuild, QObject::tr("Run through input"), 0);
+    m_pActionBar->insertAction(0, m_pBuildNet);
+    m_pBuildNet->setDisabled(false);
+
     m_pStartTraining = new QAction(iconStartTraining, QObject::tr("Start Training"), 0);
-    m_pActionBar->insertAction(0, m_pStartTraining);
-    //TODO m_pStartTraining->setDisabled(true);
+    m_pActionBar->insertAction(1, m_pStartTraining);
+    m_pStartTraining->setDisabled(true);
 
     m_pRunInput = new QAction(iconRun, QObject::tr("Run through input"), 0);
-    m_pActionBar->insertAction(1, m_pRunInput);
+    m_pActionBar->insertAction(2, m_pRunInput);
     m_pRunInput->setDisabled(true);
 
     connect(m_pStartTraining, SIGNAL(triggered ()), this, SLOT(sl_startTraining()) );
     connect(m_pRunInput, SIGNAL(triggered ()), this, SLOT(sl_run()) );
+    connect(m_pBuildNet, SIGNAL(triggered ()), this, SLOT(sl_build()) );
 
     /*
      * Regular tool bar
@@ -238,6 +287,8 @@ void MainWindow::createActions() {
     m_pRemoveEdges = m_ActionsBar->addAction(iconRemEdge, "Remove selected edges");
     m_ActionsBar->addSeparator();
     m_pRemoveAllEdges = m_ActionsBar->addAction(iconRemEdges, "Remove all edges");
+    m_ActionsBar->addSeparator();
+    m_pSetTrainingPairs = m_ActionsBar->addAction(iconRemEdges, "Set number of training pairs");
 
     connect(m_pAddLayer, SIGNAL(triggered ()), this, SLOT(sl_createLayer()) );
     connect(m_pAddNeuron, SIGNAL(triggered ()), m_pViewer, SLOT(sl_addNeurons()) );
@@ -248,84 +299,31 @@ void MainWindow::createActions() {
 
     connect(m_pRemoveEdges, SIGNAL(triggered ()), m_pViewer, SLOT(sl_removeConnections()) );
     connect(m_pRemoveAllEdges, SIGNAL(triggered() ), m_pViewer, SLOT(sl_removeAllConnections()) );
+
+    connect(m_pSetTrainingPairs, SIGNAL(triggered() ), m_pInputDial, SLOT(sl_setNmbrOfSets()) );
+}
+
+
+void MainWindow::sl_build() {
+	m_pANNet = m_pViewer->getScene()->getANNet();
 }
 
 void MainWindow::sl_run() {
-	if(m_pANNet)
-		m_pOutputTable->Display(m_pANNet);
+	if(m_pANNet && m_pTrainingSet) {
+		m_pANNet->SetTrainingSet(m_pTrainingSet);
+		m_pOutputTable->display(m_pANNet);
+	}
 }
 
 void MainWindow::sl_setTrainingSet() {
 	m_pRunInput->setDisabled(false);
 	m_pStartTraining->setDisabled(false);
+
+	if(m_pInputDial->getTrainingSet())
+		m_pTrainingSet = m_pInputDial->getTrainingSet();
 }
 
 void MainWindow::sl_startTraining() {
-/*TEST SAMPLES FOR DEBUGGING*/
-	  float fInp1[3];
-	  fInp1[0] = 0;
-	  fInp1[1] = 0;
-	  fInp1[2] = 0;
-
-	  float fInp2[3];
-	  fInp2[0] = 0;
-	  fInp2[1] = 1;
-	  fInp2[2] = 0;
-
-	  float fInp3[3];
-	  fInp3[0] = 0;
-	  fInp3[1] = 0;
-	  fInp3[2] = 1;
-
-	  float fInp4[3];
-	  fInp4[0] = 1;
-	  fInp4[1] = 0;
-	  fInp4[2] = 1;
-
-	  float fOut1[6];
-	  fOut1[0] = 0.1;
-	  fOut1[1] = 0.2;
-	  fOut1[2] = 0.3;
-	  fOut1[3] = 0.4;
-	  fOut1[4] = 0.5;
-	  fOut1[5] = 0.6;
-	  float fOut2[6];
-
-	  fOut2[0] = 0;
-	  fOut2[1] = 1;
-	  fOut2[2] = 0;
-	  fOut2[3] = 0;
-	  fOut2[4] = 0;
-	  fOut2[5] = 0;
-
-	  float fOut3[6];
-	  fOut3[0] = 0;
-	  fOut3[1] = 0;
-	  fOut3[2] = 1;
-	  fOut3[3] = 0;
-	  fOut3[4] = 0;
-	  fOut3[5] = 0;
-
-	  float fOut4[6];
-	  fOut4[0] = 0;
-	  fOut4[1] = 0;
-	  fOut4[2] = 0;
-	  fOut4[3] = 1;
-	  fOut4[4] = 0;
-	  fOut4[5] = 0;
-
-	  ANN::TrainingSet input;
-	  input.AddInput(fInp1, 3);
-	  input.AddOutput(fOut1, 6);
-	  input.AddInput(fInp2, 3);
-	  input.AddOutput(fOut2, 6);
-	  input.AddInput(fInp3, 3);
-	  input.AddOutput(fOut3, 6);
-	  input.AddInput(fInp4, 3);
-	  input.AddOutput(fOut4, 6);
-	  m_TrainingSet = input;
-/////////////////////////////////////////////
-
 	int iCycles 			= m_pTrainingDial->getMaxCycles();
 	float fMaxError 		= m_pTrainingDial->getMaxError();
 	float fLearningRate 	= m_pTrainingDial->getLearningRate();
@@ -333,7 +331,14 @@ void MainWindow::sl_startTraining() {
 	float fWeightDecay 		= m_pTrainingDial->getWeightDecay();
  	std::string sTFunct 	= m_pTrainingDial->getTransfFunct().data();
 
- 	m_pANNet 				= m_pViewer->getScene()->getANNet();
+ 	// Save current training set
+	m_pTrainingSet 			= m_pInputDial->getTrainingSet();
+	// Get current net
+	if(m_pANNet == NULL) {
+		m_pANNet 			= m_pViewer->getScene()->getANNet();
+	}
+ 	// Reload the IO widget
+	m_pInputDial->setTrainingSet(m_pTrainingSet);
 
 	if(m_pANNet == NULL) {
 		m_pSave->setDisabled(true);
@@ -348,12 +353,11 @@ void MainWindow::sl_startTraining() {
 		m_pANNet->SetWeightDecay(fWeightDecay);
 		m_pANNet->SetTransfFunction(ANN::Functions::ResolveTransfFByName(sTFunct.data()));
 
-		m_pANNet->SetTrainingSet(m_TrainingSet);
+		m_pANNet->SetTrainingSet(m_pTrainingSet);
 		m_vErrors = m_pANNet->TrainFromData(iCycles, 0.001);
 		iCycles = m_vErrors.size();
 
 		sl_run();
-		std::cout<<m_pANNet<<std::endl;
 
 		// generate some data to plot:
 		float fGreatest = m_vErrors[0];

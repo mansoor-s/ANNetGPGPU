@@ -367,6 +367,13 @@ void AbsNet::ExpToFS(std::string path) {
 		GetLayer(i)->ExpToFS(bz2out, iBZ2Error);
 	}
 
+	bool bTrainingSet = false;
+	if(m_pTrainingData) {
+		bTrainingSet = true;
+		BZ2_bzWrite( &iBZ2Error, bz2out, &bTrainingSet, sizeof(bool) );
+		m_pTrainingData->ExpToFS(bz2out, iBZ2Error);
+	}
+
 	BZ2_bzWriteClose ( &iBZ2Error, bz2out, 0, NULL, NULL );
 	fclose( fout );
 }
@@ -399,6 +406,13 @@ void AbsNet::ImpFromFS(std::string path) {
 	}
 
 	CreateNet( Table );
+
+	bool bTrainingSet = false;
+	BZ2_bzRead( &iBZ2Error, bz2in, &bTrainingSet, sizeof(bool) );
+	if(bTrainingSet) {
+		m_pTrainingData = new ANN::TrainingSet;
+		m_pTrainingData->ImpFromFS(bz2in, iBZ2Error);
+	}
 
 	BZ2_bzReadClose ( &iBZ2Error, bz2in );
 	fclose(fin);

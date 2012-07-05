@@ -17,6 +17,8 @@
 #include <utility>
 #include <vector>
 
+#include <bzlib.h>
+
 namespace ANN {
 
 
@@ -32,14 +34,6 @@ class TrainingSet {
 private:
 	std::vector<std::vector<float> > m_vInputList;
 	std::vector<std::vector<float> > m_vOutputList;
-
-	// same like vectors, saved like a 2d array
-	float *m_pInputList;	// for opencl implementation
-	float *m_pOutputList;	// for opencl implementation
-	unsigned int m_iOutW;
-	unsigned int m_iOutH;
-	unsigned int m_iInpW;
-	unsigned int m_iInpH;
 
 public:
 	TrainingSet();
@@ -57,14 +51,8 @@ public:
 
 	void Clear();
 
-	// GPGPU implementation
-	void CreateArrays();
-
-	float *GetIArray();
-	float *GetOArray();
-
-	int GetIArraySize() const;
-	int GetOArraySize() const;
+	void ExpToFS(BZFILE* bz2out, int iBZ2Error);
+	void ImpFromFS(BZFILE* bz2in, int iBZ2Error);
 };
 
 }

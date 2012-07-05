@@ -14,18 +14,9 @@ using namespace ANN;
 
 
 TrainingSet::TrainingSet() {
-	m_pInputList = NULL;
-	m_pOutputList = NULL;
 }
 
 TrainingSet::~TrainingSet() {
-	if(m_pOutputList != NULL) {
-		delete [] m_pOutputList;
-	}
-	if(m_pInputList != NULL) {
-		delete [] m_pInputList;
-	}
-
 	Clear();
 }
 
@@ -52,11 +43,6 @@ void TrainingSet::AddOutput(float *pOut, const unsigned int &iSize) {
 }
 
 unsigned int TrainingSet::GetNrElements() const {
-/*
-	assert( m_vInputList.size() == m_vOutputList.size() );
-	assert( m_vInputList.size() > 0 );
-	assert( m_vOutputList.size() > 0 );
-*/
 	return m_vInputList.size();
 }
 
@@ -69,68 +55,71 @@ std::vector<float> TrainingSet::GetOutput(const unsigned int &iID) const {
 }
 
 void TrainingSet::Clear() {
-	m_vInputList.clear(); m_vOutputList.clear();
+	m_vInputList.clear();
+	m_vOutputList.clear();
 }
 
-// OPENCL
-void TrainingSet::CreateArrays() {
-	/*
-	 * Alloc memory
-	 */
-	unsigned int iMaxW = 0;
-	unsigned int iMaxH = m_vInputList.size();
-	for(unsigned int i = 0; i < iMaxH; i++) {
-		if( iMaxW < m_vInputList.at(i).size() )
-			iMaxW = m_vInputList.at(i).size();
-	}
-	m_iInpW = iMaxW;
-	m_iInpH = iMaxH;
-	assert(m_iInpH*m_iInpW > 0);
-	m_pInputList = new float [iMaxH*iMaxW];
+void TrainingSet::ExpToFS(BZFILE* bz2out, int iBZ2Error) {
+	unsigned int iNrInpE = m_vInputList.size();
+	unsigned int iNrOutE = m_vOutputList.size();
 
-	iMaxH = m_vOutputList.size();
-	for(unsigned int i = 0; i < iMaxH; i++) {
-		if( iMaxW < m_vOutputList.at(i).size() )
-			iMaxW = m_vOutputList.at(i).size();
-	}
-	m_iOutW = iMaxW;
-	m_iOutH = iMaxH;
-	assert(m_iOutW*m_iOutH > 0);
-	m_pOutputList = new float [iMaxH*iMaxW];
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iNrInpE, sizeof(unsigned int) );
+	BZ2_bzWrite( &iBZ2Error, bz2out, &iNrOutE, sizeof(unsigned int) );
 
-	/*
-	 * Fill memory
-	 */
-	assert(m_vInputList.size() > m_iInpH);
-	for(unsigned int y = 0; y < m_vInputList.size(); y++) {
-		for(unsigned int x = 0; x < m_vInputList.at(y).size(); x++) {
-			m_pInputList[y*m_iInpW+x] = m_vInputList[y][x];
+	for(unsigned int i = 0; i < iNrInpE; i++) {
+		std::vector<float> vInp = m_vInputList.at(i);
+		unsigned int iSizeI = vInp.size();
+		BZ2_bzWrite( &iBZ2Error, bz2out, &iSizeI, sizeof(unsigned int) );
+
+		for(unsigned int j = 0; j < iSizeI; j++) {
+			float fVal = vInp.at(j);
+			BZ2_bzWrite( &iBZ2Error, bz2out, &fVal, sizeof(float) );
 		}
 	}
-	assert(m_vOutputList.size() > m_iOutH);
-	for(unsigned int y = 0; y < m_vOutputList.size(); y++) {
-		for(unsigned int x = 0; x < m_vOutputList.at(y).size(); x++) {
-			m_pOutputList[y*m_iInpW+x] = m_vOutputList[y][x];
+	for(unsigned int i = 0; i < iNrOutE; i++) {
+		std::vector<float> vOut = m_vOutputList.at(i);
+		unsigned int iSizeO = vOut.size();
+		BZ2_bzWrite( &iBZ2Error, bz2out, &iSizeO, sizeof(unsigned int) );
+
+		for(unsigned int j = 0; j < iSizeO; j++) {
+			float fVal = vOut.at(j);
+			BZ2_bzWrite( &iBZ2Error, bz2out, &fVal, sizeof(float) );
 		}
 	}
 }
 
-float *TrainingSet::GetIArray() {
-	assert(m_pInputList != NULL);
-	return m_pInputList;
-}
+void TrainingSet::ImpFromFS(BZFILE* bz2in, int iBZ2Error) {
+	Clear();
 
-float *TrainingSet::GetOArray() {
-	assert(m_pOutputList != NULL);
-	return m_pOutputList;
-}
+	unsigned int iNrInpE = 0;
+	unsigned int iNrOutE = 0;
 
-int TrainingSet::GetIArraySize() const {
-	assert(m_iInpH*m_iInpW > 0);
-	return (m_iInpH*m_iInpW);
-}
+	BZ2_bzRead( &iBZ2Error, bz2in, &iNrInpE, sizeof(unsigned int) );
+	BZ2_bzRead( &iBZ2Error, bz2in, &iNrOutE, sizeof(unsigned int) );
 
-int TrainingSet::GetOArraySize() const {
-	assert(m_iOutW*m_iOutH > 0);
-	return (m_iOutW*m_iOutH);
+	for(unsigned int i = 0; i < iNrInpE; i++) {
+		std::vector<float> vInp;
+		unsigned int iSizeI = 0;
+		BZ2_bzRead( &iBZ2Error, bz2in, &iSizeI, sizeof(unsigned int) );
+
+		for(unsigned int j = 0; j < iSizeI; j++) {
+			float fVal = 0.f;
+			BZ2_bzRead( &iBZ2Error, bz2in, &fVal, sizeof(float) );
+			vInp.push_back(fVal);
+		}
+		m_vInputList.push_back(vInp);
+	}
+	for(unsigned int i = 0; i < iNrOutE; i++) {
+		std::vector<float> vOut;
+		unsigned int iSizeO = 0;
+		BZ2_bzRead( &iBZ2Error, bz2in, &iSizeO, sizeof(unsigned int) );
+
+		for(unsigned int j = 0; j < iSizeO; j++) {
+			float fVal = 0.f;
+			BZ2_bzRead( &iBZ2Error, bz2in, &fVal, sizeof(float) );
+			vOut.push_back(fVal);
+		}
+		m_vOutputList.push_back(vOut);
+	}
+
 }

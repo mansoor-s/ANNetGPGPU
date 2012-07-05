@@ -24,6 +24,8 @@ class Layer;
 
 class Scene : public QGraphicsScene
 {
+	Q_OBJECT
+
 private:
     QList<Node*> m_lNodes;
     QList<Edge*> m_lEdges;
@@ -31,12 +33,15 @@ private:
 
     ANN::BPNet *m_pANNet;
 
+signals:
+	void si_netChanged(ANN::BPNet *m_pANNet);
+
 public:
     Scene(QObject *parent = 0);
 
     void clearAll();
 
-    ANN::BPNet *getANNet();
+    ANN::BPNet *getANNet(bool bDial = true);
     void setANNet(ANN::BPNet &);
 
     void addEdge(Edge*);

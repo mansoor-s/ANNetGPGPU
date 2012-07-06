@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 #endif
     m_pANNet 		= NULL;
     m_pTrainingSet 	= NULL;
+    m_bTrained 		= false;
 
     qApp->setStyle(new ManhattanStyle(baseName));
     Utils::StyleHelper::setBaseColor(Qt::darkGray);
@@ -39,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent)
     m_pActionBar 	= new FancyActionBar;
 
     m_pViewer       = new Viewer;
-    m_pCustomPlot   = new QCustomPlot;
+    m_pCustomPlot   = new GraphTab;
     m_pInputDial    = new IOForm;
     m_pTrainingDial = new TrainingForm;
     m_pOutputTable 	= new Output;
@@ -67,7 +68,7 @@ MainWindow::MainWindow(QWidget *parent)
     createTabs();
     createMenus();
     createActions();
-    createGraph();
+//    createGraph();
 
     connect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
     connect(m_pTabBar, SIGNAL(currentChanged(int)), this, SLOT(sl_tabChanged(int)) );
@@ -88,26 +89,39 @@ MainWindow::~MainWindow()
     
 }
 
-void MainWindow::createGraph() {
+QCustomPlot *MainWindow::createGraph(	float fXmin, float fXmax,
+										float fYmin, float fYmax,
+										QVector<double> x, QVector<double> y)
+{
+	QCustomPlot *pCustomPlot = new QCustomPlot;
+
 	// give the axes some labels:
-	m_pCustomPlot->xAxis->setLabel(QObject::tr("Training cycle (t)") );
-	m_pCustomPlot->yAxis->setLabel(QObject::tr("Standard Deviation (SE)") );
+	pCustomPlot->xAxis->setLabel(QObject::tr("Training cycle (t)") );
+	pCustomPlot->yAxis->setLabel(QObject::tr("Standard Deviation (SE)") );
 	// set axes ranges, so we see all data:
-	m_pCustomPlot->xAxis->setRange(0, 1);
-	m_pCustomPlot->yAxis->setRange(0, 10);
+	pCustomPlot->xAxis->setRange(fXmin, fXmax);
+	pCustomPlot->yAxis->setRange(fYmin, fYmax);
+
+	pCustomPlot->addGraph();
+	pCustomPlot->graph(0)->setData(x, y);
+	pCustomPlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20))); // first graph will be filled with translucent blue
+
+	pCustomPlot->replot();
+
+	return pCustomPlot;
 }
 
 void MainWindow::createTabs() {
     m_pTabBar->insertTab(0, m_pViewer, QIcon("gfx/monitor_icon.png"), QObject::tr("Designer") );
     m_pTabBar->setTabEnabled(0, true);
     m_pTabBar->insertTab(1, m_pInputDial, QIcon("gfx/training_icon.png"), QObject::tr("Input/Output") );
-    m_pTabBar->setTabEnabled(1, true);
+    m_pTabBar->setTabEnabled(1, false);		// m_pInputDial
     m_pTabBar->insertTab(2, m_pTrainingDial, QIcon("gfx/QuestionMark.png"), QObject::tr("Configuration") );
-    m_pTabBar->setTabEnabled(2, true);
+    m_pTabBar->setTabEnabled(2, false); 	// m_pTrainingDial
     m_pTabBar->insertTab(3, m_pCustomPlot, QIcon("gfx/graph_icon.png"), QObject::tr("Learning curve") );
-    m_pTabBar->setTabEnabled(3, true);
+    m_pTabBar->setTabEnabled(3, false); 	// m_pCustomPlot
     m_pTabBar->insertTab(4, m_pOutputTable, QIcon("gfx/output_icon.png"), QObject::tr("Output data") );
-    m_pTabBar->setTabEnabled(4, true);
+    m_pTabBar->setTabEnabled(4, false); 	// m_pOutputTable
 
     m_pTabBar->setCurrentIndex(0);
     m_pTabBar->addCornerWidget(m_pActionBar);
@@ -163,6 +177,8 @@ void MainWindow::sl_ShowNodes(bool bState) {
 }
 
 void MainWindow::sl_newProject() {
+	m_bTrained = false;
+
     m_pShowEdges->setCheckable(true);
     m_pShowEdges->setChecked(true);
     m_pShowEdges->setDisabled(true);
@@ -183,9 +199,17 @@ void MainWindow::sl_newProject() {
 	// Reset tables
 	m_pOutputTable->reset();
 	m_pInputDial->reset();
+
+	m_pTabBar->setCurrentIndex(0);			// m_pViewer
+	m_pTabBar->setTabEnabled(1, false); 	// m_pInputDial
+	m_pTabBar->setTabEnabled(2, false); 	// m_pTrainingDial
+	m_pTabBar->setTabEnabled(3, false); 	// m_pCustomPlot
+	m_pTabBar->setTabEnabled(4, false); 	// m_pOutputTable
 }
 
 void MainWindow::sl_saveANNet() {
+	m_bTrained = false;
+
 	if(m_pANNet) {
 		QString fileName = QFileDialog::getSaveFileName(this, QObject::tr("Save file"), "/home/", QObject::tr("ANNet Files (*.annet)") );
 		m_pANNet->ExpToFS(fileName.toStdString() );
@@ -220,22 +244,32 @@ void MainWindow::sl_loadANNet() {
 			return;
 		}
 
+		m_pTabBar->setTabEnabled(1, true); 	// m_pInputDial
+		m_pTabBar->setTabEnabled(2, true); 	// m_pTrainingDial
+
 		m_pOutputTable->reset();
 
 		m_pTrainingSet = m_pANNet->GetTrainingSet();
 		if(m_pTrainingSet) {
 			m_pRunInput->setDisabled(false);
 			// Resize table widgets
+			m_pInputDial->setNmbrOfSets(m_pTrainingSet->GetNrElements());
 			m_pInputDial->sl_createTables(m_pANNet);
-		 	// Reload the IO widget
 			m_pInputDial->setTrainingSet(m_pTrainingSet);
+
+			m_bTrained = true;					// for warning dialog
+			m_pTabBar->setTabEnabled(3, true); 	// m_pCustomPlot
+			m_pTabBar->setTabEnabled(4, true); 	// m_pOutputTable
 		}
 		else {
 			m_pRunInput->setDisabled(true);
 			// Reset tables
 			m_pInputDial->reset();
-			// Resize table widgets
 			m_pInputDial->sl_createTables(m_pANNet);
+
+			m_bTrained = false;					// for warning dialog
+			m_pTabBar->setTabEnabled(3, false); 	// m_pCustomPlot
+			m_pTabBar->setTabEnabled(4, false); 	// m_pOutputTable
 		}
 	}
 }
@@ -307,13 +341,36 @@ void MainWindow::createActions() {
 
 
 void MainWindow::sl_build() {
+	if(m_bTrained) {
+		int ret = QMessageBox::warning(this, tr("ANNetDesigner"),
+									tr("This will destroy all previous training progress.\n"
+									"Do you want to save your changes?"),
+									QMessageBox::Yes | QMessageBox::No | QMessageBox::Abort);
+
+		if (ret == QMessageBox::Abort)
+			return;
+		if(ret == QMessageBox::Yes)
+			sl_saveANNet();
+		if(ret == QMessageBox::No)
+			m_bTrained = false;
+	}
+
+	disconnect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
 	m_pANNet = m_pViewer->getScene()->getANNet();
+	connect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
+
+	if(m_pANNet) {
+		m_pTabBar->setTabEnabled(1, true);	// m_pInputDial
+		m_pTabBar->setTabEnabled(2, true); 	// m_pTrainingDial
+	}
 }
 
 void MainWindow::sl_run() {
 	if(m_pANNet && m_pTrainingSet) {
 		m_pANNet->SetTrainingSet(m_pTrainingSet);
 		m_pOutputTable->display(m_pANNet);
+
+		m_pTabBar->setCurrentIndex(4);			// m_pOutputTable
 	}
 }
 
@@ -347,6 +404,8 @@ void MainWindow::sl_startTraining() {
 		return;
 	}
 	else {
+		m_bTrained = true;
+
 		m_vErrors.clear();
 		m_pSave->setDisabled(false);
 
@@ -370,15 +429,13 @@ void MainWindow::sl_startTraining() {
 			if(fGreatest < m_vErrors[i])
 				fGreatest = m_vErrors[i];
 		}
+		int iTrial = m_pCustomPlot->getTabWidget()->count()+1;
+		int iID = m_pCustomPlot->getTabWidget()->addTab(createGraph(0, iCycles, 0, fGreatest, x, y), QObject::tr("Plot ")+QString::number(iTrial));
+		m_pCustomPlot->getTabWidget()->setCurrentIndex(iID);
 
-		// set axes ranges, so we see all data:
-		m_pCustomPlot->xAxis->setRange(0, iCycles);
-		m_pCustomPlot->yAxis->setRange(0, fGreatest);
-		// create graph and assign data to it:
-		m_pCustomPlot->addGraph();
-		m_pCustomPlot->graph(0)->setData(x, y);
-		m_pCustomPlot->graph(0)->setBrush(QBrush(QColor(0, 0, 255, 20))); // first graph will be filled with translucent blue
-		m_pCustomPlot->replot();
+		m_pTabBar->setTabEnabled(3, true); 	// m_pCustomPlot
+		m_pTabBar->setTabEnabled(4, true); 	// m_pOutputTable
+		m_pTabBar->setCurrentIndex(3);		// m_pCustomPlot
 	}
 }
 

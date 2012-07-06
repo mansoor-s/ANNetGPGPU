@@ -23,6 +23,7 @@
 #include <gui/QTrainingForm.h>
 #include <gui/QIOForm.h>
 #include <gui/QOutput.h>
+#include <gui/QGraphTab.h>
 
 //3rd party classes
 #include <gui/QCustomPlot/qcustomplot.h>
@@ -39,6 +40,7 @@ class MainWindow : public QMainWindow
 private:
     ANN::BPNet *m_pANNet;
     ANN::TrainingSet *m_pTrainingSet;
+    bool m_bTrained;	// for warning dialog
 
     /////////////////////////////////////////
     FancyActionBar *m_pActionBar;
@@ -66,7 +68,7 @@ private:
     FancyTabWidget *m_pTabBar;
 
     Viewer *m_pViewer;
-    QCustomPlot *m_pCustomPlot;
+    GraphTab *m_pCustomPlot;
     IOForm *m_pInputDial;
     TrainingForm *m_pTrainingDial;
     Output *m_pOutputTable;
@@ -112,10 +114,13 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-    void createGraph();
     void createMenus();
     void createTabs();
     void createActions();
+
+    static QCustomPlot *createGraph(float fXmin, float fXmax,
+									float fYmin, float fYmax,
+									QVector<double> x, QVector<double> y);
 };
 
 #endif // MAINWINDOW_H

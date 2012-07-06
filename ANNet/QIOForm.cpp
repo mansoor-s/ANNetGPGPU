@@ -16,7 +16,7 @@ IOForm::IOForm(QWidget *parent) : QWidget(parent) {
     //m_pOTable->setDragDropMode(QAbstractItemView::DragDrop);
 
 	QFont font;
-	font.setPixelSize(16);
+	font.setPointSize(16);
 	font.setBold(true);
 
     QLabel *pILabel 		= new QLabel(QObject::tr("Input data:"));
@@ -91,40 +91,44 @@ void IOForm::setTrainingSet(ANN::TrainingSet *pTSet) {
 	m_pTrainingSet = pTSet;
 
 	int iHeight;
-
+/*
 	if(pTSet->GetNrElements() > m_iDataSets) {
 		setNmbrOfSets(pTSet->GetNrElements());
 		sl_createTables(m_pNet);
 	}
-
+*/
 	// Set the size of the input table
-	for(unsigned int x = 0; x < pTSet->GetNrElements(); x++) {
+	for(unsigned int x = 0; x < m_iDataSets; x++) {
 
-		if(pTSet->GetInput(x).size() > m_pITable->rowCount() )
-			iHeight = m_pITable->rowCount();
-		else iHeight = pTSet->GetInput(x).size();
+		if(x < pTSet->GetNrElements()) {
+			if(pTSet->GetInput(x).size() > m_pITable->rowCount() )
+				iHeight = m_pITable->rowCount();
+			else iHeight = pTSet->GetInput(x).size();
 
-		for(unsigned int y = 0; y < iHeight; y++) {
-			if(y < pTSet->GetInput(x).size()) {
-				float fVal = pTSet->GetInput(x)[y];
-				QModelIndex index = m_pITable->model()->index(y, x, QModelIndex());
-        		m_pITable->model()->setData(index, QVariant(fVal));
+			for(unsigned int y = 0; y < iHeight; y++) {
+				if(y < pTSet->GetInput(x).size() ) {
+					float fVal = pTSet->GetInput(x)[y];
+					QModelIndex index = m_pITable->model()->index(y, x, QModelIndex());
+	        		m_pITable->model()->setData(index, QVariant(fVal));
+				}
 			}
 		}
 	}
 
 	// Set the size of the input table
-	for(unsigned int x = 0; x < pTSet->GetNrElements(); x++) {
+	for(unsigned int x = 0; x < m_iDataSets; x++) {
 
-		if(pTSet->GetInput(x).size() > m_pOTable->rowCount() )
-			iHeight = m_pOTable->rowCount();
-		else iHeight = pTSet->GetOutput(x).size();
+		if(x < pTSet->GetNrElements()) {
+			if(pTSet->GetInput(x).size() > m_pOTable->rowCount() )
+				iHeight = m_pOTable->rowCount();
+			else iHeight = pTSet->GetOutput(x).size();
 
-		for(unsigned int y = 0; y < iHeight; y++) {
-			if(y < pTSet->GetOutput(x).size()) {
-				float fVal = pTSet->GetOutput(x)[y];
-				QModelIndex index = m_pOTable->model()->index(y, x, QModelIndex());
-				m_pOTable->model()->setData(index, QVariant(fVal));
+			for(unsigned int y = 0; y < iHeight; y++) {
+				if(y < pTSet->GetOutput(x).size() ) {
+					float fVal = pTSet->GetOutput(x)[y];
+					QModelIndex index = m_pOTable->model()->index(y, x, QModelIndex());
+					m_pOTable->model()->setData(index, QVariant(fVal));
+				}
 			}
 		}
 	}

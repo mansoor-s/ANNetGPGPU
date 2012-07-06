@@ -16,7 +16,7 @@ Output::Output(QWidget *parent) : QWidget(parent) {
 	m_pTableWidget->setAlternatingRowColors(true);
 
 	QFont font;
-	font.setPixelSize(16);
+	font.setPointSize(16);
 	font.setBold(true);
 
     QLabel *pLabel = new QLabel(QObject::tr("Network output:"));

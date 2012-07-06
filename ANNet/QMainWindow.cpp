@@ -258,7 +258,7 @@ void MainWindow::sl_loadANNet() {
 			m_pInputDial->setTrainingSet(m_pTrainingSet);
 
 			m_bTrained = true;					// for warning dialog
-			m_pTabBar->setTabEnabled(3, true); 	// m_pCustomPlot
+			m_pTabBar->setTabEnabled(3, false); // m_pCustomPlot
 			m_pTabBar->setTabEnabled(4, true); 	// m_pOutputTable
 		}
 		else {
@@ -268,8 +268,8 @@ void MainWindow::sl_loadANNet() {
 			m_pInputDial->sl_createTables(m_pANNet);
 
 			m_bTrained = false;					// for warning dialog
-			m_pTabBar->setTabEnabled(3, false); 	// m_pCustomPlot
-			m_pTabBar->setTabEnabled(4, false); 	// m_pOutputTable
+			m_pTabBar->setTabEnabled(3, false); // m_pCustomPlot
+			m_pTabBar->setTabEnabled(4, false); // m_pOutputTable
 		}
 	}
 }
@@ -366,6 +366,8 @@ void MainWindow::sl_build() {
 }
 
 void MainWindow::sl_run() {
+ 	// Save current training set
+	m_pTrainingSet 			= m_pInputDial->getTrainingSet();
 	if(m_pANNet && m_pTrainingSet) {
 		m_pANNet->SetTrainingSet(m_pTrainingSet);
 		m_pOutputTable->display(m_pANNet);

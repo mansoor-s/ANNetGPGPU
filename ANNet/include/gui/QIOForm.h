@@ -3,6 +3,7 @@
 
 #include <ANNet>
 #include <containers/ANTrainingSet.h>
+#include <gui/QTableWidget.h>
 #include <Qt/QtGui>
 
 
@@ -30,8 +31,8 @@ public slots:
     void sl_setNmbrOfSets();
 
 private:
-    QTableWidget *m_pITable;
-    QTableWidget *m_pOTable;
+    TableWidget *m_pITable;
+    TableWidget *m_pOTable;
 
     unsigned int m_iDataSets;
 

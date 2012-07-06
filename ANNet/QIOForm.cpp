@@ -8,10 +8,10 @@ IOForm::IOForm(QWidget *parent) : QWidget(parent) {
 
     SpinBoxDelegate *pDelegate= new SpinBoxDelegate;
 
-    m_pITable 				= new QTableWidget;
+    m_pITable 				= new TableWidget;
     m_pITable->setItemDelegate(pDelegate);
     //m_pITable->setDragDropMode(QAbstractItemView::DragDrop);
-    m_pOTable 				= new QTableWidget;
+    m_pOTable 				= new TableWidget;
     m_pOTable->setItemDelegate(pDelegate);
     //m_pOTable->setDragDropMode(QAbstractItemView::DragDrop);
 

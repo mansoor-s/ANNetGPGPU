@@ -101,6 +101,8 @@ set( ANGUISourceFiles
   QIOForm.cpp
   QViewer.cpp
   QOutput.cpp
+  QGraphTab.cpp
+  QTableWidget.cpp
 )
 
 set( ANGUIHeaderFiles 
@@ -116,6 +118,8 @@ set( ANGUIHeaderFiles
   include/gui/QIOForm.h
   include/gui/QViewer.h
   include/gui/QOutput.h
+  include/gui/QGraphTab.h
+  include/gui/QTableWidget.h
 )
 
 if (QT4_FOUND)

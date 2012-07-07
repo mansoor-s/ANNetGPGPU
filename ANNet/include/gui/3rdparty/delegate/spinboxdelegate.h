@@ -41,11 +41,7 @@
  #ifndef DELEGATE_H
  #define DELEGATE_H
 
- #include <QItemDelegate>
- #include <QModelIndex>
- #include <QObject>
- #include <QSize>
- #include <QDoubleSpinBox>
+ #include <QtGui>
  
 
  class SpinBoxDelegate : public QItemDelegate

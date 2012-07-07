@@ -146,18 +146,22 @@ endif (CUDA_FOUND)
 
 # Create a library called "ANNet" which includes the source files listed in "ANSourceFiles".
 # The extension is already found. Any number of sources could be listed here.
-if (CUDA_FOUND)
-  cuda_add_library (ANNet SHARED ${ANSourceFiles} ${ANCUDASourceFiles}) 
-elseif (NOT CUDA_FOUND)
-  add_library (ANNet SHARED ${ANSourceFiles} )
-endif(CUDA_FOUND)
-
-if (QT4_FOUND)
-  add_library (ANNetGUI SHARED ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
-  target_link_libraries (ANNetGUI ${QT_LIBRARIES})
-endif (QT4_FOUND)
-
 if (BZIP2_FOUND)
-  include_directories(${BZIP_INCLUDE_DIRS})
-  target_link_libraries (ANNet ${BZIP2_LIBRARIES})
+  if (CUDA_FOUND)
+    cuda_add_library (ANNet SHARED ${ANSourceFiles} ${ANCUDASourceFiles} ${BZIP_INCLUDE_DIRS}) 
+  elseif (NOT CUDA_FOUND)
+    add_library (ANNet SHARED ${ANSourceFiles} ${BZIP_INCLUDE_DIRS})
+  endif(CUDA_FOUND)
+
+  # -fopenmp necessary for mingw NOT gcc
+  if(OPENMP_FOUND)
+    target_link_libraries (ANNet ${BZIP2_LIBRARIES} -fopenmp)
+  elseif(NOT OPENMP_FOUND)
+    target_link_libraries (ANNet ${BZIP2_LIBRARIES})
+  endif(OPENMP_FOUND)
+
+  if (QT4_FOUND)
+    add_library (ANNetGUI SHARED ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
+    target_link_libraries (ANNetGUI ANNet ${QT_LIBRARIES})
+  endif (QT4_FOUND)
 endif (BZIP2_FOUND)

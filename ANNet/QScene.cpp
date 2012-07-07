@@ -146,8 +146,8 @@ void Scene::setANNet(ANN::BPNet &Net) {
 				Node *pSrcNode 		= pSrcLayer->nodes().at(iSrcNeurID);
 				Node *pDstNode 		= pDstLayer->nodes().at(iDstNeurID);
 
-	            Edge *pEdge = new Edge(pSrcNode, pDstNode);
-	            addEdge(pEdge);
+	            Edge *pNewEdge = new Edge(pSrcNode, pDstNode);
+	            addEdge(pNewEdge);
 			}
 		}
 	}

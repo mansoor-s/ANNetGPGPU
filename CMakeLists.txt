@@ -43,5 +43,5 @@ target_link_libraries (HFNet ANNet)
 
 if (QT4_FOUND)
   add_executable (ANNetDesigner ANNetDesigner.cpp)
-  target_link_libraries (ANNetDesigner ANNet ANNetGUI) 
+  target_link_libraries (ANNetDesigner ANNetGUI) 
 endif(QT4_FOUND)

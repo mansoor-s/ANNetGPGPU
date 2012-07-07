@@ -105,7 +105,7 @@ static inline int commonPartSize(const QString &s1, const QString &s2)
     return common;
 }
 
-QTCREATOR_UTILS_EXPORT QString withTildeHomePath(const QString &path)
+/*QTCREATOR_UTILS_EXPORT*/ QString withTildeHomePath(const QString &path)
 {
 #ifdef Q_OS_WIN
     QString outPath = path;

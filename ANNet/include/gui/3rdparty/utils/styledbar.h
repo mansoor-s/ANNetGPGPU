@@ -54,7 +54,7 @@ protected:
     void paintEvent(QPaintEvent *event);
 };
 
-class QTCREATOR_UTILS_EXPORT StyledSeparator : public QWidget
+class /*QTCREATOR_UTILS_EXPORT*/ StyledSeparator : public QWidget
 {
     Q_OBJECT
 public:

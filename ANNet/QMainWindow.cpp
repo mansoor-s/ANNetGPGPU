@@ -1,4 +1,9 @@
 #include <iostream>
+#ifdef __GNUC__
+	#include <cassert>
+#else
+	#include <assert.h>
+#endif
 #include <QEdge.h>
 #include <QNode.h>
 #include <gui/QLayer.h>

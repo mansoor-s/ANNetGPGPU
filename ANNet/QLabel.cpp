@@ -1,5 +1,5 @@
 #include <gui/QLabel.h>
-#include <Qt/QtCore>
+#include <QtCore>
 #include <ANNet>
 
 

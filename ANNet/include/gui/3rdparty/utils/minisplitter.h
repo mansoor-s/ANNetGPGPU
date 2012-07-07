@@ -44,7 +44,7 @@ QT_END_NAMESPACE
 namespace Core {
 
 /*! This is a simple helper-class to obtain mac-style 1-pixel wide splitters */
-class CORE_EXPORT MiniSplitter : public QSplitter
+class /*CORE_EXPORT*/ MiniSplitter : public QSplitter
 {
 public:
     MiniSplitter(QWidget *parent = 0);

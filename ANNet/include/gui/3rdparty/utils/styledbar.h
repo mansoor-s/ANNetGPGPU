@@ -39,7 +39,7 @@
 
 namespace Utils {
 
-class QTCREATOR_UTILS_EXPORT StyledBar : public QWidget
+class /*QTCREATOR_UTILS_EXPORT*/ StyledBar : public QWidget
 {
     Q_OBJECT
 public:

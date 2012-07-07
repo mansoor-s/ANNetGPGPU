@@ -43,22 +43,22 @@ namespace Utils {
 
 // Create a usable settings key from a category,
 // for example Editor|C++ -> Editor_C__
-QTCREATOR_UTILS_EXPORT QString settingsKey(const QString &category);
+/*QTCREATOR_UTILS_EXPORT*/ QString settingsKey(const QString &category);
 
 // Return the common prefix part of a string list:
 // "C:\foo\bar1" "C:\foo\bar2"  -> "C:\foo\bar"
-QTCREATOR_UTILS_EXPORT QString commonPrefix(const QStringList &strings);
+/*QTCREATOR_UTILS_EXPORT*/ QString commonPrefix(const QStringList &strings);
 
 // Return the common path of a list of files:
 // "C:\foo\bar1" "C:\foo\bar2"  -> "C:\foo"
-QTCREATOR_UTILS_EXPORT QString commonPath(const QStringList &files);
+/*QTCREATOR_UTILS_EXPORT*/ QString commonPath(const QStringList &files);
 
 // On Linux/Mac replace user's home path with ~
 // Uses cleaned path and tries to use absolute path of "path" if possible
 // If path is not sub of home path, or when running on Windows, returns the input
-QTCREATOR_UTILS_EXPORT QString withTildeHomePath(const QString &path);
+/*QTCREATOR_UTILS_EXPORT*/ QString withTildeHomePath(const QString &path);
 
-class QTCREATOR_UTILS_EXPORT AbstractMacroExpander {
+class /*QTCREATOR_UTILS_EXPORT*/ AbstractMacroExpander {
 public:
     virtual ~AbstractMacroExpander() {}
     // Not const, as it may change the state of the expander.
@@ -70,7 +70,7 @@ public:
     virtual int findMacro(const QString &str, int *pos, QString *ret) = 0;
 };
 
-class QTCREATOR_UTILS_EXPORT AbstractQtcMacroExpander : public AbstractMacroExpander {
+class /*QTCREATOR_UTILS_EXPORT*/ AbstractQtcMacroExpander : public AbstractMacroExpander {
 public:
     virtual int findMacro(const QString &str, int *pos, QString *ret);
     //! Provide a replacement string for an expando
@@ -80,8 +80,8 @@ public:
     virtual bool resolveMacro(const QString &name, QString *ret) = 0;
 };
 
-QTCREATOR_UTILS_EXPORT void expandMacros(QString *str, AbstractMacroExpander *mx);
-QTCREATOR_UTILS_EXPORT QString expandMacros(const QString &str, AbstractMacroExpander *mx);
+/*QTCREATOR_UTILS_EXPORT*/ void expandMacros(QString *str, AbstractMacroExpander *mx);
+/*QTCREATOR_UTILS_EXPORT*/ QString expandMacros(const QString &str, AbstractMacroExpander *mx);
 
 } // namespace Utils
 

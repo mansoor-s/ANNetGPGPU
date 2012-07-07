@@ -50,7 +50,7 @@ QT_END_NAMESPACE
 // Helper class holding all custom color values
 
 namespace Utils {
-class QTCREATOR_UTILS_EXPORT StyleHelper
+class /*QTCREATOR_UTILS_EXPORT*/ StyleHelper
 {
 public:
     static const unsigned int DEFAULT_BASE_COLOR = 0x666666;

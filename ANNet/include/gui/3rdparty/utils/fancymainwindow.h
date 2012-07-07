@@ -45,7 +45,7 @@ namespace Utils {
 
 struct FancyMainWindowPrivate;
 
-class QTCREATOR_UTILS_EXPORT FancyMainWindow : public QMainWindow
+class /*QTCREATOR_UTILS_EXPORT*/ FancyMainWindow : public QMainWindow
 {
     Q_OBJECT
 

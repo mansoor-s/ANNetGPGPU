@@ -14,7 +14,7 @@
 #ifndef SOMPIXMAP_H
 #define SOMPIXMAP_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 
 
 class SOMReader : public QLabel

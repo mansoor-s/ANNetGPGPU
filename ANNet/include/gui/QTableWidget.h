@@ -8,7 +8,7 @@
 #ifndef QTABLEWIDGET_H_
 #define QTABLEWIDGET_H_
 
-#include <Qt/QtGui>
+#include <QtGui>
 
 
 class TableWidget: public QTableWidget {

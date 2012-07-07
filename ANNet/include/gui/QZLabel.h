@@ -15,7 +15,7 @@
 #ifndef QZLABEL_H_
 #define QZLABEL_H_
 
-#include <Qt/QtGui>
+#include <QtGui>
 
 
 class ZLabel  : public QGraphicsItem {

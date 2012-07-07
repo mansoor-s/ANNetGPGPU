@@ -4,7 +4,7 @@
 #include <ANNet>
 #include <containers/ANTrainingSet.h>
 #include <gui/QTableWidget.h>
-#include <Qt/QtGui>
+#include <QtGui>
 
 
 class IOForm : public QWidget

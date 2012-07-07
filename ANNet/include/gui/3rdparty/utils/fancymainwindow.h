@@ -33,7 +33,7 @@
 #ifndef FANCYMAINWINDOW_H
 #define FANCYMAINWINDOW_H
 
-#include "utils_global.h"
+#include <gui/3rdparty/utils/utils_global.h>
 
 #include <QtGui/QMainWindow>
 

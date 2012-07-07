@@ -3,8 +3,8 @@
 #include <QNode.h>
 #include <gui/QLayer.h>
 #include <gui/QMainWindow.h>
-#include <gui/utils/stylehelper.h>
-#include <gui/utils/manhattanstyle.h>  //"manhattanstyle.h"
+#include <gui/3rdparty/utils/stylehelper.h>
+#include <gui/3rdparty/utils/manhattanstyle.h>  //"manhattanstyle.h"
 #include <math/ANFunctions.h>
 #include <containers/ANTrainingSet.h>
 

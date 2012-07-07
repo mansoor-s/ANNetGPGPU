@@ -8,7 +8,7 @@
 #ifndef QOUTPUT_H_
 #define QOUTPUT_H_
 
-#include <Qt/QtGui>
+#include <QtGui>
 #include <ANNet>
 
 

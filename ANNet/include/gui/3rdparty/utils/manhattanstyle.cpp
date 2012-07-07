@@ -30,10 +30,10 @@
 **
 **************************************************************************/
 
-#include <gui/utils/manhattanstyle.h>
-#include <gui/utils/styleanimator.h>
-#include <gui/utils/stylehelper.h>
-#include <gui/utils/fancymainwindow.h>
+#include <gui/3rdparty/utils/manhattanstyle.h>
+#include <gui/3rdparty/utils/styleanimator.h>
+#include <gui/3rdparty/utils/stylehelper.h>
+#include <gui/3rdparty/utils/fancymainwindow.h>
 
 #include <QtCore/QLibrary>
 #include <QtGui/QApplication>

@@ -30,7 +30,7 @@
 **
 **************************************************************************/
 
-#include <gui/utils/stylehelper.h>
+#include <gui/3rdparty/utils/stylehelper.h>
 
 #include <QtGui/QPixmapCache>
 #include <QtGui/QWidget>

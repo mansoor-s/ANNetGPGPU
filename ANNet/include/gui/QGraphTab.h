@@ -8,8 +8,8 @@
 #ifndef QGRAPHTAB_H_
 #define QGRAPHTAB_H_
 
-#include <Qt/QtGui>
-#include <gui/QCustomPlot/qcustomplot.h>
+#include <QtGui>
+#include <gui/3rdparty/qcustomplot.h>
 
 
 class GraphTab: public QWidget {

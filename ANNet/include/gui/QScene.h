@@ -14,7 +14,7 @@
 #ifndef SCENE_H
 #define SCENE_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 #include <ANNet>
 
 class Edge;

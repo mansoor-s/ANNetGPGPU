@@ -30,7 +30,7 @@
 **
 **************************************************************************/
 
-#include <gui/utils/fancymainwindow.h>
+#include <gui/3rdparty/utils/fancymainwindow.h>
 
 #include <QtCore/QList>
 #include <QtCore/QHash>

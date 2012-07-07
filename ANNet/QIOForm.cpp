@@ -1,6 +1,6 @@
 #include <QIOForm.h>
 #include <vector>
-#include <gui/delegate/spinboxdelegate.h>
+#include <gui/3rdparty/delegate/spinboxdelegate.h>
 
 
 IOForm::IOForm(QWidget *parent) : QWidget(parent) {

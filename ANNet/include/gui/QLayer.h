@@ -14,7 +14,7 @@
 #ifndef LAYER_H
 #define LAYER_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 #include <gui/QZLabel.h>
 
 class Node;

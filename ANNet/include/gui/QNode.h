@@ -14,7 +14,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 
 class Edge;
 class Viewer;

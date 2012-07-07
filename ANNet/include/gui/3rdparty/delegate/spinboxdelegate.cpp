@@ -46,7 +46,7 @@
  */
 
  #include <Qt/QtGui>
- #include <gui/delegate/spinboxdelegate.h>
+ #include <gui/3rdparty/delegate/spinboxdelegate.h>
 
  
  SpinBoxDelegate::SpinBoxDelegate(QObject *parent)

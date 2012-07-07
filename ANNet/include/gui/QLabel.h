@@ -15,7 +15,7 @@
 #define LABEL_H
 
 #include <stdint.h>
-#include <Qt/QtGui>
+#include <QtGui>
 
 
 class Label : public QGraphicsItem

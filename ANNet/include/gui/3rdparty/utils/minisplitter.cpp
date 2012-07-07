@@ -30,9 +30,8 @@
 **
 **************************************************************************/
 
-#include <gui/utils/minisplitter.h>
-
-#include <gui/utils/stylehelper.h>
+#include <gui/3rdparty/utils/minisplitter.h>
+#include <gui/3rdparty/utils/stylehelper.h>
 
 #include <QtGui/QPaintEvent>
 #include <QtGui/QPainter>

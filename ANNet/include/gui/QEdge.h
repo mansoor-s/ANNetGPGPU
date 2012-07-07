@@ -14,7 +14,7 @@
 #ifndef EDGE_H
 #define EDGE_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 
 class Node;
 

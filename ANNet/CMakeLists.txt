@@ -60,32 +60,32 @@ SET(ANGUIFormularFiles
 )
 
 set( 3rdPartySourceFiles
-  include/gui/QCustomPlot/qcustomplot.cpp
-  include/gui/utils/fancymainwindow.cpp
-  include/gui/utils/manhattanstyle.cpp
-  include/gui/utils/minisplitter.cpp
-  include/gui/utils/styleanimator.cpp
-  include/gui/utils/styledbar.cpp
-  include/gui/utils/stylehelper.cpp
-  include/gui/utils/stringutils.cpp
-  include/gui/fancytabwidget.cpp
-  include/gui/fancyactionbar.cpp
-  include/gui/delegate/spinboxdelegate.cpp
+  include/gui/3rdparty/qcustomplot.cpp
+  include/gui/3rdparty/utils/fancymainwindow.cpp
+  include/gui/3rdparty/utils/manhattanstyle.cpp
+  include/gui/3rdparty/utils/minisplitter.cpp
+  include/gui/3rdparty/utils/styleanimator.cpp
+  include/gui/3rdparty/utils/styledbar.cpp
+  include/gui/3rdparty/utils/stylehelper.cpp
+  include/gui/3rdparty/utils/stringutils.cpp
+  include/gui/3rdparty/fancytabwidget.cpp
+  include/gui/3rdparty/fancyactionbar.cpp
+  include/gui/3rdparty/delegate/spinboxdelegate.cpp
 )
 
 set( 3rdPartyHeaderFiles
-  include/gui/QCustomPlot/qcustomplot.h
-  include/gui/utils/fancymainwindow.h
-  include/gui/utils/manhattanstyle.h
-  include/gui/utils/minisplitter.h
-  include/gui/utils/styleanimator.h
-  include/gui/utils/styledbar.h
-  include/gui/utils/stylehelper.h
-  include/gui/utils/stringutils.h
-  include/gui/coreplugin/coreconstants.h
-  include/gui/fancytabwidget.h
-  include/gui/fancyactionbar.h
-  include/gui/delegate/spinboxdelegate.h
+  include/gui/3rdparty/qcustomplot.h
+  include/gui/3rdparty/utils/fancymainwindow.h
+  include/gui/3rdparty/utils/manhattanstyle.h
+  include/gui/3rdparty/utils/minisplitter.h
+  include/gui/3rdparty/utils/styleanimator.h
+  include/gui/3rdparty/utils/styledbar.h
+  include/gui/3rdparty/utils/stylehelper.h
+  include/gui/3rdparty/utils/stringutils.h
+  include/gui/3rdparty/coreplugin/coreconstants.h
+  include/gui/3rdparty/fancytabwidget.h
+  include/gui/3rdparty/fancyactionbar.h
+  include/gui/3rdparty/delegate/spinboxdelegate.h
 )
 
 set( ANGUISourceFiles

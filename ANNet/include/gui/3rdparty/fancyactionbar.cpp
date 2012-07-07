@@ -30,11 +30,11 @@
 **
 **************************************************************************/
 
-#include <gui/fancyactionbar.h>
-#include <gui/coreplugin/coreconstants.h>
+#include <gui/3rdparty/fancyactionbar.h>
+#include <gui/3rdparty/coreplugin/coreconstants.h>
 
-#include <gui/utils/stylehelper.h>
-#include <gui/utils/stringutils.h>
+#include <gui/3rdparty/utils/stylehelper.h>
+#include <gui/3rdparty/utils/stringutils.h>
 
 //#include <gui/coreplugin/icore.h>
 //#include <gui/coreplugin/imode.h>

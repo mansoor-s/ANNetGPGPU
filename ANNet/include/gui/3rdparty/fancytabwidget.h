@@ -33,7 +33,7 @@
 #ifndef FANCYTABWIDGET_H
 #define FANCYTABWIDGET_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 
 #include <QtCore/QTimer>
 #include <QtCore/QPropertyAnimation>

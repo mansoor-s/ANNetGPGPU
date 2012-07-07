@@ -30,7 +30,7 @@
 **
 **************************************************************************/
 
-#include <gui/utils/styleanimator.h>
+#include <gui/3rdparty/utils/styleanimator.h>
 #include <QtGui/QStyleOption>
 
 Animation * StyleAnimator::widgetAnimation(const QWidget *widget) const

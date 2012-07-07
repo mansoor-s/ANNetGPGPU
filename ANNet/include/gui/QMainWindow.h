@@ -14,7 +14,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 // own classes
 #include <ANNet>
 #include <containers/ANTrainingSet.h>
@@ -26,9 +26,9 @@
 #include <gui/QGraphTab.h>
 
 //3rd party classes
-#include <gui/QCustomPlot/qcustomplot.h>
-#include <gui/fancytabwidget.h>
-#include <gui/fancyactionbar.h>
+#include <gui/3rdparty/qcustomplot.h>
+#include <gui/3rdparty/fancytabwidget.h>
+#include <gui/3rdparty/fancyactionbar.h>
 
 using namespace Core;
 using namespace Core::Internal;

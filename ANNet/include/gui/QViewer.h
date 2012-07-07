@@ -14,7 +14,7 @@
 #ifndef VIEWER_H
 #define VIEWER_H
 
-#include <Qt/QtGui>
+#include <QtGui>
 
 class Scene;
 class Node;

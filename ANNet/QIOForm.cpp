@@ -33,8 +33,8 @@ IOForm::IOForm(QWidget *parent) : QWidget(parent) {
     pVBLayout->addWidget(pOLabel);
     pVBLayout->addWidget(m_pOTable);
 
-    connect(m_pITable, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(sl_send()));
-    connect(m_pOTable, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(sl_send()));
+    QObject::connect(m_pITable, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(sl_send()));
+    QObject::connect(m_pOTable, SIGNAL(itemChanged(QTableWidgetItem *)), this, SLOT(sl_send()));
 }
 
 IOForm::~IOForm() {

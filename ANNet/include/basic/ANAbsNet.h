@@ -17,6 +17,8 @@
 #include <vector>
 #include <string>
 #include <bzlib.h>
+#include <sstream>
+#include <iostream>
 
 #include <basic/ANAbsLayer.h>
 
@@ -122,7 +124,7 @@ public:
 	 * @param iCycles Maximum number of training cycles
 	 * @param fTolerance Maximum error value (working as a break condition for early break-off)
 	 */
-	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance = 0.005f);
+	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance = 0.005f/*, std::stringstream *pSStream = NULL*/);
 
 	/**
 	 * Adds a new layer to the network. New layer will get appended to m_lLayers.

@@ -229,10 +229,9 @@ void BPNet::PropagateBW() {
 	}
 }
 
-std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance) {
+std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance/*, std::stringstream *pSStream*/) {
 	bool bZSort = false;
 	for(int i = 0; i < m_lLayers.size(); i++) {
-		std::cout<<"Z-layer: "<<((BPLayer*)m_lLayers[i])->GetZLayer()<<std::endl;
 		if(((BPLayer*)m_lLayers[i])->GetZLayer() > -1)
 			bZSort = true;
 		else {
@@ -241,7 +240,6 @@ std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float
 		}
 	}
 	if(bZSort) {
-		std::cout<<"Z-layers were set."<<std::endl;
 		std::sort(m_lLayers.begin(), m_lLayers.end(), smallestFunctor);
 		// The IDs of the layers must be set according to Z-Value
 		for(int i = 0; i < m_lLayers.size(); i++) {
@@ -249,7 +247,7 @@ std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float
 		}
 	}
 
-	return AbsNet::TrainFromData(iCycles, fTolerance);
+	return AbsNet::TrainFromData(iCycles, fTolerance/*, pSStream*/);
 }
 
 void BPNet::SetLearningRate(const float &fVal)

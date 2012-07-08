@@ -22,6 +22,17 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
 	int iSize 			= -1;
 
 	/**
+	 * Checke whether anything to do
+	 */
+	if(!m_lLayers.size() && bDial) {
+		QMessageBox msgBox;
+		msgBox.setText("There is no network to create.");
+		msgBox.exec();
+
+		return NULL;
+	}
+
+	/**
 	 * Create layers for neural net
 	 */
 	QList<ANN::BPLayer*> lLayers;

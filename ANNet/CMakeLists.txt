@@ -103,6 +103,7 @@ set( ANGUISourceFiles
   QOutput.cpp
   QGraphTab.cpp
   QTableWidget.cpp
+  QTrainingThread.cpp
 )
 
 set( ANGUIHeaderFiles 
@@ -120,6 +121,7 @@ set( ANGUIHeaderFiles
   include/gui/QOutput.h
   include/gui/QGraphTab.h
   include/gui/QTableWidget.h
+  include/gui/QTrainingThread.h
 )
 
 if (QT4_FOUND)

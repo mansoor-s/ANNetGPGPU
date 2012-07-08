@@ -4,6 +4,7 @@
 #else
 	#include <assert.h>
 #endif
+
 #include <QEdge.h>
 #include <QNode.h>
 #include <gui/QLayer.h>
@@ -12,6 +13,7 @@
 #include <gui/3rdparty/utils/manhattanstyle.h>  //"manhattanstyle.h"
 #include <math/ANFunctions.h>
 #include <containers/ANTrainingSet.h>
+#include <gui/QTrainingThread.h>
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -81,11 +83,43 @@ MainWindow::MainWindow(QWidget *parent)
 }
 
 void MainWindow::sl_tabChanged(int iTab) {
-	if(iTab == 1) {
+	if(iTab == 0) {	// Designer tab
+	    m_pAddLayer->setDisabled(false);
+	    m_pRemoveLayers->setDisabled(false);
+	    m_pAddNeuron->setDisabled(false);
+	    m_pRemoveNeurons->setDisabled(false);
+	    m_pAddEdges->setDisabled(false);
+	    m_pRemoveEdges->setDisabled(false);
+	    m_pRemoveAllEdges->setDisabled(false);
+
+	    m_pSetTrainingPairs->setDisabled(true);
+	}
+	else if(iTab == 1) {		// IO tab
 		// Resize table widgets
 		m_pInputDial->sl_createTables(m_pANNet);
 	 	// Reload the IO widget
 		m_pInputDial->setTrainingSet(m_pTrainingSet);
+
+	    m_pAddLayer->setDisabled(true);
+	    m_pRemoveLayers->setDisabled(true);
+	    m_pAddNeuron->setDisabled(true);
+	    m_pRemoveNeurons->setDisabled(true);
+	    m_pAddEdges->setDisabled(true);
+	    m_pRemoveEdges->setDisabled(true);
+	    m_pRemoveAllEdges->setDisabled(true);
+
+	    m_pSetTrainingPairs->setDisabled(false);
+	}
+	else {
+	    m_pAddLayer->setDisabled(true);
+	    m_pRemoveLayers->setDisabled(true);
+	    m_pAddNeuron->setDisabled(true);
+	    m_pRemoveNeurons->setDisabled(true);
+	    m_pAddEdges->setDisabled(true);
+	    m_pRemoveEdges->setDisabled(true);
+	    m_pRemoveAllEdges->setDisabled(true);
+
+	    m_pSetTrainingPairs->setDisabled(true);
 	}
 }
 
@@ -331,6 +365,19 @@ void MainWindow::createActions() {
     m_ActionsBar->addSeparator();
     m_pSetTrainingPairs = m_ActionsBar->addAction(iconSetNrPairs, "Set number of training pairs");
 
+    /*
+	 * Standard tool bar seetings for first tab
+	 */
+    m_pAddLayer->setDisabled(false);
+    m_pRemoveLayers->setDisabled(false);
+    m_pAddNeuron->setDisabled(false);
+    m_pRemoveNeurons->setDisabled(false);
+    m_pAddEdges->setDisabled(false);
+    m_pRemoveEdges->setDisabled(false);
+    m_pRemoveAllEdges->setDisabled(false);
+
+    m_pSetTrainingPairs->setDisabled(true);
+
     connect(m_pAddLayer, SIGNAL(triggered ()), this, SLOT(sl_createLayer()) );
     connect(m_pAddNeuron, SIGNAL(triggered ()), m_pViewer, SLOT(sl_addNeurons()) );
     connect(m_pAddEdges, SIGNAL(triggered ()), m_pViewer, SLOT(sl_createConnections()) );
@@ -422,7 +469,8 @@ void MainWindow::sl_startTraining() {
 		m_pANNet->SetTransfFunction(ANN::Functions::ResolveTransfFByName(sTFunct.data()));
 
 		m_pANNet->SetTrainingSet(m_pTrainingSet);
-		m_vErrors = m_pANNet->TrainFromData(iCycles, 0.001);
+		m_vErrors = m_pANNet->TrainFromData(iCycles, fMaxError);
+
 		iCycles = m_vErrors.size();
 
 		sl_run();
@@ -431,13 +479,13 @@ void MainWindow::sl_startTraining() {
 		float fGreatest = m_vErrors[0];
 		QVector<double> x(iCycles), y(iCycles); // initialize with entries 0..100
 		for (int i=0; i < iCycles; i++) {
-			x[i] = i;
+			x[i] = i+1;
 			y[i] = m_vErrors[i];
 			if(fGreatest < m_vErrors[i])
 				fGreatest = m_vErrors[i];
 		}
 		int iTrial = m_pCustomPlot->getTabWidget()->count()+1;
-		int iID = m_pCustomPlot->getTabWidget()->addTab(createGraph(0, iCycles, 0, fGreatest, x, y), QObject::tr("Plot ")+QString::number(iTrial));
+		int iID = m_pCustomPlot->getTabWidget()->addTab(createGraph(1, iCycles, 0, fGreatest, x, y), QObject::tr("Plot ")+QString::number(iTrial));
 		m_pCustomPlot->getTabWidget()->setCurrentIndex(iID);
 
 		m_pTabBar->setTabEnabled(3, true); 	// m_pCustomPlot

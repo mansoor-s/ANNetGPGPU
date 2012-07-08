@@ -152,7 +152,7 @@ void AbsNet::EraseAll() {
 	m_lLayers.clear();
 }
 
-std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance) {
+std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance/*, std::stringstream *pSStream*/) {
 	std::vector<float> pErrors;
 
 	if(m_pTrainingData == NULL)
@@ -161,23 +161,40 @@ std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const floa
 //	float fStepSize 	= 0.01f;
 //	float fLastError 	= 0.f;
 	float fCurError 	= 0.f;
+	int iProgCount 		= 1;
 
 	for(unsigned int j = 0; j < iCycles; j++) {
+		/*
+		 * Output for progress bar
+		 */
+		if(iCycles >= 10) {
+			if(((j+1) / (iCycles/10)) == iProgCount && (j+1) % (iCycles/10) == 0) {
+				std::cout << "Training progress: " << iProgCount*10.f << "%" << std::endl;
+				iProgCount++;
+			}
+		}
+		else {
+			std::cout << "Training progress: " << (float)(j+1)/(float)iCycles*100.f << "%" << std::endl;
+		}
+
+		/*
+		 * Break if error is beyond bias
+		 */
 		if(fCurError < fTolerance && j > 0) {
-			std::cout<<"Break after: "<<j<<" cycles.\nLast total error: "<<fCurError<<"\nLearning rate: "<<m_fLearningRate<<std::endl;
 			return pErrors;
 		}
 
+		/*
+		 * Save current error in a std::vector
+		 */
 		fCurError 	= 0.f;
 		for( unsigned int i = 0; i < m_pTrainingData->GetNrElements(); i++ ) {
 			SetInput( m_pTrainingData->GetInput(i) );
 			fCurError += SetOutput( m_pTrainingData->GetOutput(i) );
 			PropagateBW();
 		}
-
 		pErrors.push_back(fCurError);
 	}
-	std::cout<<"Break\nLast total error: "<<fCurError<<"\nLearning rate: "<<m_fLearningRate<<std::endl;
 	return pErrors;
 }
 

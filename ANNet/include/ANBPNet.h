@@ -45,7 +45,7 @@ public:
 	 * Copy constructor for copying the complete network:
 	 * @param pNet
 	 */
-	BPNet(AbsNet *pNet);
+	BPNet(ANN::BPNet *pNet);
 
 	virtual ~BPNet();
 
@@ -67,7 +67,7 @@ public:
 	 * @param iCycles Maximum number of training cycles
 	 * @param fTolerance Maximum error value (working as a break condition for early break-off)
 	 */
-	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance = 0.005f/*, std::stringstream *pSStream = NULL*/);
+	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress);
 
 	/**
 	 * Propagates through all neurons of the net beginning from the input layer.

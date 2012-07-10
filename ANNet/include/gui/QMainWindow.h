@@ -24,6 +24,7 @@
 #include <gui/QIOForm.h>
 #include <gui/QOutput.h>
 #include <gui/QGraphTab.h>
+#include <gui/QTrainingThread.h>
 
 //3rd party classes
 #include <gui/3rdparty/qcustomplot.h>
@@ -40,12 +41,16 @@ class MainWindow : public QMainWindow
 private:
     ANN::BPNet *m_pANNet;
     ANN::TrainingSet *m_pTrainingSet;
-    bool m_bTrained;	// for warning dialog
+    TrainingThread *m_pTrainingThread;
+    bool m_bBreakTraining;
+    bool m_bAlreadyTrained;	// for warning dialog
+
+    QTimer m_tTimer;
 
     /////////////////////////////////////////
     FancyActionBar *m_pActionBar;
 
-    QAction *m_pStartTraining;
+    QAction *m_pStartStopTraining;
     QAction *m_pRunInput;
     QAction *m_pBuildNet;
 
@@ -67,21 +72,21 @@ private:
     /////////////////////////////////////////
     FancyTabWidget *m_pTabBar;
 
-    Viewer *m_pViewer;
+    Viewer 	*m_pViewer;
     GraphTab *m_pCustomPlot;
-    IOForm *m_pInputDial;
+    IOForm 	*m_pInputDial;
     TrainingForm *m_pTrainingDial;
-    Output *m_pOutputTable;
+    Output 	*m_pOutputTable;
 
     /////////////////////////////////////////
-    QMenu *m_pFileMenu;
+    QMenu 	*m_pFileMenu;
 
     QAction *m_pSave;
     QAction *m_pLoad;
     QAction *m_pNew;
     QAction *m_pQuit;
     
-    QMenu *m_pViewMenu;
+    QMenu 	*m_pViewMenu;
     QAction *m_pZoomIn;
     QAction *m_pZoomOut;
     QAction *m_pShowEdges;
@@ -90,11 +95,18 @@ private:
     /////////////////////////////////////////
     std::vector<float> m_vErrors;
 
-public slots:
+private slots:
+	void sl_tabChanged(int);
+	void sl_updateGraph();
+	void sl_switchStartStopTraining();
+
+	void sl_updateProgr();
+
     void sl_createLayer();
-    void sl_startTraining();
-    void sl_run();
     void sl_setTrainingSet();
+    void sl_startTraining();
+    void sl_stopTraining();
+    void sl_run();
     void sl_build();
 
     // File menu
@@ -107,8 +119,6 @@ public slots:
     void sl_zoomOut();
     void sl_ShowEdges(bool);
     void sl_ShowNodes(bool);
-
-    void sl_tabChanged(int);
 
 public:
     MainWindow(QWidget *parent = 0);

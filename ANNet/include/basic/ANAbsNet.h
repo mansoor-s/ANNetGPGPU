@@ -84,7 +84,7 @@ protected:
 
 public:
 	AbsNet();
-	AbsNet(AbsNet *pNet);
+	//AbsNet(AbsNet *pNet);	// TODO implement
 	virtual ~AbsNet();
 
 	/**
@@ -124,7 +124,7 @@ public:
 	 * @param iCycles Maximum number of training cycles
 	 * @param fTolerance Maximum error value (working as a break condition for early break-off)
 	 */
-	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance = 0.005f/*, std::stringstream *pSStream = NULL*/);
+	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress);
 
 	/**
 	 * Adds a new layer to the network. New layer will get appended to m_lLayers.

@@ -38,13 +38,13 @@ AbsNet::AbsNet() //: Importer(this),  Exporter(this)
 	// Init time for rdom numbers
 	INIT_TIME
 }
-
+/*
 AbsNet::AbsNet(AbsNet *pNet) //: Importer(this),  Exporter(this)
 {
 	assert( pNet != NULL );
 	*this = *pNet;
 }
-
+*/
 void AbsNet::CreateNet(const ConTable &Net) {
 	std::cout<<"Create AbsNet()"<<std::endl;
 
@@ -152,7 +152,7 @@ void AbsNet::EraseAll() {
 	m_lLayers.clear();
 }
 
-std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance/*, std::stringstream *pSStream*/) {
+std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress) {
 	std::vector<float> pErrors;
 
 	if(m_pTrainingData == NULL)
@@ -167,6 +167,7 @@ std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const floa
 		/*
 		 * Output for progress bar
 		 */
+		fProgress = (float)(j+1)/(float)iCycles*100.f;
 		if(iCycles >= 10) {
 			if(((j+1) / (iCycles/10)) == iProgCount && (j+1) % (iCycles/10) == 0) {
 				std::cout << "Training progress: " << iProgCount*10.f << "%" << std::endl;
@@ -174,13 +175,13 @@ std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const floa
 			}
 		}
 		else {
-			std::cout << "Training progress: " << (float)(j+1)/(float)iCycles*100.f << "%" << std::endl;
+			std::cout << "Training progress: " << fProgress << "%" << std::endl;
 		}
 
 		/*
 		 * Break if error is beyond bias
 		 */
-		if(fCurError < fTolerance && j > 0) {
+		if(fCurError < fTolerance && j > 0 || bBreak == true) {
 			return pErrors;
 		}
 

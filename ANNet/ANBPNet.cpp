@@ -31,11 +31,13 @@ BPNet::BPNet() {
 	m_fTypeFlag 	= ANNetBP;
 }
 
-BPNet::BPNet(AbsNet *pNet) : AbsNet(pNet) {
+BPNet::BPNet(ANN::BPNet *pNet) //: AbsNet(pNet)
+{
 	assert( pNet != NULL );
-	*this = *GetSubNet( 0, pNet->GetLayers().size()-1 );
+	//*this = *GetSubNet( 0, pNet->GetLayers().size()-1 );
+	//m_fTypeFlag 	= ANNetBP;
 
-	m_fTypeFlag 	= ANNetBP;
+	*this = *pNet;
 }
 
 BPNet::~BPNet() {
@@ -117,6 +119,9 @@ void BPNet::AddLayer(BPLayer *pLayer) {
  * TODO better use of copy constructors
  */
 BPNet *BPNet::GetSubNet(const unsigned int &iStartID, const unsigned int &iStopID) {
+	std::cout<<"start: "<<iStartID<<std::endl;
+	std::cout<<"stop: "<<GetLayers().size()<<std::endl;
+
 	assert( iStopID < GetLayers().size() );
 	assert( iStartID >= 0 );
 
@@ -191,11 +196,11 @@ BPNet *BPNet::GetSubNet(const unsigned int &iStartID, const unsigned int &iStopI
 
 	// Import further properties
 	if( GetTransfFunction() )
-		pNet->SetTransfFunction( pNet->GetTransfFunction() );
+		pNet->SetTransfFunction( GetTransfFunction() );
 	if( GetTrainingSet() )
-		pNet->SetTrainingSet( this->GetTrainingSet() );
-	pNet->SetLearningRate( this->GetLearningRate() );
-	pNet->SetMomentum( this->GetMomentum() );
+		pNet->SetTrainingSet( GetTrainingSet() );
+	pNet->SetLearningRate( GetLearningRate() );
+	pNet->SetMomentum( GetMomentum() );
 
 	return pNet;
 }
@@ -229,7 +234,7 @@ void BPNet::PropagateBW() {
 	}
 }
 
-std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance/*, std::stringstream *pSStream*/) {
+std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress) {
 	bool bZSort = false;
 	for(int i = 0; i < m_lLayers.size(); i++) {
 		if(((BPLayer*)m_lLayers[i])->GetZLayer() > -1)
@@ -247,7 +252,7 @@ std::vector<float> BPNet::TrainFromData(const unsigned int &iCycles, const float
 		}
 	}
 
-	return AbsNet::TrainFromData(iCycles, fTolerance/*, pSStream*/);
+	return AbsNet::TrainFromData(iCycles, fTolerance, bBreak, fProgress);
 }
 
 void BPNet::SetLearningRate(const float &fVal)

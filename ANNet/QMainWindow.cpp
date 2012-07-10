@@ -35,12 +35,14 @@ MainWindow::MainWindow(QWidget *parent)
             baseName = QLatin1String("cleanlooks");
     }
 #endif
-    m_pANNet 		= NULL;
-    m_pTrainingSet 	= NULL;
-    m_bTrained 		= false;
-
     qApp->setStyle(new ManhattanStyle(baseName));
     Utils::StyleHelper::setBaseColor(Qt::darkGray);
+
+    m_pANNet 		= NULL;
+    m_pTrainingSet 	= NULL;
+    m_bAlreadyTrained 	= false;
+    m_bBreakTraining 	= false;
+	m_pTrainingThread 	= new TrainingThread;
 
     m_ActionsBar    = new QToolBar;
     m_pTabBar       = new FancyTabWidget;
@@ -75,11 +77,16 @@ MainWindow::MainWindow(QWidget *parent)
     createTabs();
     createMenus();
     createActions();
-//    createGraph();
+
+	QObject::connect(m_pTrainingThread, SIGNAL(finished() ), this, SLOT(sl_updateGraph()) );
+	QObject::connect(m_pTrainingThread, SIGNAL(finished() ), this, SLOT(sl_switchStartStopTraining()) );
+	QObject::connect(m_pTrainingThread, SIGNAL(started() ), this, SLOT(sl_switchStartStopTraining()) );
 
     connect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
     connect(m_pTabBar, SIGNAL(currentChanged(int)), this, SLOT(sl_tabChanged(int)) );
     connect(m_pInputDial, SIGNAL(si_contentChanged()), this, SLOT(sl_setTrainingSet()) );
+
+    connect(&m_tTimer, SIGNAL(timeout()), this, SLOT(sl_updateProgr()) );
 }
 
 void MainWindow::sl_tabChanged(int iTab) {
@@ -151,15 +158,15 @@ QCustomPlot *MainWindow::createGraph(	float fXmin, float fXmax,
 }
 
 void MainWindow::createTabs() {
-    m_pTabBar->insertTab(0, m_pViewer, QIcon("gfx/monitor_icon.png"), QObject::tr("Designer") );
+    m_pTabBar->insertTab(0, m_pViewer, QIcon("gfx/monitor.png"), QObject::tr("Designer") );
     m_pTabBar->setTabEnabled(0, true);
-    m_pTabBar->insertTab(1, m_pInputDial, QIcon("gfx/training_icon.png"), QObject::tr("Input/Output") );
+    m_pTabBar->insertTab(1, m_pInputDial, QIcon("gfx/training.png"), QObject::tr("Input/Output") );
     m_pTabBar->setTabEnabled(1, false);		// m_pInputDial
     m_pTabBar->insertTab(2, m_pTrainingDial, QIcon("gfx/QuestionMark.png"), QObject::tr("Configuration") );
     m_pTabBar->setTabEnabled(2, false); 	// m_pTrainingDial
-    m_pTabBar->insertTab(3, m_pCustomPlot, QIcon("gfx/graph_icon.png"), QObject::tr("Learning curve") );
+    m_pTabBar->insertTab(3, m_pCustomPlot, QIcon("gfx/graph.png"), QObject::tr("Learning curve") );
     m_pTabBar->setTabEnabled(3, false); 	// m_pCustomPlot
-    m_pTabBar->insertTab(4, m_pOutputTable, QIcon("gfx/output_icon.png"), QObject::tr("Output data") );
+    m_pTabBar->insertTab(4, m_pOutputTable, QIcon("gfx/output.png"), QObject::tr("Output data") );
     m_pTabBar->setTabEnabled(4, false); 	// m_pOutputTable
 
     m_pTabBar->setCurrentIndex(0);
@@ -216,7 +223,7 @@ void MainWindow::sl_ShowNodes(bool bState) {
 }
 
 void MainWindow::sl_newProject() {
-	m_bTrained = false;
+	m_bAlreadyTrained = false;
 
     m_pShowEdges->setCheckable(true);
     m_pShowEdges->setChecked(true);
@@ -233,7 +240,7 @@ void MainWindow::sl_newProject() {
     m_pViewer->getScene()->clearAll();
 
 	m_pRunInput->setDisabled(true);
-	m_pStartTraining->setDisabled(true);
+	m_pStartStopTraining->setDisabled(true);
 
 	// Reset tables
 	m_pOutputTable->reset();
@@ -247,7 +254,13 @@ void MainWindow::sl_newProject() {
 }
 
 void MainWindow::sl_saveANNet() {
-	m_bTrained = false;
+	m_bAlreadyTrained = false;
+
+ 	// Save current training set
+	m_pTrainingSet 			= m_pInputDial->getTrainingSet();
+	if(m_pTrainingSet) {
+		m_pANNet->SetTrainingSet(m_pTrainingSet);
+	}
 
 	if(m_pANNet) {
 		QString fileName = QFileDialog::getSaveFileName(this, QObject::tr("Save file"), "/home/", QObject::tr("ANNet Files (*.annet)") );
@@ -291,22 +304,24 @@ void MainWindow::sl_loadANNet() {
 		m_pTrainingSet = m_pANNet->GetTrainingSet();
 		if(m_pTrainingSet) {
 			m_pRunInput->setDisabled(false);
+			m_pStartStopTraining->setDisabled(false);
 			// Resize table widgets
 			m_pInputDial->setNmbrOfSets(m_pTrainingSet->GetNrElements());
 			m_pInputDial->sl_createTables(m_pANNet);
 			m_pInputDial->setTrainingSet(m_pTrainingSet);
 
-			m_bTrained = true;					// for warning dialog
+			m_bAlreadyTrained = true;					// for warning dialog
 			m_pTabBar->setTabEnabled(3, false); // m_pCustomPlot
-			m_pTabBar->setTabEnabled(4, true); 	// m_pOutputTable
+			m_pTabBar->setTabEnabled(4, false); // m_pOutputTable
 		}
 		else {
 			m_pRunInput->setDisabled(true);
+			m_pStartStopTraining->setDisabled(true);
 			// Reset tables
 			m_pInputDial->reset();
 			m_pInputDial->sl_createTables(m_pANNet);
 
-			m_bTrained = false;					// for warning dialog
+			m_bAlreadyTrained = false;					// for warning dialog
 			m_pTabBar->setTabEnabled(3, false); // m_pCustomPlot
 			m_pTabBar->setTabEnabled(4, false); // m_pOutputTable
 		}
@@ -324,7 +339,7 @@ void MainWindow::createActions() {
     QIcon iconRemEdge("gfx/rem_edge.png");
     QIcon iconRemEdges("gfx/rem_edges.png");
 
-    QIcon iconSetNrPairs("gfx/plus_icon.png");
+    QIcon iconSetNrPairs("gfx/plus.png");
 
     QIcon iconStartTraining("gfx/train.png");
     QIcon iconRun("gfx/run.png");
@@ -337,15 +352,15 @@ void MainWindow::createActions() {
     m_pActionBar->insertAction(0, m_pBuildNet);
     m_pBuildNet->setDisabled(false);
 
-    m_pStartTraining = new QAction(iconStartTraining, QObject::tr("Start Training"), 0);
-    m_pActionBar->insertAction(1, m_pStartTraining);
-    m_pStartTraining->setDisabled(true);
+    m_pStartStopTraining = new QAction(iconStartTraining, QObject::tr("Start Training"), 0);
+    m_pActionBar->insertAction(1, m_pStartStopTraining);
+    m_pStartStopTraining->setDisabled(true);
 
     m_pRunInput = new QAction(iconRun, QObject::tr("Run through input"), 0);
     m_pActionBar->insertAction(2, m_pRunInput);
     m_pRunInput->setDisabled(true);
 
-    connect(m_pStartTraining, SIGNAL(triggered ()), this, SLOT(sl_startTraining()) );
+    connect(m_pStartStopTraining, SIGNAL(triggered ()), this, SLOT(sl_startTraining()) );
     connect(m_pRunInput, SIGNAL(triggered ()), this, SLOT(sl_run()) );
     connect(m_pBuildNet, SIGNAL(triggered ()), this, SLOT(sl_build()) );
 
@@ -393,7 +408,7 @@ void MainWindow::createActions() {
 
 
 void MainWindow::sl_build() {
-	if(m_bTrained) {
+	if(m_bAlreadyTrained) {
 		int ret = QMessageBox::warning(this, tr("ANNetDesigner"),
 									tr("This will destroy all previous training progress.\n"
 									"Do you want to save your changes?"),
@@ -404,7 +419,7 @@ void MainWindow::sl_build() {
 		if(ret == QMessageBox::Yes)
 			sl_saveANNet();
 		if(ret == QMessageBox::No)
-			m_bTrained = false;
+			m_bAlreadyTrained = false;
 	}
 
 	disconnect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
@@ -412,6 +427,9 @@ void MainWindow::sl_build() {
 	connect(m_pViewer->getScene(), SIGNAL(si_netChanged(ANN::BPNet *)), m_pInputDial, SLOT(sl_createTables(ANN::BPNet *)) );
 
 	if(m_pANNet) {
+		m_pRunInput->setDisabled(false);
+		m_pStartStopTraining->setDisabled(false);
+
 		m_pTabBar->setTabEnabled(1, true);	// m_pInputDial
 		m_pTabBar->setTabEnabled(2, true); 	// m_pTrainingDial
 	}
@@ -424,16 +442,98 @@ void MainWindow::sl_run() {
 		m_pANNet->SetTrainingSet(m_pTrainingSet);
 		m_pOutputTable->display(m_pANNet);
 
-		m_pTabBar->setCurrentIndex(4);			// m_pOutputTable
+		m_pTabBar->setTabEnabled(4, true); 	// m_pOutputTable
+		m_pTabBar->setCurrentIndex(4);		// m_pOutputTable
 	}
 }
 
 void MainWindow::sl_setTrainingSet() {
-	m_pRunInput->setDisabled(false);
-	m_pStartTraining->setDisabled(false);
+	if(m_pTrainingThread == NULL) {
+		m_pRunInput->setDisabled(false);
+		m_pStartStopTraining->setDisabled(false);
+	}
 
 	if(m_pInputDial->getTrainingSet())
 		m_pTrainingSet = m_pInputDial->getTrainingSet();
+}
+
+void MainWindow::sl_updateGraph() {
+	/*
+	 * Make a graph
+	 */
+	if(m_pTrainingThread != NULL) {
+		m_vErrors = m_pTrainingThread->getErrors();
+		// generate some data to plot:
+		int iCycles = m_vErrors.size();
+		float fGreatest = m_vErrors[0];
+		QVector<double> x(iCycles), y(iCycles); // initialize with entries 0..100
+		for (int i=0; i < iCycles; i++) {
+			x[i] = i+1;
+			y[i] = m_vErrors[i];
+			if(fGreatest < m_vErrors[i])
+				fGreatest = m_vErrors[i];
+		}
+		int iTrial = m_pCustomPlot->getTabWidget()->count()+1;
+		int iID = m_pCustomPlot->getTabWidget()->addTab(createGraph(1, iCycles, 0, fGreatest, x, y), QObject::tr("Plot ")+QString::number(iTrial));
+		m_pCustomPlot->getTabWidget()->setCurrentIndex(iID);
+
+		m_pTabBar->setTabEnabled(3, true); 	// m_pCustomPlot
+		m_pTabBar->setTabEnabled(4, false); // m_pOutputTable
+		m_pTabBar->setCurrentIndex(3);		// m_pCustomPlot
+	}
+}
+
+void MainWindow::sl_updateProgr() {
+	if(m_pTrainingThread->isRunning()) {
+		QString sName = "Stop training - Current progress: ";
+		QString sProgr = QString::number(m_pTrainingThread->getProgress() );
+		m_pStartStopTraining->setText(sName+sProgr);
+		m_pActionBar->update();
+	}
+}
+
+void MainWindow::sl_switchStartStopTraining() {
+	if(m_pTrainingThread->isRunning()) {
+		/*
+		 * Activate training button
+		 * Deactivate run button
+		 */
+		m_pStartStopTraining->setDisabled(false);
+		m_pRunInput->setDisabled(true);
+
+		/*
+		 * Switch to stop mode
+		 */
+		QIcon iconStopTraining("gfx/stop.png");
+		m_pStartStopTraining->setIcon(iconStopTraining);
+		m_pStartStopTraining->setText(QObject::tr("Stop training"));
+		QObject::disconnect(m_pStartStopTraining, SIGNAL(triggered ()), this, SLOT(sl_startTraining()) );
+		QObject::connect(m_pStartStopTraining, SIGNAL(triggered ()), this, SLOT(sl_stopTraining()) );
+	}
+	else {
+		/*
+		 * Activate run and training button
+		 * after training finished
+		 */
+		m_pStartStopTraining->setDisabled(false);
+		m_pRunInput->setDisabled(false);
+
+		/*
+		 * Switch to start mode
+		 */
+	    QIcon iconStartTraining("gfx/train.png");
+	    m_pStartStopTraining->setIcon(iconStartTraining);
+	    m_pStartStopTraining->setText(QObject::tr("Start training"));
+	    QObject::disconnect(m_pStartStopTraining, SIGNAL(triggered ()), this, SLOT(sl_stopTraining()) );
+	    QObject::connect(m_pStartStopTraining, SIGNAL(triggered ()), this, SLOT(sl_startTraining()) );
+		m_bBreakTraining = false;
+	}
+}
+
+
+void MainWindow::sl_stopTraining() {
+	m_bBreakTraining = true;
+    m_tTimer.stop();
 }
 
 void MainWindow::sl_startTraining() {
@@ -458,10 +558,13 @@ void MainWindow::sl_startTraining() {
 		return;
 	}
 	else {
-		m_bTrained = true;
+	    m_tTimer.start(10);
 
-		m_vErrors.clear();
+		// Disable the start training button
+		m_pRunInput->setDisabled(true);
 		m_pSave->setDisabled(false);
+		m_bAlreadyTrained = true;
+		m_vErrors.clear();
 
 		m_pANNet->SetLearningRate(fLearningRate);
 		m_pANNet->SetMomentum(fMomentum);
@@ -469,28 +572,9 @@ void MainWindow::sl_startTraining() {
 		m_pANNet->SetTransfFunction(ANN::Functions::ResolveTransfFByName(sTFunct.data()));
 
 		m_pANNet->SetTrainingSet(m_pTrainingSet);
-		m_vErrors = m_pANNet->TrainFromData(iCycles, fMaxError);
 
-		iCycles = m_vErrors.size();
-
-		sl_run();
-
-		// generate some data to plot:
-		float fGreatest = m_vErrors[0];
-		QVector<double> x(iCycles), y(iCycles); // initialize with entries 0..100
-		for (int i=0; i < iCycles; i++) {
-			x[i] = i+1;
-			y[i] = m_vErrors[i];
-			if(fGreatest < m_vErrors[i])
-				fGreatest = m_vErrors[i];
-		}
-		int iTrial = m_pCustomPlot->getTabWidget()->count()+1;
-		int iID = m_pCustomPlot->getTabWidget()->addTab(createGraph(1, iCycles, 0, fGreatest, x, y), QObject::tr("Plot ")+QString::number(iTrial));
-		m_pCustomPlot->getTabWidget()->setCurrentIndex(iID);
-
-		m_pTabBar->setTabEnabled(3, true); 	// m_pCustomPlot
-		m_pTabBar->setTabEnabled(4, true); 	// m_pOutputTable
-		m_pTabBar->setCurrentIndex(3);		// m_pCustomPlot
+		m_pTrainingThread->setNet(m_pANNet, iCycles, fMaxError, m_bBreakTraining);
+		m_pTrainingThread->start();
 	}
 }
 

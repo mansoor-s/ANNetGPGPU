@@ -107,7 +107,9 @@ int main(int argc, char *argv[]) {
   net.SetTrainingSet(input);
 
 
-  errors = net.TrainFromData(100, 0.001);
+  bool b = false;
+  float f;
+  errors = net.TrainFromData(100, 0.001, b, f);
   std::cout<< net <<std::endl;
 
   net.ExpToFS("TEST");

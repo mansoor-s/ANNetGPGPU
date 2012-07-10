@@ -30,13 +30,14 @@ HFNet::HFNet(const unsigned int &iW, const unsigned int &iH) {
 
 	m_fTypeFlag 	= ANNetHopfield;
 }
-
-HFNet::HFNet(AbsNet *pNet) : AbsNet(pNet) {
+/*
+HFNet::HFNet(AbsNet *pNet) : AbsNet(pNet)
+{
 	assert( pNet != NULL );
 
 	m_fTypeFlag 	= ANNetHopfield;
 }
-
+*/
 HFNet::~HFNet() {
 
 }

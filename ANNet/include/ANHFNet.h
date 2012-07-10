@@ -44,7 +44,7 @@ protected:
 public:
 	HFNet();
 	HFNet(const unsigned int &iW, const unsigned int &iH);
-	HFNet(AbsNet *pNet);
+	//HFNet(AbsNet *pNet);	// TODO implement
 	virtual ~HFNet();
 
 	/*

@@ -24,7 +24,13 @@ void Layer::setID(const int &iID) {
 int Layer::getID() const {
     return m_iID;
 }
-      
+
+void Layer::refreshNodeIDs() {
+    for(unsigned int i = 0; i < m_NodeList.size(); i++) {
+    	Node *pNode = m_NodeList.at(i);
+    	pNode->setID(i);
+    }
+}
 
 void Layer::addNode(Node *node) {
     m_NodeList << node;
@@ -42,6 +48,11 @@ void Layer::removeNode(Node* pDelNode) {
             pNewList << pNode;
     }
     m_NodeList = pNewList;
+
+    /*
+     * Refresh the IDs of the nodes in the GUI
+     */
+    refreshNodeIDs();
 }
 
 void Layer::adjust() {

@@ -33,6 +33,8 @@ private:
 
     ANN::BPNet *m_pANNet;
 
+    void refreshLayerIDs();
+
 signals:
 	void si_netChanged(ANN::BPNet *m_pANNet);
 

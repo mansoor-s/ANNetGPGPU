@@ -104,25 +104,40 @@ void AbsNet::CreateNet(const ConTable &Net) {
 	 */
 	std::cout<<"Adding edges ";
 	for(unsigned int i = 0; i < Net.NeurCons.size(); i++) {
+		/*
+		 * Read settings
+		 */
 		iDstNeurID 	= Net.NeurCons.at(i).m_iDstNeurID;
 		iSrcNeurID 	= Net.NeurCons.at(i).m_iSrcNeurID;
 		iDstLayerID = Net.NeurCons.at(i).m_iDstLayerID;
 		iSrcLayerID = Net.NeurCons.at(i).m_iSrcLayerID;
 
-		if(iDstNeurID < 0 || iSrcNeurID < 0 || iDstLayerID < 0 || iSrcLayerID < 0) {
-			return;
-		}
-		else {
-			fEdgeValue 	= Net.NeurCons.at(i).m_fVal;
+		/*
+		 * Check whether all settings are usable
+		 */
+		assert(iDstNeurID 	>= 0);
+		assert(iSrcNeurID 	>= 0);
+		assert(iDstLayerID 	>= 0);
+		assert(iSrcLayerID 	>= 0);
+		assert(i < Net.NeurCons.size());
 
-			pDstLayer 	= GetLayer(iDstLayerID);
-			pSrcLayer 	= GetLayer(iSrcLayerID);
+		/*
+		 * Create edges and register in neurons
+		 */
+		fEdgeValue 	= Net.NeurCons.at(i).m_fVal;
+		pDstLayer 	= GetLayer(iDstLayerID);
+		pSrcLayer 	= GetLayer(iSrcLayerID);
+		pDstNeur 	= pDstLayer->GetNeuron(iDstNeurID);
+		pSrcNeur 	= pSrcLayer->GetNeuron(iSrcNeurID);
 
-			pDstNeur 	= pDstLayer->GetNeuron(iDstNeurID);
-			pSrcNeur 	= pSrcLayer->GetNeuron(iSrcNeurID);
+		// Check for NULL pointers
+		assert(pDstLayer 	!= NULL);
+		assert(pSrcLayer 	!= NULL);
+		assert(pDstNeur 	!= NULL);
+		assert(pSrcNeur 	!= NULL);
 
-			Connect(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
-		}
+		//Connect neurons with edge
+		Connect(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
 	}
 	std::cout<<".. finished!"<<std::endl;
 }
@@ -158,8 +173,6 @@ std::vector<float> AbsNet::TrainFromData(const unsigned int &iCycles, const floa
 	if(m_pTrainingData == NULL)
 		return pErrors;
 
-//	float fStepSize 	= 0.01f;
-//	float fLastError 	= 0.f;
 	float fCurError 	= 0.f;
 	int iProgCount 		= 1;
 
@@ -208,8 +221,12 @@ std::vector<AbsLayer*> AbsNet::GetLayers() const {
 	return m_lLayers;
 }
 
-AbsLayer* AbsNet::GetLayer(const unsigned int &iLayerID) const {
-	return m_lLayers.at(iLayerID);
+AbsLayer* AbsNet::GetLayer(const unsigned int &iID) const {
+	assert( m_lLayers.at(iID) != NULL );
+	assert( iID >= 0 );
+	assert( iID < m_lLayers.size() );
+
+	return m_lLayers.at(iID);
 }
 
 void AbsNet::SetInput(const std::vector<float> &inputArray) {
@@ -285,7 +302,6 @@ float AbsNet::SetOutput(const std::vector<float> &outputArray, const unsigned in
 }
 
 float AbsNet::SetOutput(float *outputArray, const unsigned int &size, const unsigned int &layerID) {
-//	assert( m_lLayers[layerID]->GetFlag() & LayerOutput );
 	assert( layerID < m_lLayers.size() );
 	assert( size == m_lLayers[layerID]->GetNeurons().size() );
 
@@ -327,14 +343,14 @@ const AbsLayer *AbsNet::GetOPLayer() const {
 
 void AbsNet::SetIPLayer(const unsigned int iID) {
 	assert (iID >= 0);
-	assert (iID <= GetLayers().size() );
+	assert (iID < GetLayers().size() );
 
 	m_pIPLayer = GetLayer(iID);
 }
 
 void AbsNet::SetOPLayer(const unsigned int iID) {
 	assert (iID >= 0);
-	assert (iID <= GetLayers().size() );
+	assert (iID < GetLayers().size() );
 
 	m_pOPLayer = GetLayer(iID);
 }

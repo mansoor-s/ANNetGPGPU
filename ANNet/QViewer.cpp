@@ -173,9 +173,6 @@ void Viewer::sl_removeLayers() {
     if(!pLayers.size()) // if nothing selected
         return;         // return
 
-    // remove edges
-    removeSCons();
-
     QSet<Layer*>::const_iterator i = pLayers.constBegin();
     while (i != pLayers.constEnd()) {
         m_pScene->removeLayer(*i);
@@ -188,10 +185,7 @@ void Viewer::sl_removeLayers() {
 void Viewer::sl_removeNeurons() {
     m_bStartConnect = false;
 
-    // remove edges
-    removeSCons();
-
-    QList<Layer*> lRawLayers;
+    // remove nodes
     foreach(Layer *pLayer, getScene()->layers() ) {
        foreach(Node *pNode, pLayer->nodes() ) {
            if(pNode->isSelected())  {
@@ -199,8 +193,26 @@ void Viewer::sl_removeNeurons() {
            }
        }
     }
-
     m_pScene->adjust();
+
+    // remove empty layers
+    QList<Layer*> lRawLayers;
+    foreach(Layer *pLayer, getScene()->layers() ) {
+    	if(!pLayer->nodes().size()) {
+    		lRawLayers << pLayer;
+    	}
+    }
+
+    QSet<Layer*> pLayers = QSet<Layer*>::fromList(lRawLayers);
+
+    if(!pLayers.size()) // if nothing selected
+        return;         // return
+
+    QSet<Layer*>::const_iterator i = pLayers.constBegin();
+    while (i != pLayers.constEnd()) {
+        m_pScene->removeLayer(*i);
+        ++i;
+    }
 }
 
 void Viewer::sl_removeConnections() {

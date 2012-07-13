@@ -42,6 +42,8 @@ private:
 
     Scene *m_pScene;
 
+    void refreshNodeIDs();
+
 public:
     Layer(Viewer *parent = NULL);
 

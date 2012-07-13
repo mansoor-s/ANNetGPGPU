@@ -35,7 +35,6 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
 	/**
 	 * Create layers for neural net
 	 */
-	QList<ANN::BPLayer*> lLayers;
 	foreach(Layer *pLayer, m_lLayers) {
 		LayerTypeFlag = pLayer->getLabel()->getType();
 		iSize = pLayer->nodes().size();
@@ -67,22 +66,17 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
 	Net.NetType 	= ANN::ANNetBP;
 	Net.NrOfLayers 	= m_lLayers.size();
 
-	//std::cout<<"number of layers: "<<m_lLayers.size()<<std::endl;
 	foreach(Layer *pLayer, m_lLayers) {
 		Net.SizeOfLayer.push_back(pLayer->nodes().size() );
 		Net.ZValOfLayer.push_back(pLayer->getZLabel()->getZLayer() );
 		Net.TypeOfLayer.push_back(pLayer->getLabel()->getType() );
 
-		std::cout<<"zlayer: "<<pLayer->getZLabel()->getZLayer()<<std::endl;
-
-		//std::cout<<"number of neurons: "<<pLayer->nodes().size()<<std::endl;
 		foreach(Node *pNode, pLayer->nodes() ) {
 			ANN::NeurDescr neuron;
 			neuron.m_iLayerID 		= pLayer->getID();
 			neuron.m_iNeurID 		= pNode->getID();
 			Net.Neurons.push_back(neuron);
 
-			//std::cout<<"number of edges O: "<<pNode->edgesO().size()<<std::endl;
 			foreach(Edge *pEdge, pNode->edgesO() ) {
 				ANN::ConDescr edge;
 				edge.m_iSrcLayerID 	= pEdge->sourceNode()->getLayer()->getID();
@@ -95,14 +89,11 @@ ANN::BPNet *Scene::getANNet(bool bDial) {
 			}
 		}
 	}
+	// Delete old and create new ANN::BPNet
+	if(m_pANNet)
+		delete m_pANNet;
+	m_pANNet = new ANN::BPNet;
 	m_pANNet->CreateNet(Net);
-
-	/**
-	 * Add layers to neural net
-	 */
-	foreach(ANN::BPLayer *pLayer, lLayers) {
-		m_pANNet->AddLayer(pLayer);
-	}
 
     // Update ANN::BPNet
     emit(si_netChanged(m_pANNet));
@@ -171,6 +162,13 @@ void Scene::adjust() {
         layer->adjust();
 }
 
+void Scene::refreshLayerIDs() {
+    for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+    	Layer *pLayer = m_lLayers.at(i);
+    	pLayer->setID(i);
+    }
+}
+
 Layer* Scene::addLayer(const unsigned int &iNodes, const QPointF &fPos, const QString &sName) {
     Layer *pLayer = new Layer;
     pLayer->setScene(this);
@@ -193,20 +191,12 @@ Layer* Scene::addLayer(const unsigned int &iNodes, const QPointF &fPos, const QS
     pLayer->addNodes(iNodes-1);
     pLayer->adjust();
 
-    // Update ANN::BPNet
-//    getANNet(false);
-//    emit(si_netChanged(m_pANNet));
-
     return pLayer;
 }
 
 void Scene::addNode(Node* pNode) {
     m_lNodes << pNode;
     addItem(pNode);
-
-    // Update ANN::BPNet
-//    getANNet(false);
-//    emit(si_netChanged(m_pANNet));
 }
 
 void Scene::addEdge(Edge* pEdge) {
@@ -235,12 +225,17 @@ void Scene::removeNode(Node* pDelNode) {
     removeItem(pDelNode);
     pDelNode->getLayer()->removeNode(pDelNode);
 
-	foreach(Edge* pEdge, pDelNode->edgesI() ) {
-		removeEdge(pEdge);
-	}
-	foreach(Edge* pEdge, pDelNode->edgesO() ) {
-		removeEdge(pEdge);
-	}
+	// remove edges
+    foreach(Edge *pEdge, pDelNode->edgesI() ) {
+        pEdge->sourceNode()->removeEdge(pEdge);
+        pEdge->destNode()->removeEdge(pEdge);
+        removeEdge(pEdge);
+    }
+    foreach(Edge *pEdge, pDelNode->edgesO() ) {
+        pEdge->sourceNode()->removeEdge(pEdge);
+        pEdge->destNode()->removeEdge(pEdge);
+        removeEdge(pEdge);
+    }
 
     QList<Node*> pNewList;
     foreach(Node *pNode, m_lNodes) {
@@ -248,10 +243,6 @@ void Scene::removeNode(Node* pDelNode) {
             pNewList << pNode;
     }
     m_lNodes = pNewList;
-
-    // Update ANN::BPNet
-//    getANNet(false);
-//    emit(si_netChanged(m_pANNet));
 }
 
 void Scene::removeLayer(Layer* pDelLayer) {
@@ -270,9 +261,10 @@ void Scene::removeLayer(Layer* pDelLayer) {
     }
     m_lLayers = pNewList;
 
-    // Update ANN::BPNet
-//    getANNet(false);
-//    emit(si_netChanged(m_pANNet));
+    /*
+     * Refresh the IDs of the layers in the GUI
+     */
+    refreshLayerIDs();
 }
 
 QList<Edge*> Scene::edges() {

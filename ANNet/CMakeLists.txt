@@ -48,6 +48,7 @@ set( ANSourceFiles
 )
 
 set( ANCUDASourceFiles
+  ANBPNetGPU.cpp
   ANSOMNetGPU.cpp
   ANBPKernel.cu
   ANSOMKernel.cu
@@ -136,7 +137,7 @@ endif(QT4_FOUND)
 
 if (CUDA_FOUND)
   INCLUDE(FindCUDA)
-  set(CUDA_NVCC_FLAGS "-arch=sm_11")
+  set(CUDA_NVCC_FLAGS "-arch=sm_20")
   include_directories (${CUDA_SDK_ROOT_DIR}/C/common/inc/)
 
   if (CUDATHRUST_FOUND)

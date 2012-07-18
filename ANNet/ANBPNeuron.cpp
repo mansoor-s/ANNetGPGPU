@@ -71,15 +71,16 @@ void BPNeuron::AdaptEdges() {
 	if(GetConsO().size() == 0)
 		return;
 
-	AbsNeuron *pCurNeuron;
+	AbsNeuron 	*pCurNeuron;
 	Edge 		*pCurEdge;
 	float 		fVal;
 
 	// calc error deltas
 	fVal = GetErrorDelta();
 	for(unsigned int i = 0; i < GetConsO().size(); i++) {
-		pCurNeuron = GetConO(i)->GetDestination(this);
-		fVal += pCurNeuron->GetErrorDelta() * GetConO(i)->GetValue();
+		pCurEdge 	= GetConO(i);
+		pCurNeuron 	= pCurEdge->GetDestination(this);
+		fVal += pCurNeuron->GetErrorDelta() * pCurEdge->GetValue();
 	}
 	fVal *= GetTransfFunction()->derivate( GetValue(), 0.f );
 	SetErrorDelta(fVal);
@@ -89,7 +90,7 @@ void BPNeuron::AdaptEdges() {
 		pCurEdge = GetConO(i);
 		if(pCurEdge->GetAdaptationState() == true) {
 			fVal = 0.f;	// delta for momentum
-			// stdard backpropagation
+			// standard back propagation algorithm
 			fVal += pCurEdge->GetDestination(this)->GetErrorDelta() * m_fLearningRate * GetValue()
 			// weight decay term
 			- m_fWeightDecay * pCurEdge->GetValue()

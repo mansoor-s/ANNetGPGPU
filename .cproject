@@ -26,8 +26,16 @@
 							<tool id="ai3.tool.cuda_qt.cpp_compiler.2069764341" name="C++ Compiler" superClass="ai3.tool.cuda_qt.cpp_compiler">
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.include.paths.415013265" name="Include Paths (-I)" superClass="ai3.tool.cuda_qt.cpp_compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include}&quot;"/>
-									<listOptionValue builtIn="false" value="/usr/local/cuda/include"/>
+									<listOptionValue builtIn="false" value="/usr/include/QtCore"/>
+									<listOptionValue builtIn="false" value="/usr/include/QtGui"/>
+									<listOptionValue builtIn="false" value="/usr/include/Qt"/>
 									<listOptionValue builtIn="false" value="/usr/local/NVIDIA_GPU_Computing_SDK/C/common/inc"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty/utils}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty/delegate}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty/coreplugin}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/local/cuda/include"/>
 									<listOptionValue builtIn="false" value="/usr/include"/>
 								</option>
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.optimization.level.471357179" name="Optimization Level" superClass="ai3.tool.cuda_qt.cpp_compiler.option.optimization.level" value="ai3.tool.cuda_qt.cpp_compiler.optimization.level.none" valueType="enumerated"/>
@@ -2636,18 +2644,26 @@
 						<toolChain id="ai3.toolchain.cuda_qt.596204900" name="CUDA Toolchain with QT" superClass="ai3.toolchain.cuda_qt">
 							<targetPlatform archList="all" binaryParser="org.eclipse.cdt.core.ELF" id="ai3.target.cuda_qt.1021851426" name="CUDA Platform" osList="linux,hpux,aix,qnx" superClass="ai3.target.cuda_qt"/>
 							<builder buildPath="${workspace_loc:/ANNetGPGPU/Release}" id="ai3.target.cuda_qt.builder.1935672126" keepEnvironmentInBuildfile="false" name="CUDA Builder" superClass="ai3.target.cuda_qt.builder"/>
-							<tool id="ai3.toolchain.cuda_qt.moc.530403357" name="QT Meta-Object Compiler" superClass="ai3.toolchain.cuda_qt.moc"/>
+							<tool command="moc" commandLinePattern="${command} ${flags} ${output_flag} ${output} ${inputs}" id="ai3.toolchain.cuda_qt.moc.530403357" name="QT Meta-Object Compiler" superClass="ai3.toolchain.cuda_qt.moc"/>
 							<tool id="ai3.tool.cuda_qt.cpp_compiler.490464267" name="C++ Compiler" superClass="ai3.tool.cuda_qt.cpp_compiler">
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.include.paths.1873635451" name="Include Paths (-I)" superClass="ai3.tool.cuda_qt.cpp_compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include}&quot;"/>
+									<listOptionValue builtIn="false" value="/usr/include/QtCore"/>
+									<listOptionValue builtIn="false" value="/usr/include/QtGui"/>
+									<listOptionValue builtIn="false" value="/usr/include/Qt"/>
 									<listOptionValue builtIn="false" value="/usr/local/NVIDIA_GPU_Computing_SDK/C/common/inc"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty/utils}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty/delegate}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/${ProjName}/ANNet/include/gui/3rdparty/coreplugin}&quot;"/>
 									<listOptionValue builtIn="false" value="/usr/local/cuda/include"/>
 									<listOptionValue builtIn="false" value="/usr/include"/>
 								</option>
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.optimization.level.106630351" name="Optimization Level" superClass="ai3.tool.cuda_qt.cpp_compiler.option.optimization.level" value="ai3.tool.cuda_qt.cpp_compiler.optimization.level.most" valueType="enumerated"/>
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.debugging.level.509457328" name="Debug Level" superClass="ai3.tool.cuda_qt.cpp_compiler.option.debugging.level" value="ai3.tool.cuda_qt.cpp_compiler.debugging.level.none" valueType="enumerated"/>
 								<option id="ai3.tool.cuda_qt.cpp_compiler.option.other.other.1793634045" name="Other flags" superClass="ai3.tool.cuda_qt.cpp_compiler.option.other.other" value="-c -fmessage-length=0 -fopenmp" valueType="string"/>
-								<option id="ai3.tool.cuda_qt.cpp_compiler.option.preprocessor.def.106953890" superClass="ai3.tool.cuda_qt.cpp_compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="ai3.tool.cuda_qt.cpp_compiler.option.preprocessor.def.106953890" name="Defined Symbols (-D)" superClass="ai3.tool.cuda_qt.cpp_compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CUDA"/>
 								</option>
 								<inputType id="ai3.tool.cuda_qt.cpp_compiler.input.1559386991" superClass="ai3.tool.cuda_qt.cpp_compiler.input"/>

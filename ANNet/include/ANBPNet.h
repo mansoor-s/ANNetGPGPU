@@ -21,6 +21,8 @@
 
 namespace ANN {
 
+class BPLayer;
+
 /**
  * \brief Implementation of a back propagation network.
  *

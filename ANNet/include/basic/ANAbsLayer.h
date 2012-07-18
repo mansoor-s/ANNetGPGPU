@@ -155,10 +155,10 @@ public:
 	 */
 	virtual F2DArray ExpEdgesIn() const;
 	/** \brief:
-	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
+	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * ..
 	 * @return Returns a matrix with a row for each neuron and a column for each outgoing weight to the next layer
 	 */

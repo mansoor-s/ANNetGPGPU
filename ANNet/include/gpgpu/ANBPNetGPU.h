@@ -19,7 +19,7 @@ class BPNetGPU: public ANN::BPNet {
 private:
 	std::vector<thrust::device_vector<float> > m_vNeuronVals;
 	std::vector<ANN::Matrix> m_vEdgeMatrices;
-	std::vector<ANN::Matrix> m_vEdgeMomentums;
+	std::vector<ANN::Matrix> m_vEdgeMomentumMatrices;
 	std::vector<ANN::Matrix> m_vBiasEdgeMatrices;
 	std::vector<float> m_vOutDelta;
 /*

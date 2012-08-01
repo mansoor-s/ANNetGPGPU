@@ -68,6 +68,7 @@ float BPNetGPU::SetOutput(float *pOutArray, const unsigned int &size, const unsi
 
 	return fError;
 }
+
 /*
 void BPNetGPU::ExpNeurVals() {
 	m_vNeuronVals.clear();
@@ -102,11 +103,12 @@ void BPNetGPU::PropagateFW() {
 		vInput.push_back(pNeuron->GetValue() );
 	}
 
-	m_vNeuronVals =	hostBPPropagateFW(
-			m_vEdgeMatrices,
-			m_vBiasEdgeMatrices,
-			vInput,
-			GetTransfFunction()->normal);
+	m_vNeuronVals =	hostBPPropagateFW (
+		m_vEdgeMatrices,				// const
+		m_vBiasEdgeMatrices,			// const
+		vInput,							// const
+		GetTransfFunction()->normal		// fptr
+	);
 }
 
 void BPNetGPU::PropagateBW() {
@@ -122,13 +124,13 @@ void BPNetGPU::PropagateBW() {
 	/*
 	 * Process
 	 */
-	m_vEdgeMomentums =
-	hostBPPropagateBW(
-			m_vEdgeMatrices,
-			m_vNeuronVals,
-			m_vOutDelta,
-			GetLearningRate(),
-			GetTransfFunction()->derivate);
+	m_vEdgeMomentumMatrices = hostBPPropagateBW	(
+		m_vEdgeMatrices,				// -> changed due to training
+		m_vNeuronVals,					// const
+		m_vOutDelta,					// const
+		GetLearningRate(),				// const
+		GetTransfFunction()->derivate	// fptr
+	);
 }
 
 std::vector<float> BPNetGPU::TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress) {

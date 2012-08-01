@@ -219,6 +219,33 @@ int BPLayer::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table) {
 	return iLayerID;
 }
 
+F2DArray BPLayer::ExpBiasEdgesIn() const {
+	unsigned int iWidth 	= m_lNeurons.size();
+	assert(iWidth > 0);
+
+	F2DArray vRes;
+	vRes.Alloc(iWidth, 1);
+
+	for(unsigned int x = 0; x < iWidth; x++) {
+		vRes[0][x] = m_lNeurons.at(x)->GetBiasEdge()->GetValue();
+	}
+	return vRes;
+}
+
+F2DArray BPLayer::ExpBiasEdgesOut() const {
+	unsigned int iHeight 	= m_pBiasNeuron->GetConsO().size();
+
+	assert(iHeight > 0);
+
+	F2DArray vRes;
+	vRes.Alloc(1, iHeight);
+
+	for(int y = 0; y < static_cast<int>(iHeight); y++) {
+		vRes[y][0] = m_pBiasNeuron->GetConO(y)->GetValue();
+	}
+	return vRes;
+}
+
 /*
  * AUSGABEOPERATOR
  * OSTREAM
@@ -238,4 +265,6 @@ std::ostream& operator << (std::ostream &os, BPLayer *op)
     os << "Nr. neurons: \t" << op->GetNeurons().size() 					<< std::endl;
     return os;     // Ref. auf Stream
 }
+
+
 

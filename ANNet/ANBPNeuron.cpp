@@ -89,9 +89,9 @@ void BPNeuron::AdaptEdges() {
 	for(unsigned int i = 0; i < GetConsO().size(); i++) {
 		pCurEdge = GetConO(i);
 		if(pCurEdge->GetAdaptationState() == true) {
-			fVal = 0.f;	// delta for momentum
+			//fVal = 0.f;	// delta for momentum
 			// standard back propagation algorithm
-			fVal += pCurEdge->GetDestination(this)->GetErrorDelta() * m_fLearningRate * GetValue()
+			fVal = pCurEdge->GetDestination(this)->GetErrorDelta() * m_fLearningRate * GetValue()
 			// weight decay term
 			- m_fWeightDecay * pCurEdge->GetValue()
 			// momentum term

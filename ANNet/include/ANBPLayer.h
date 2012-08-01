@@ -86,7 +86,8 @@ public:
 	virtual void Resize(const unsigned int &iSize);
 
 	/**
-	 *
+	 * Adds neurons to the layer
+	 * @param iSize stands for the number of neurons which get added to the layer.
 	 */
 	virtual void AddNeurons(const unsigned int &iSize);
 
@@ -161,6 +162,25 @@ public:
 	 * standard output of the layer.
 	 */
 	friend std::ostream& operator << (std::ostream &os, BPLayer *op);
+
+	/** \brief:
+	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
+	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
+	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
+	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
+	 * ..
+	 * @return Returns a vector like matrix with a row for each neuron and a column for each incoming weight from the previous layer
+	 */
+	virtual F2DArray ExpBiasEdgesIn() const;
+	/** \brief:
+	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * ..
+	 * @return Returns a vector like matrix with a row for each neuron and a column for each outgoing weight to the next layer
+	 */
+	virtual F2DArray ExpBiasEdgesOut() const;
 };
 
 }

@@ -64,24 +64,24 @@ public:
 	 * @param pSource Pointer to a neuron building this edge.
 	 * @return Returns a pointer to the neuron != pSource.
 	 */
-	AbsNeuron *GetDestination(AbsNeuron *pSource) const;
+	virtual AbsNeuron *GetDestination(AbsNeuron *pSource) const;
 	/**
 	 * Looking from neuron pSource. Is returning an index to the other neuron.
 	 * @param pSource Pointer to a neuron building this edge.
 	 * @return Returns the index of the neuron != pSource.
 	 */
-	int GetDestinationID(AbsNeuron *pSource) const;
+	virtual int GetDestinationID(AbsNeuron *pSource) const;
 
 	/**
 	 * Value of this edge.
 	 * @return Returns the value of this edge.
 	 */
-	const float &GetValue() const;
+	virtual const float &GetValue() const;
 	/**
 	 * Sets the value of this edge.
 	 * @param fValue New value of this edge.
 	 */
-	void SetValue(float fValue);
+	virtual void SetValue(float fValue);
 
 	/**
 	 * Momentum of this edge.
@@ -92,21 +92,21 @@ public:
 	 * Sets the momentum of this edge.
 	 * @param fValue New momentum of this edge.
 	 */
-	void SetMomentum(float fValue);
+	virtual void SetMomentum(float fValue);
 
 	/**
 	 * Returns whether weight is changeable or not.
 	 */
-	bool GetAdaptationState() const;
+	virtual bool GetAdaptationState() const;
 	/**
 	 * Switch the state whether changeable or not.
 	 */
-	void SetAdaptationState(const bool &bAdapt);
+	virtual void SetAdaptationState(const bool &bAdapt);
 
 	/**
 	 * Returns the value of the Edge.
 	 */
-	operator float() const;
+	virtual operator float() const;
 };
 
 }

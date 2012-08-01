@@ -105,12 +105,12 @@ public:
 	 * Sets the type of the net
 	 * @param fType Flag describing the type of the net.
 	 */
-	void SetFlag(const NetTypeFlag &fType);
+	virtual void SetFlag(const NetTypeFlag &fType);
 	/**
 	 * Adds a flag if not already set.
 	 * @param fType Flag describing the type of the net.
 	 */
-	void AddFlag(const NetTypeFlag &fType);
+	virtual void AddFlag(const NetTypeFlag &fType);
 	/**
 	 * Type of the net
 	 * @return Returns the flag describing the type of the net.
@@ -135,7 +135,7 @@ public:
 	 * List of all layers of the net.
 	 * @return Returns an array with pointers to every layer.
 	 */
-	std::vector<AbsLayer*> GetLayers() const;
+	virtual std::vector<AbsLayer*> GetLayers() const;
 
 	/**
 	 * Deletes the complete network (all connections and all values).
@@ -195,44 +195,44 @@ public:
 	/**
 	 *  Sets training data of the net.
 	 */
-	void SetTrainingSet(TrainingSet *pData);
+	virtual void SetTrainingSet(TrainingSet *pData);
 	/**
 	 *  Sets training data of the net.
 	 */
-	void SetTrainingSet(const TrainingSet &Data);
+	virtual void SetTrainingSet(const TrainingSet &Data);
 	/**
 	 *  Training data of the net.
 	 *  @return Returns the current training set of the net or NULL if nothing was set.
 	 */
-	TrainingSet *GetTrainingSet() const;
+	virtual TrainingSet *GetTrainingSet() const;
 
 	/**
 	 * Returns layer at index iLayerID.
 	 * @return Pointer to Layer at iLayerID.
 	 */
-	AbsLayer* GetLayer(const unsigned int &iLayerID) const;
+	virtual AbsLayer* GetLayer(const unsigned int &iLayerID) const;
 
 	/**
 	 * Pointer to the input layer (If input layer was already defined).
 	 * @return Returns a pointer to the input layer.
 	 */
-	const AbsLayer *GetIPLayer() const;
+	virtual const AbsLayer *GetIPLayer() const;
 	/**
 	 * Pointer to the output layer (If output layer was already defined).
 	 * @return Returns a pointer to the output layer.
 	 */
-	const AbsLayer *GetOPLayer() const;
+	virtual const AbsLayer *GetOPLayer() const;
 
 	/**
 	 * Sets the input layer
 	 * @param iID ID of the layer.
 	 */
-	void SetIPLayer(const unsigned int iID);
+	virtual void SetIPLayer(const unsigned int iID);
 	/**
 	 * Sets the output layer
 	 * @param iID ID of the layer.
 	 */
-	void SetOPLayer(const unsigned int iID);
+	virtual void SetOPLayer(const unsigned int iID);
 
 	/**
 	 * Defines the type of "activation" function the net has to use for back-/propagation.
@@ -242,7 +242,7 @@ public:
 	/**
 	 * @return Returns the current net (activation) function.
 	 */
-	const TransfFunction *GetTransfFunction() const;
+	virtual const TransfFunction *GetTransfFunction() const;
 
 	/**
 	 * Save net's content to filesystem
@@ -258,7 +258,7 @@ public:
 	 * Only usable if input/output layer was already set.
 	 * @return Returns the values of the output layer after propagating the net.
 	 */
-	std::vector<float> GetOutput();
+	virtual std::vector<float> GetOutput();
 	/**
 	 * standard output of the net. Only usable if input/output layer was already set.
 	 */

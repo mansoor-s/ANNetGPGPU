@@ -96,27 +96,27 @@ public:
 	 */
 	virtual void AddConO(Edge *ANEdge);
 
-	void SetConO(Edge *Edge, const unsigned int iID);
-	void SetConI(Edge *Edge, const unsigned int iID);
+	virtual void SetConO(Edge *Edge, const unsigned int iID);
+	virtual void SetConI(Edge *Edge, const unsigned int iID);
 
 	/**
 	 * @return Pointer to an incoming edge
 	 * @param iID Index of edge in m_lIncomingConnections
 	 */
-	Edge* GetConI(const unsigned int &iID) const;
+	virtual Edge* GetConI(const unsigned int &iID) const;
 	/**
 	 * @return Pointer to an outgoing edge
 	 * @param iID Index of edge in m_lOutgoingConnections
 	 */
-	Edge* GetConO(const unsigned int &iID) const;
+	virtual Edge* GetConO(const unsigned int &iID) const;
 	/**
 	 * @return Array of pointers of all incoming edges
 	 */
-	std::vector<Edge*> GetConsI() const;
+	virtual std::vector<Edge*> GetConsI() const;
 	/**
 	 * @return Array of pointers of all outgoing edges
 	 */
-	std::vector<Edge*> GetConsO() const;
+	virtual std::vector<Edge*> GetConsO() const;
 	/**
 	 * @param iID New index of this neuron.
 	 */
@@ -124,7 +124,7 @@ public:
 	/**
 	 * @return Index of this neuron.
 	 */
-	unsigned int GetID() const;
+	virtual unsigned int GetID() const;
 	/**
 	 * @param fValue New value of this neuron.
 	 */
@@ -132,17 +132,17 @@ public:
 	/**
 	 * @return Returns the value of this neuron.
 	 */
-	const float &GetValue() const;
+	virtual const float &GetValue() const;
 	/*
 	 * Get the position of the neuron
 	 * @return x, y, z, .. coordinates of the neuron (e.g. SOM)
 	 */
-	const std::vector<float> GetPosition() const;
+	virtual const std::vector<float> GetPosition() const;
 	/**
 	 * Sets the current position of the neuron in the net.
 	 * @param vPos Vector with Cartesian coordinates
 	 */
-	void SetPosition(const std::vector<float> &vPos);
+	virtual void SetPosition(const std::vector<float> &vPos);
 	/**
 	 * @param fValue New error delts of this neuron.
 	 */
@@ -150,7 +150,7 @@ public:
 	/**
 	 * @return Returns the error delta of this neuron.
 	 */
-	const float &GetErrorDelta() const;
+	virtual const float &GetErrorDelta() const;
 	/**
 	 * @param pANEdge Pointer to edge connecting this neuron with bias neuron.
 	 */
@@ -158,7 +158,7 @@ public:
 	/**
 	 * @return Returns pointer to edge connecting this neuron with bias neuron.
 	 */
-	Edge *GetBiasEdge() const;
+	virtual Edge *GetBiasEdge() const;
 	/**
 	 * @param pFCN Kind of function the net has to use while back-/propagating.
 	 */
@@ -166,7 +166,7 @@ public:
 	/**
 	 * @return The transfer function of the net.
 	 */
-	const TransfFunction *GetTransfFunction() const;
+	virtual const TransfFunction *GetTransfFunction() const;
 
 	/**
 	 * Overload to define how the net has to act while propagating back.

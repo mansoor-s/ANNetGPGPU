@@ -17,11 +17,22 @@ namespace ANN {
 
 class BPNetGPU: public ANN::BPNet {
 private:
+	std::vector<thrust::device_vector<float> > m_vNeuronVals;
 	std::vector<ANN::Matrix> m_vEdgeMatrices;
-
+	std::vector<ANN::Matrix> m_vEdgeMomentums;
+	std::vector<ANN::Matrix> m_vBiasEdgeMatrices;
+	std::vector<float> m_vOutDelta;
+/*
+	void ExpNeurVals();
+	void ImpNeurVals();
+*/
 public:
 	BPNetGPU();
 	virtual ~BPNetGPU();
+
+	virtual float SetOutput(const std::vector<float> &vOutArray);
+	virtual float SetOutput(const std::vector<float> &outputArray, const unsigned int &layerID);
+	virtual float SetOutput(float *pOutArray, const unsigned int &size, const unsigned int &layerID);
 
 	virtual void PropagateFW();
 	virtual void PropagateBW();

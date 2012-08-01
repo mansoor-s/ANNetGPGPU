@@ -15,10 +15,34 @@
 #define ANKERNELS_H_
 
 #include <cassert>
+#include <vector>
 #include <containers/ANTrainingSet.h>
 #include <thrust/device_vector.h>
 #include <gpgpu/ANMatrix.h>
 
+
+/*
+ * BP kernels
+ */
+std::vector<float>
+hostBPCalcDelta(
+		const thrust::device_vector<float> &vNeurOut,
+		const std::vector<float> &vTrainOut );
+
+std::vector<thrust::device_vector<float> >
+hostBPPropagateFW(
+		const std::vector<ANN::Matrix> &vEdgeMatrices,
+		const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
+		const std::vector<float> &vInput,
+		float (*pf_Transfer)(const float &, const float &) );			// transfer function
+
+std::vector<ANN::Matrix>
+hostBPPropagateBW(
+		std::vector<ANN::Matrix> &vEdgeMatrices,
+		const std::vector<thrust::device_vector<float> > &vNeuronValues,
+		const std::vector<float> &vErrors,
+		const float &fLearningRate, 									// learning rate
+		float (*pf_DevTransfer)(const float &, const float &) ); 		// deviation of transfer function
 
 /*
  * SOM kernels
@@ -35,7 +59,8 @@ hostSOMFindBMNeuronID(
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
+hostSOMPropagateBW(
+		ANN::Matrix &SOMEdgeMatrix,
 		const ANN::Matrix &SOMPositionMatrix,
 		const thrust::device_vector<float> &dvInputVector,
 		const unsigned int BMUID,
@@ -43,7 +68,8 @@ hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
 		const float &fLearningRate );
 
 void
-hostSOMTraining( ANN::Matrix &SOMEdgeMatrix,
+hostSOMTraining(
+		ANN::Matrix &SOMEdgeMatrix,
 		const ANN::Matrix &SOMPositionMatrix,
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,

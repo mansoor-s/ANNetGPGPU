@@ -73,12 +73,12 @@ public:
 	 * Returns the current ID in the Network inheriting the layer.
 	 * Useful for administration purposes.
 	 */
-	int GetID() const;
+	virtual int GetID() const;
 
 	/*
 	 * TODO
 	 */
-	void EraseAllEdges();
+	virtual void EraseAllEdges();
 	/**
 	 * Deletes the complete layer (all connections and all values).
 	 */
@@ -96,12 +96,12 @@ public:
 	 * @return Returns the pointer of the neuron at index iID
 	 * @param iID Index of the neuron in m_lNeurons
 	 */
-	AbsNeuron *GetNeuron(const unsigned int &iID) const;
+	virtual AbsNeuron *GetNeuron(const unsigned int &iID) const;
 	/**
 	 * List of all neurons in this layer (not bias neuron).
 	 * @return Returns an array with pointers of neurons in this layer.
 	 */
-	const std::vector<AbsNeuron *> &GetNeurons() const;
+	virtual const std::vector<AbsNeuron *> &GetNeurons() const;
 
 	/**
 	 *
@@ -130,7 +130,7 @@ public:
 	 * Type of the layer
 	 * @return Returns the flag describing the type of the layer.
 	 */
-	LayerTypeFlag GetFlag() const;
+	virtual LayerTypeFlag GetFlag() const;
 
 	/**
 	 * Save layer's content to filesystem

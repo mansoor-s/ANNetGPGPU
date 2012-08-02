@@ -246,6 +246,36 @@ F2DArray BPLayer::ExpBiasEdgesOut() const {
 	return vRes;
 }
 
+void BPLayer::ImpMomentumsEdgesIn(const F2DArray &mat) {
+	unsigned int iHeight 	= m_lNeurons.at(0)->GetConsI().size();
+	unsigned int iWidth 	= m_lNeurons.size();
+
+	assert(iHeight == mat.GetH() );
+	assert(iWidth == mat.GetW() );
+
+	#pragma omp parallel for
+	for(int y = 0; y < static_cast<int>(iHeight); y++) {
+		for(unsigned int x = 0; x < iWidth; x++) {
+			m_lNeurons.at(x)->GetConI(y)->SetMomentum(mat[y][x]);
+		}
+	}
+}
+
+void BPLayer::ImpMomentumsEdgesOut(const F2DArray &mat) {
+	unsigned int iHeight 	= m_lNeurons.at(0)->GetConsO().size();
+	unsigned int iWidth 	= m_lNeurons.size();
+
+	assert(iHeight == mat.GetH() );
+	assert(iWidth == mat.GetW() );
+
+	#pragma omp parallel for
+	for(int y = 0; y < static_cast<int>(iHeight); y++) {
+		for(unsigned int x = 0; x < iWidth; x++) {
+			m_lNeurons.at(x)->GetConO(y)->SetMomentum(mat[y][x]);
+		}
+	}
+}
+
 /*
  * AUSGABEOPERATOR
  * OSTREAM

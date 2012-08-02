@@ -2,7 +2,7 @@
  * Net.cpp
  *
  *  Created on: 30.05.2009
- *      Author: Xerces
+ *      Author: Daniel <dgrat> Frenzel
  */
 
 #include <iostream>

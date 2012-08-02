@@ -155,6 +155,15 @@ public:
 	virtual int ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table);
 
 	/**
+	 * TODO
+	 */
+	virtual void ImpMomentumsEdgesIn(const F2DArray &);
+	/**
+	 * TODO
+	 */
+	virtual void ImpMomentumsEdgesOut(const F2DArray &);
+
+	/**
 	 * standard output of the layer.
 	 */
 	friend std::ostream& operator << (std::ostream &os, BPLayer &op);

@@ -164,8 +164,13 @@ public:
 	 */
 	virtual F2DArray ExpEdgesOut() const;
 
+	/**
+	 * TODO
+	 */
 	virtual void ImpEdgesIn(const F2DArray &);
-
+	/**
+	 * TODO
+	 */
 	virtual void ImpEdgesOut(const F2DArray &);
 
 	/**

@@ -69,19 +69,6 @@ float BPNetGPU::SetOutput(float *pOutArray, const unsigned int &size, const unsi
 	return fError;
 }
 
-/*
-void BPNetGPU::ExpNeurVals() {
-	m_vNeuronVals.clear();
-	for(int i = 0; i < GetLayers().size(); i++) {
-		thrust::host_vector<float> hvLayer;
-		for(int j = 0; j < GetLayer(i)->GetNeurons().size(); j++) {
-			hvLayer.push_back(GetLayer(i)->GetNeuron(j)->GetValue() );
-		}
-		m_vNeuronVals.push_back(hvLayer);
-	}
-}
-*/
-
 void BPNetGPU::PropagateFW() {
 	/*
 	 * Copy edges in matrix
@@ -134,11 +121,34 @@ void BPNetGPU::PropagateBW() {
 }
 
 std::vector<float> BPNetGPU::TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress) {
-	std::vector<float> vOutput;
-	for(unsigned int i = 0; i < GetOPLayer()->GetNeurons().size(); i++) {
-		ANN::AbsNeuron *pNeuron = GetOPLayer()->GetNeuron(i);
-		vOutput.push_back(pNeuron->GetValue() );
+	/*
+	 * Error deltas get stored here
+	 */
+	std::vector<float> vRes;
+
+	/*
+	 * Not a big dealm, ..
+	 */
+	vRes = ANN::BPNet::TrainFromData(iCycles, fTolerance, bBreak, fProgress);
+
+	/*
+	 * .. but this (import new calculated edges), ..
+	 */
+	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+		m_lLayers.at(i)->ImpEdgesOut(m_vEdgeMatrices.at(i) );
 	}
+
+	/*
+	 * .. and this (import momentums for all the edges)
+	 */
+	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+		((ANN::BPLayer*)m_lLayers.at(i))->ImpMomentumsEdgesOut(m_vEdgeMatrices.at(i) );
+	}
+
+	/*
+	 * Return error deltas
+	 */
+	return vRes;
 }
 
 }

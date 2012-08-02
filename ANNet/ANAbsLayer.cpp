@@ -159,7 +159,6 @@ F2DArray AbsLayer::ExpEdgesIn() const {
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
 		for(unsigned int x = 0; x < iWidth; x++) {
 			vRes[y][x] = m_lNeurons.at(x)->GetConI(y)->GetValue();
-			//std::cout << "ExpEdgesIn() - weight: " << m_lNeurons.at(x)->GetConI(y)->GetValue() << std::endl;
 		}
 	}
 	return vRes;

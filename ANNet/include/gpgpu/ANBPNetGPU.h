@@ -22,10 +22,7 @@ private:
 	std::vector<ANN::Matrix> m_vEdgeMomentumMatrices;
 	std::vector<ANN::Matrix> m_vBiasEdgeMatrices;
 	std::vector<float> m_vOutDelta;
-/*
-	void ExpNeurVals();
-	void ImpNeurVals();
-*/
+
 public:
 	BPNetGPU();
 	virtual ~BPNetGPU();

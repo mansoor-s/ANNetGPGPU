@@ -70,9 +70,31 @@ float BPNetGPU::SetOutput(float *pOutArray, const unsigned int &size, const unsi
 	return fError;
 }
 
+void BPNetGPU::RefreshNeurons() {
+	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+		std::vector<float> vNeurVals(m_vNeuronVals.at(i).size() );
+		thrust::copy(m_vNeuronVals.at(i).begin(), m_vNeuronVals.at(i).end(), vNeurVals.begin());
+
+		for(unsigned int j = 0; j < m_lLayers.at(i)->GetNeurons().size(); j++) {
+			m_lLayers.at(i)->GetNeuron(j)->SetValue(vNeurVals.at(j) );
+		}
+	}
+}
+
+void BPNetGPU::RefreshEdges() {
+	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
+		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
+			pLayer->ImpEdgesOut(m_vEdgeMatrices.at(i) );
+			pLayer->ImpMomentumsEdgesOut(m_vEdgeMatrices.at(i) );
+		}
+	}
+}
+
 void BPNetGPU::PropagateFW() {
 	/*
 	 * Copy edges in matrix
+	 * TODO optimize, is very slow
 	 */
 	m_vEdgeMatrices.clear();
 	m_vBiasEdgeMatrices.clear();
@@ -101,11 +123,18 @@ void BPNetGPU::PropagateFW() {
 		vInput,							// const
 		GetTransfFunction()->normal		// fptr
 	);
+
+	/*
+	 * Write neurons back
+	 * TODO optimize, is very slow
+	 */
+	RefreshNeurons();
 }
 
 void BPNetGPU::PropagateBW() {
 	/*
 	 * Copy edges in matrix
+	 * TODO optimize, is very slow
 	 */
 	m_vEdgeMatrices.clear();
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
@@ -125,6 +154,12 @@ void BPNetGPU::PropagateBW() {
 		GetLearningRate(),				// const
 		GetTransfFunction()->derivate	// fptr
 	);
+
+	/*
+	 * Write edges back
+	 * TODO optimize, is very slow
+	 */
+	RefreshEdges();
 }
 
 std::vector<float> BPNetGPU::TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress) {
@@ -142,13 +177,7 @@ std::vector<float> BPNetGPU::TrainFromData(const unsigned int &iCycles, const fl
 	 * .. but this (import new calculated edges), ..
 	 * .. and this (import momentums for all the edges)
 	 */
-	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
-		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
-			pLayer->ImpEdgesOut(m_vEdgeMatrices.at(i) );
-			pLayer->ImpMomentumsEdgesOut(m_vEdgeMatrices.at(i) );
-		}
-	}
+	RefreshEdges();
 
 	/*
 	 * Return error deltas

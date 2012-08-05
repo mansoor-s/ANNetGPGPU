@@ -115,6 +115,7 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 		    		saxpy_functor(hvInput[y]) ); 							// A
 		}
 		
+		// TODO optimize that
 		if(vBiasEdgeMatrices.size() > 0) {
 			dvBias = thrust::device_vector<float>(vBiasEdgeMatrices.at(i).getRowBegin(0), vBiasEdgeMatrices.at(i).getRowEnd(0));
 		}

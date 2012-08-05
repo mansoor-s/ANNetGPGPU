@@ -23,6 +23,9 @@ private:
 	std::vector<ANN::Matrix> m_vBiasEdgeMatrices;
 	std::vector<float> m_vOutDelta;
 
+	void RefreshNeurons();
+	void RefreshEdges();
+
 public:
 	BPNetGPU();
 	virtual ~BPNetGPU();

@@ -8,6 +8,7 @@
 #ifndef GPGPU_H_
 #define GPGPU_H_
 
+#include <gpgpu/ANBPNetGPU.h>
 #include <gpgpu/ANSOMNetGPU.h>
 
 #endif /* GPGPU_H_ */

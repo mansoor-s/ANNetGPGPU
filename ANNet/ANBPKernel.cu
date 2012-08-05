@@ -40,11 +40,12 @@ struct saxy_functor {
 struct binaryTransferFcn_functor {
 	float (*m_pf)(const float &, const float &);
 	
-	binaryTransferFcn_functor(float (*pf)(const float &, const float &) ) : m_pf(pf)	{}
+	binaryTransferFcn_functor(float (*pf)(const float &, const float &) ) : m_pf(pf) {
+	}
 	
     __host__ __device__
 	float operator()(const float& fVal, const float& fBias) const { 
-		return (m_pf)(fVal, fBias);
+    	return ANN::fcn_log_normal(fVal, fBias);	// works
 	}
 };
 
@@ -55,7 +56,8 @@ struct unaryTransferFcn_functor {
 	
     __host__ __device__
 	float operator()(const float& fVal) const { 
-		return (m_pf)(fVal, 0);
+		//return (m_pf)(fVal, 0);
+    	return ANN::fcn_log_derivate(fVal, 0);
 	}
 };
 
@@ -64,9 +66,9 @@ hostBPCalcDelta(	const thrust::device_vector<float> &dvNeurOut,	// from forward 
 					const std::vector<float> &vTrainOut ) 			// from training set
 {
 	thrust::device_vector<float> dvTrainOut (vTrainOut.begin(), vTrainOut.end() );
-	thrust::device_vector<float> dvDelta	(dvNeurOut.size(), 0.f);
-    std::vector<float> vRes;
-	
+	thrust::device_vector<float> dvDelta	(vTrainOut.size(), 0.f);
+    std::vector<float> vRes(vTrainOut.size() );
+    
 	// Calc error deltas of output layer
     thrust::transform(
     		dvTrainOut.begin(),
@@ -85,22 +87,23 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 					const std::vector<float> &vInput, 
 					float (*pf_Transfer)(const float &, const float &) ) 
 {
-	std::vector<thrust::device_vector<float> > vNeuronValues;
-	
+	std::vector<thrust::device_vector<float> > vNeuronValues(1, vInput);
+
 	// Copy Input from vInput in device vector: vOutput
-	thrust::device_vector<float> dvInput(vInput.begin(), vInput.end() ); 	// input
+	thrust::host_vector<float> hvInput(vInput.begin(), vInput.end() ); 	// input
 	thrust::device_vector<float> dvLayer;
+	thrust::device_vector<float> dvBias;
 	
 	unsigned int iWidth 	= 0;
 	unsigned int iHeight 	= 0;
 	
-	for(unsigned int i = 0; i < vEdgeMatrices.size(); i++) {
-		iWidth 		= vEdgeMatrices.at(i).GetW();							// Nr. of neurons in next layer
-		iHeight 	= vEdgeMatrices.at(i).GetH();							// Nr. of neurons in this layer
+	for(unsigned int i = 0; i < vEdgeMatrices.size(); i++) {	
+		iWidth 		= vEdgeMatrices.at(i).GetW();							// iWidth == size of the next layer
+		iHeight 	= vEdgeMatrices.at(i).GetH();							// iHeight == size of this layer
 		
 		// alloc memory
-		dvLayer 	= thrust::device_vector<float>(iWidth, 0.f); 			// layer
-		
+		dvLayer 	= thrust::device_vector<float>(iWidth, 0.f); 			// iWidth == size of the next layer
+	
 		// Calculate the result of the current layer
 		for(unsigned int y = 0; y < iHeight; y++) {	
 		    // Y <- A * X + Y
@@ -109,23 +112,29 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 		    		vEdgeMatrices.at(i).getRowEnd(y), 						// X
 		    		dvLayer.begin(), 										// Y
 		    		dvLayer.begin(), 										// Y
-		    		saxpy_functor(dvInput[y]) ); 							// A
-			
+		    		saxpy_functor(hvInput[y]) ); 							// A
+		}
+		
+		if(vBiasEdgeMatrices.size() > 0) {
+			dvBias = thrust::device_vector<float>(vBiasEdgeMatrices.at(i).getRowBegin(0), vBiasEdgeMatrices.at(i).getRowEnd(0));
+		}
+		else {
+			dvBias 	= thrust::device_vector<float>(iWidth, 0.f); 			// bias
 		}
 		
 		// Run values through transfer function
 	    thrust::transform(
 	    		dvLayer.begin(),
 	    		dvLayer.end(),
-	    		vBiasEdgeMatrices.at(i).getRowBegin(0),
+	    		dvBias.begin(),
 	    		dvLayer.begin(),
 	    		binaryTransferFcn_functor(pf_Transfer) ); 
 		
 		// Now the input of the next layer will be the the previous one
-		dvInput = dvLayer;
+		hvInput = dvLayer;
 		vNeuronValues.push_back(dvLayer);
 	}
-	
+
 	return vNeuronValues;
 }
 
@@ -143,45 +152,52 @@ hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatrices,
 		vEdgeMomentums.push_back(matrix);
 	}
 	
-	thrust::device_vector<float> dvErrors	(vErrors.begin(), vErrors.end());
-	std::vector<thrust::device_vector<float> > vErrorDeltas;
-    vErrorDeltas.push_back(dvErrors);
+	thrust::device_vector	<float> 			dvErrors	(vErrors.begin(), vErrors.end());
+	thrust::device_vector	<float> 			hvErrors;
+	std::vector<thrust::device_vector<float> > 	vErrorDeltas(1, dvErrors);
 	
+	unsigned int iWidth 	= 0;
 	unsigned int iHeight 	= 0;
 	// calc it for the rest of the layers
-	for(int i = vEdgeMatrices.size()-1; i >= 0; i--) {					// All layers except output!
-		iHeight = vEdgeMatrices.at(i).GetH();							// Nr. of neurons in this layer
+	for(int i = vEdgeMatrices.size()-1; i >= 0; i--) {						// All layers except output!
+		iWidth 		= vEdgeMatrices.at(i).GetW();							// Nr. of neurons in next layer
+		iHeight 	= vEdgeMatrices.at(i).GetH();							// Nr. of neurons in this layer
 		
-		dvErrors = thrust::device_vector<float>(iHeight, 0.f);
+		dvErrors 	= thrust::device_vector<float>(iWidth, 0.f);
+		hvErrors 	= thrust::host_vector<float>(vErrorDeltas.front().begin(), vErrorDeltas.front().end() );
 		
-		// Calculate the result of the current layer
-		for(unsigned int y = 0; y < iHeight; y++) {	
-			// Y <- A * X + Y
-		    thrust::transform(
-		    		vEdgeMatrices.at(i).getRowBegin(y), 					// X
-		    		vEdgeMatrices.at(i).getRowEnd(y), 						// X
-		    		dvErrors.begin(), 										// Y
-		    		dvErrors.begin(), 										// Y
-		    		saxpy_functor(vErrorDeltas.back()[y]) ); 							// A
+		if(vErrorDeltas.front().size() == iHeight) {
+			// Calculate the result of the current layer
+			for(unsigned int y = 0; y < iHeight; y++) {	
+				// Y <- A * X + Y
+				thrust::transform(
+						vEdgeMatrices.at(i).getRowBegin(y), 					// X
+						vEdgeMatrices.at(i).getRowEnd(y), 						// X
+						dvErrors.begin(), 										// Y
+						dvErrors.begin(), 										// Y
+						saxpy_functor(hvErrors[y]) ); 				// A
+			}
+			
+			// Run values through transfer function
+			thrust::transform(
+					dvErrors.begin(),
+					dvErrors.end(),
+					dvErrors.begin(),
+					unaryTransferFcn_functor(pf_DevTransfer) ); 
+			
+			// save in vector
+			vErrorDeltas.insert(vErrorDeltas.begin(), dvErrors);
 		}
-		
-		// Run values through transfer function
-	    thrust::transform(
-	    		dvErrors.begin(),
-	    		dvErrors.end(),
-	    		dvErrors.begin(),
-	    		unaryTransferFcn_functor(pf_DevTransfer) ); 
-	    // save in vector
-	    vErrorDeltas.insert(vErrorDeltas.begin(), dvErrors);
 	}
 	
 	// Calc new weight matrix
 	// Adapt weights
-	for(int i = vEdgeMatrices.size()-1; i >= 0; i--) {					// All layers except output!
-		iHeight = vEdgeMatrices.at(i).GetH();							// Nr. of neurons in this layer
+	for(int i = vEdgeMatrices.size()-1; i >= 0 && vNeuronValues.size() > 0; i--) {					// All layers except output!
+//		iWidth 		= vEdgeMatrices.at(i).GetW();							// Nr. of neurons in next layer
+		iHeight 	= vEdgeMatrices.at(i).GetH();							// Nr. of neurons in this layer
 		
 		thrust::device_vector<float> dvMomentums(vNeuronValues.at(i).size(), 0.f);
-		
+
 		// M <- A * X * Y
 		thrust::transform(
 				vErrorDeltas.at(i+1).begin(), 							// X
@@ -189,7 +205,7 @@ hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatrices,
 				vNeuronValues.at(i).begin(), 							// Y
 				dvMomentums.begin(), 									// Y
 				saxy_functor(fLearningRate) ); 							// A
-		
+	
 		// Calculate the result of the current layer
 		for(unsigned int y = 0; y < iHeight; y++) {		
 			// X <- Y

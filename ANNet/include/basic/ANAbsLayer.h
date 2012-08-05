@@ -151,7 +151,7 @@ public:
 	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
 	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
 	 * ..
-	 * @return Returns a matrix with a row for each neuron and a column for each incoming weight from the previous layer
+	 * @return Returns a matrix with a column for each neuron in this layer and a row for each incoming weight from the previous layer
 	 */
 	virtual F2DArray ExpEdgesIn() const;
 	/** \brief:
@@ -160,7 +160,7 @@ public:
 	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * ..
-	 * @return Returns a matrix with a row for each neuron and a column for each outgoing weight to the next layer
+	 * @return Returns a matrix with a column for each neuron in this layer and a row for each outgoing weight to the next layer
 	 */
 	virtual F2DArray ExpEdgesOut() const;
 

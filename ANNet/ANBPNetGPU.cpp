@@ -14,7 +14,8 @@
 namespace ANN {
 
 BPNetGPU::BPNetGPU() {
-
+	m_fTypeFlag 		= ANNetBP;
+	SetTransfFunction(&ANN::Functions::fcn_log);	// TODO not nice
 }
 
 BPNetGPU::~BPNetGPU() {
@@ -77,8 +78,12 @@ void BPNetGPU::PropagateFW() {
 	m_vBiasEdgeMatrices.clear();
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		m_vEdgeMatrices.push_back(pLayer->ExpEdgesOut() );
-		m_vBiasEdgeMatrices.push_back(pLayer->ExpBiasEdgesOut() );
+		if(!(pLayer->GetFlag() & ANLayerInput) ) {
+			m_vEdgeMatrices.push_back(pLayer->ExpEdgesIn() );
+			if(pLayer->GetBiasNeuron() != NULL) {
+				m_vBiasEdgeMatrices.push_back(pLayer->ExpBiasEdgesOut() );
+			}
+		}
 	}
 
 	/*
@@ -105,7 +110,9 @@ void BPNetGPU::PropagateBW() {
 	m_vEdgeMatrices.clear();
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		m_vEdgeMatrices.push_back(pLayer->ExpEdgesOut() );
+		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
+			m_vEdgeMatrices.push_back(pLayer->ExpEdgesOut() );
+		}
 	}
 
 	/*
@@ -127,22 +134,20 @@ std::vector<float> BPNetGPU::TrainFromData(const unsigned int &iCycles, const fl
 	std::vector<float> vRes;
 
 	/*
-	 * Not a big dealm, ..
+	 * Not a big deal, ..
 	 */
 	vRes = ANN::BPNet::TrainFromData(iCycles, fTolerance, bBreak, fProgress);
 
 	/*
 	 * .. but this (import new calculated edges), ..
-	 */
-	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
-		m_lLayers.at(i)->ImpEdgesOut(m_vEdgeMatrices.at(i) );
-	}
-
-	/*
 	 * .. and this (import momentums for all the edges)
 	 */
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
-		((ANN::BPLayer*)m_lLayers.at(i))->ImpMomentumsEdgesOut(m_vEdgeMatrices.at(i) );
+		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
+		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
+			pLayer->ImpEdgesOut(m_vEdgeMatrices.at(i) );
+			pLayer->ImpMomentumsEdgesOut(m_vEdgeMatrices.at(i) );
+		}
 	}
 
 	/*

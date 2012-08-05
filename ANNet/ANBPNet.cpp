@@ -28,7 +28,8 @@ bool smallestFunctor(AbsLayer *i, AbsLayer *j) {
 }
 
 BPNet::BPNet() {
-	m_fTypeFlag 	= ANNetBP;
+	m_fTypeFlag 		= ANNetBP;
+	SetTransfFunction(&ANN::Functions::fcn_log); 	// TODO not nice
 }
 
 BPNet::BPNet(ANN::BPNet *pNet) //: AbsNet(pNet)

@@ -19,7 +19,7 @@ if (QT4_FOUND)
 endif(QT4_FOUND)
 
 if(DOXYGEN_FOUND)
-  configure_file(Doxyfile.in Doxyfile @ONLY)
+  configure_file(Doxyfile Doxyfile @ONLY)
   add_custom_target(doc #ALL
     ${DOXYGEN_EXECUTABLE} Doxyfile
     WORKING_DIRECTORY ${ANNetGPU_CURRENT_BINARY_DIR}

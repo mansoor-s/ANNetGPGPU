@@ -25,7 +25,7 @@ Matrix::Matrix(unsigned int width, unsigned int height, thrust::host_vector<floa
 
 }
 
-thrust::device_vector<float> Matrix::GetCol(const unsigned int x) const {
+thrust::device_vector<float> Matrix::getCol(const unsigned int x) const {
 	assert(x < iWidth);
 	thrust::device_vector<float> dvTmp(iHeight);
 	for(unsigned int y = 0; y < iHeight; y++) {

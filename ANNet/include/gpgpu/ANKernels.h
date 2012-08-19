@@ -19,7 +19,7 @@
 #include <containers/ANTrainingSet.h>
 #include <thrust/device_vector.h>
 #include <gpgpu/ANMatrix.h>
-
+#include <math/ANFunctions.h>
 
 /*
  * BP kernels
@@ -34,15 +34,16 @@ hostBPPropagateFW(
 		const std::vector<ANN::Matrix> &vEdgeMatrices,
 		const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
 		const std::vector<float> &vInput,
-		float (*pf_Transfer)(const float &, const float &) );			// transfer function
+		const ANN::TransfFunction &);			// transfer function
 
 std::vector<ANN::Matrix>
 hostBPPropagateBW(
-		std::vector<ANN::Matrix> &vEdgeMatrices,
+		std::vector<ANN::Matrix> &vEdgeMatricesO,
+		std::vector<ANN::Matrix> &vEdgeMatricesI,
+		std::vector<std::vector<float> > &vErrorDeltas,
 		const std::vector<thrust::device_vector<float> > &vNeuronValues,
-		const std::vector<float> &vErrors,
-		const float &fLearningRate, 									// learning rate
-		float (*pf_DevTransfer)(const float &, const float &) ); 		// deviation of transfer function
+		const float &fLearningRate, 	// learning rate
+		const ANN::TransfFunction &); 		// deviation of transfer function
 
 /*
  * SOM kernels

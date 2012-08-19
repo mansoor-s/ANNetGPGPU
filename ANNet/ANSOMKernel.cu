@@ -99,8 +99,8 @@ unsigned int hostSOMFindBMNeuronID(
 		const thrust::device_vector<float> &InputVector) 
 {
 	unsigned int BMUID 		= 0;
-	unsigned int iWidth 	= SOMEdgeMatrix.GetW();
-	unsigned int iHeight 	= SOMEdgeMatrix.GetH();
+	unsigned int iWidth 	= SOMEdgeMatrix.getW();
+	unsigned int iHeight 	= SOMEdgeMatrix.getH();
 	
 	assert(iWidth > 0);
 	assert(iHeight > 0);
@@ -190,11 +190,11 @@ void hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
 		const float &fLearningRate 
 		) 
 {
-	unsigned int iWidth 	= SOMPositionMatrix.GetW();
-	unsigned int iHeight 	= SOMPositionMatrix.GetH();
+	unsigned int iWidth 	= SOMPositionMatrix.getW();
+	unsigned int iHeight 	= SOMPositionMatrix.getH();
 	
 	// TODO PUT this in the TRAINING function the increase performance
-	thrust::device_vector<float> dvBMUPos = SOMPositionMatrix.GetCol(BMUID);
+	thrust::device_vector<float> dvBMUPos = SOMPositionMatrix.getCol(BMUID);
 	thrust::device_vector<float> dvTmp(iWidth, 0.f); // temporary
 	thrust::device_vector<float> dvInfluence(iWidth, 0.f); 
 	thrust::device_vector<float> dvDist(iWidth, 0.f);
@@ -241,8 +241,8 @@ void hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
 	
 	// 3b. Use stencil to modify only neurons inside the radius
 	// Save result in the ANN::Matrix
-	iWidth 	= SOMEdgeMatrix.GetW();
-	iHeight = SOMEdgeMatrix.GetH();
+	iWidth 	= SOMEdgeMatrix.getW();
+	iHeight = SOMEdgeMatrix.getH();
 
 	for(unsigned int y = 0; y < iHeight; y++) {		// for each edge of the neuron   	
 		thrust::transform_if(

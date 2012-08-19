@@ -33,7 +33,7 @@ public:
 	Matrix(unsigned int width, unsigned int height, float val);
 	Matrix(unsigned int width, unsigned int height, thrust::host_vector<float> vec);
 
-	thrust::device_vector<float> GetCol(const unsigned int x) const;
+	thrust::device_vector<float> getCol(const unsigned int x) const;
 
 	iterator getRowBegin(const unsigned int &y) {
 		assert(y < iHeight);
@@ -53,10 +53,10 @@ public:
 		return begin()+y*iWidth+iWidth;
 	}
 
-	unsigned int GetW() const {
+	unsigned int getW() const {
 		return iWidth;
 	}
-	unsigned int GetH() const {
+	unsigned int getH() const {
 		return iHeight;
 	}
 };

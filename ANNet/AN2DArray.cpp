@@ -30,8 +30,8 @@ F2DArray::F2DArray() {
   * host_vector< host_vector<float> >: Contains all rows  of the matrix
   */
 F2DArray::F2DArray(const Matrix &mat) {
-	unsigned int iHeight 	= mat.GetH();
-	unsigned int iWidth 	= mat.GetW();
+	unsigned int iHeight 	= mat.getH();
+	unsigned int iWidth 	= mat.getW();
 
 	Alloc(iWidth, iHeight);
 

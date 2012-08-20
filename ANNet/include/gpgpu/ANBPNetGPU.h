@@ -28,6 +28,8 @@ private:
 	void RefreshErrorDeltas();
 	void RefreshEdges();
 
+	std::vector<float> GetCurrentInput();
+	void GetEdgeMatrices();
 	void GetErrorDeltas();
 
 public:

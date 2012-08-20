@@ -33,17 +33,15 @@ std::vector<thrust::device_vector<float> >
 hostBPPropagateFW(
 		const std::vector<ANN::Matrix> &vEdgeMatrices,
 		const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
-		const std::vector<float> &vInput,
-		const ANN::TransfFunction &);			// transfer function
+		const std::vector<float> &vInput);
 
 std::vector<ANN::Matrix>
 hostBPPropagateBW(
-		std::vector<ANN::Matrix> &vEdgeMatricesO,
+		const std::vector<ANN::Matrix> &vEdgeMatricesO,
 		std::vector<ANN::Matrix> &vEdgeMatricesI,
 		std::vector<std::vector<float> > &vErrorDeltas,
 		const std::vector<thrust::device_vector<float> > &vNeuronValues,
-		const float &fLearningRate, 	// learning rate
-		const ANN::TransfFunction &); 		// deviation of transfer function
+		const float &fLearningRate);
 
 /*
  * SOM kernels

@@ -150,15 +150,12 @@ F2DArray AbsLayer::ExpEdgesIn() const {
 	unsigned int iHeight = m_lNeurons.back()->GetConsI().size();
 	unsigned int iWidth = m_lNeurons.size();
 
-	std::cout<<"iHeight "<<iHeight<<std::endl;
-	std::cout<<"iWidth "<<iWidth<<std::endl;
-
 	assert(iWidth > 0 && iHeight > 0);
 
 	F2DArray vRes;
 	vRes.Alloc(iWidth, iHeight);
 
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
 		for(unsigned int x = 0; x < iWidth; x++) {
 			vRes[y][x] = m_lNeurons.at(x)->GetConI(y)->GetValue();
@@ -176,7 +173,7 @@ F2DArray AbsLayer::ExpEdgesOut() const {
 	F2DArray vRes;
 	vRes.Alloc(iWidth, iHeight);
 
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
 		for(unsigned int x = 0; x < iWidth; x++) {
 			vRes[y][x] = m_lNeurons.at(x)->GetConO(y)->GetValue();
@@ -192,7 +189,7 @@ void AbsLayer::ImpEdgesIn(const F2DArray &mat) {
 	assert(iHeight == mat.GetH() );
 	assert(iWidth == mat.GetW() );
 
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
 		for(unsigned int x = 0; x < iWidth; x++) {
 			m_lNeurons.at(x)->GetConI(y)->SetValue(mat[y][x]);
@@ -207,7 +204,7 @@ void AbsLayer::ImpEdgesOut(const F2DArray &mat) {
 	assert(iHeight == mat.GetH() );
 	assert(iWidth == mat.GetW() );
 
-	//#pragma omp parallel for
+	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
 		for(unsigned int x = 0; x < iWidth; x++) {
 			m_lNeurons.at(x)->GetConO(y)->SetValue(mat[y][x]);

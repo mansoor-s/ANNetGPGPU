@@ -4,13 +4,6 @@
 #include <math/ANFunctions.h>
 #include <gpgpu/ANKernels.h>
 
-// X <= Y
-struct equaly_functor {
-    __host__ __device__
-        float operator()(const float& y) const { 
-            return y;
-        }
-};
 
 // Y <- A * X + Y
 struct saxpy_functor {
@@ -19,21 +12,9 @@ struct saxpy_functor {
     saxpy_functor(float _a) : a(_a) {}
 
     __host__ __device__
-        float operator()(const float& x, const float& y) const { 
-            return a * x + y;
-        }
-};
-
-// Y <- A * X * Y
-struct saxy_functor {
-    const float a;
-
-    saxy_functor(float _a) : a(_a) {}
-
-    __host__ __device__
-        float operator()(const float& x, const float& y) const { 
-            return a * x * y;
-        }
+	float operator()(const float& x, const float& y) const {
+		return a * x + y;
+	}
 };
 
 // Y <- A * X * Y
@@ -43,26 +24,20 @@ struct sax_functor {
     sax_functor(float _a) : a(_a) {}
 
     __host__ __device__
-        float operator()(const float& x) const {
-            return a * x;
-        }
+	float operator()(const float& x) const {
+		return a * x;
+	}
 };
 
 // NEEDED: -arch=sm_20
-struct binaryTransferFcn_functor {
-	binaryTransferFcn_functor(const ANN::TransfFunction &function) {
-	}
-	
+struct logTransferFcn {
     __host__ __device__
 	float operator()(const float& fVal, const float& fBias) const { 
     	return ANN::fcn_log_normal(fVal, fBias);
 	}
 };
 
-struct unaryTransferFcn_functor {
-	unaryTransferFcn_functor(const ANN::TransfFunction &function) {
-	}
-	
+struct devLogTransferFcn {
     __host__ __device__
 	float operator()(const float& fVal) const { 
     	return ANN::fcn_log_derivate(fVal, 0);
@@ -89,14 +64,6 @@ hostBPCalcDelta(	const thrust::device_vector<float> &dvNeurOut,	// from forward 
     		thrust::minus<float>() ); 
 
     thrust::copy(dvDelta.begin(), dvDelta.end(), vRes.begin());
-
-    for(int i = 0; i < dvNeurOut.size(); i++) {
-    	std::cout<<"NEURON at "<<i<<": "<<dvNeurOut[i]<<std::endl;
-    }
-    for(int i = 0; i < vRes.size(); i++) {
-    	std::cout<<"DELTA at "<<i<<": "<<vRes[i]<<std::endl;
-    }
-
     return vRes;
 }
 
@@ -106,8 +73,7 @@ hostBPCalcDelta(	const thrust::device_vector<float> &dvNeurOut,	// from forward 
 std::vector<thrust::device_vector<float> >
 hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 					const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
-					const std::vector<float> &vInput, 
-					const ANN::TransfFunction &function)
+					const std::vector<float> &vInput)
 {
 	std::vector<thrust::device_vector<float> > vNeuronValues(1, vInput);
 
@@ -119,35 +85,22 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 	unsigned int iWidth 	= 0;
 	unsigned int iHeight 	= 0;
 
-	/*
-	for(int i = 0; i < hvInput.size(); i++) {
-		std::cout<<"i: "<<hvInput[i]<<std::endl;
-	}
-	for(unsigned int i = 0; i < vEdgeMatrices.size(); i++) {
-		for(unsigned int j = 0; j < vEdgeMatrices.at(i).GetW(); j++) {
-			for(unsigned int k = 0; k < vEdgeMatrices.at(i).GetH(); k++) {
-				std::cout<<"MAT: "<<vEdgeMatrices.at(i)[j*vEdgeMatrices.at(i).GetW()+k]<<std::endl;
-			}
-		}
-	}
-	*/
-
 	for(unsigned int i = 0; i < vEdgeMatrices.size(); i++) {	
 		iWidth 		= vEdgeMatrices.at(i).getW();							// iWidth == size of the next layer
 		iHeight 	= vEdgeMatrices.at(i).getH();							// iHeight == size of this layer
 		
-		// alloc memory
+		// Alloc memory
 		dvLayer 	= thrust::device_vector<float>(iWidth, 0.f); 			// iWidth == size of the next layer
 	
 		// Calculate the result of the current layer
 		for(unsigned int y = 0; y < iHeight; y++) {	
 		    // Y <- A * X + Y
 		    thrust::transform(
-		    		vEdgeMatrices.at(i).getRowBegin(y), 					// X
-		    		vEdgeMatrices.at(i).getRowEnd(y), 						// X
-		    		dvLayer.begin(), 										// Y
-		    		dvLayer.begin(), 										// Y
-		    		saxpy_functor(hvInput[y]) ); 							// A
+		    		vEdgeMatrices.at(i).getRowBegin(y),
+		    		vEdgeMatrices.at(i).getRowEnd(y),
+		    		dvLayer.begin(),
+		    		dvLayer.begin(),
+		    		saxpy_functor(hvInput[y]) );
 		}
 		
 		// TODO optimize that
@@ -164,27 +117,21 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 	    		dvLayer.end(),
 	    		dvBias.begin(),
 	    		dvLayer.begin(),
-	    		binaryTransferFcn_functor(function) );
+	    		logTransferFcn() );
 
 		// Now the input of the next layer will be the the previous one
 		hvInput = dvLayer;
 		vNeuronValues.push_back(dvLayer);
 	}
-
-	for(int i = 0; i < hvInput.size(); i++) {
-		std::cout<<"FW OUT: "<<hvInput[i]<<std::endl;
-	}
-
 	return vNeuronValues;
 }
 
 std::vector<ANN::Matrix>
-hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesO,
+hostBPPropagateBW(	const std::vector<ANN::Matrix> &vEdgeMatricesO,
 					std::vector<ANN::Matrix> &vEdgeMatricesI,
 					std::vector<std::vector<float> > &vErrors,
 					const std::vector<thrust::device_vector<float> > &vNeuronValues,
-					const float &fLearningRate, 						// learning rate
-					const ANN::TransfFunction &function) 				// deviation of transfer function
+					const float &fLearningRate)
 {
 	// Create matrix for momentums
 	std::vector<ANN::Matrix> vEdgeMomentums;
@@ -194,39 +141,31 @@ hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesO,
 	}
 	
 	thrust::device_vector	<float> 			dvErrors	(vErrors.back().begin(), vErrors.back().end());
-	thrust::device_vector	<float> 			hvErrors;
 	std::vector<thrust::device_vector<float> > 	vErrorDeltas(1, dvErrors);
 	
-	unsigned int iWidth 	= 0;
-	unsigned int iHeight 	= 0;
-	// calc it for the rest of the layers
-
-	for(int i = vEdgeMatricesO.size()-1; i >= 0; i--) {					// All layers except output!
-		iWidth 		= vEdgeMatricesO.at(i).getW();						// Nr. of neurons in next layer
-		iHeight 	= vEdgeMatricesO.at(i).getH();						// Nr. of neurons in this layer
+	for(int i = vEdgeMatricesO.size()-1; i >= 0; i--) {						// All layers except output!
+		unsigned int iWidth 	= vEdgeMatricesO.at(i).getW();							// Nr. of neurons in next layer
+		unsigned int iHeight 	= vEdgeMatricesO.at(i).getH();							// Nr. of neurons in this layer
 
 		std::vector<float> vCurrentErr = vErrors.at(i);
 		dvErrors 	= thrust::device_vector<float>(vCurrentErr.begin(), vCurrentErr.end() );
-		hvErrors 	= thrust::host_vector<float>(vErrorDeltas.front().begin(), vErrorDeltas.front().end() );
 		
-		if(hvErrors.size() == iHeight) {
+		if(vErrorDeltas.front().size() == iHeight) {
 			// Calculate the result of the current layer
 			for(unsigned int y = 0; y < iHeight; y++) {	
-				// Y <- A * X + Y
 				thrust::transform(
-				vEdgeMatricesO.at(i).getRowBegin(y), 					// X
-				vEdgeMatricesO.at(i).getRowEnd(y), 						// X
-				dvErrors.begin(), 										// Y
-				dvErrors.begin(), 										// Y
-				saxpy_functor(hvErrors[y]) ); 							// A
+				vEdgeMatricesO.at(i).getRowBegin(y),
+				vEdgeMatricesO.at(i).getRowEnd(y),
+				dvErrors.begin(),
+				dvErrors.begin(),
+				saxpy_functor(vErrorDeltas.front()[y]) );
 			}
-			
 			// Run values through transfer function
 			thrust::transform(
 					dvErrors.begin(),
 					dvErrors.end(),
 					dvErrors.begin(),
-					unaryTransferFcn_functor(function) );
+					devLogTransferFcn() );
 
 			// save in vector
 			thrust::copy(dvErrors.begin(), dvErrors.end(), vErrors.at(i).begin());
@@ -234,44 +173,33 @@ hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesO,
 		}
 	}
 	
-	// TODO GUESS THE PROBLEM IS HERE SOMEWHERE
-	for(int i = vEdgeMatricesI.size()-1; i >= 0 && vNeuronValues.size() > 0; i--) { // All layers except output!
-		iWidth 		= vEdgeMatricesI.at(i).getW();						// Nr. of neurons in next layer
-		iHeight 	= vEdgeMatricesI.at(i).getH();						// Nr. of neurons in this layer
+	// All layers except output ..
+	for(int i = vEdgeMatricesI.size()-1; i >= 0 && vNeuronValues.size() > 0; i--) {
+		unsigned int iWidth 	= vEdgeMatricesI.at(i).getW();							// Nr. of neurons in next layer
+		unsigned int iHeight 	= vEdgeMatricesI.at(i).getH();							// Nr. of neurons in this layer
 
-		//std::cout<<"iWidth: \t"<<iWidth<<std::endl;
-		//std::cout<<"iHeight: \t"<<iHeight<<std::endl;
-
-		// Calculate the result of the current layer
 		for(unsigned int x = 0; x < iHeight; x++) {
-			thrust::device_vector<float> dvResult(iWidth, 0.f);
 			thrust::device_vector<float> dvMomentums(iWidth, 0.f);
 
-			thrust::transform(
-					vErrorDeltas.at(i+1).begin(), 							// X
-					vErrorDeltas.at(i+1).end(), 							// X
-					dvMomentums.begin(), 									// Y
-					sax_functor(fLearningRate*vNeuronValues.at(i)[x]) ); 	// A
-
-			for(int k = 0; k < iWidth; k++) {
-				//std::cout<<"dvMomentums: "<<dvMomentums[k]<<std::endl;
-			}
-
-			for(int k = 0; k < iWidth; k++) {
-				//std::cout<<"vEdgeMatricesO: "<<vEdgeMatricesI.at(i).getRowBegin(x)[k]<<std::endl;
-			}
+			// standard back propagation algorithm
+				// fVal = pCurEdge->GetDestination(this)->GetErrorDelta() * m_fLearningRate * GetValue()
+			// TODO weight decay term
+				// - m_fWeightDecay * pCurEdge->GetValue()
+			// TODO momentum term
+				// + m_fMomentum * pCurEdge->GetMomentum();
 
 			thrust::transform(
-					dvMomentums.begin(), 									// Y
-					dvMomentums.end(), 										// Y
-					vEdgeMatricesI.at(i).getRowBegin(x), 					// X
-					vEdgeMatricesI.at(i).getRowBegin(x),//dvResult.begin(), 					// X
+					vErrorDeltas.at(i+1).begin(),
+					vErrorDeltas.at(i+1).end(),
+					dvMomentums.begin(),
+					sax_functor(fLearningRate*vNeuronValues.at(i)[x]) );
+
+			thrust::transform(
+					dvMomentums.begin(),
+					dvMomentums.end(),
+					vEdgeMatricesI.at(i).getRowBegin(x),
+					vEdgeMatricesI.at(i).getRowBegin(x),
 					thrust::plus<float>() );
-
-			for(int k = 0; k < iWidth; k++) {
-				//std::cout<<"Plus Result: "<<dvResult[k]<<std::endl;
-				//std::cout<<"Plus Result: "<<vEdgeMatricesI.at(i).getRowBegin(x)[k]<<std::endl;
-			}
 		}
 	}
 	

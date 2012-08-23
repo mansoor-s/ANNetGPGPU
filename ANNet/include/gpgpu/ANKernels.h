@@ -39,7 +39,7 @@ std::vector<ANN::Matrix>
 hostBPPropagateBW(
 		const std::vector<ANN::Matrix> &vEdgeMatricesO,
 		std::vector<ANN::Matrix> &vEdgeMatricesI,
-		std::vector<std::vector<float> > &vErrorDeltas,
+		std::vector<thrust::device_vector<float> > vErrorDeltas, //std::vector<std::vector<float> > &vErrorDeltas,
 		const std::vector<thrust::device_vector<float> > &vNeuronValues,
 		const float &fLearningRate);
 

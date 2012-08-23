@@ -23,9 +23,9 @@ private:
 	std::vector<ANN::Matrix> m_vEdgeMomentumMatrices;
 	std::vector<ANN::Matrix> m_vBiasEdgeMatrices;
 	std::vector<std::vector<float> > m_vOutDeltas;
+	std::vector<thrust::device_vector<float> > m_dvOutDeltas;
 
 	void RefreshNeurons();
-	void RefreshErrorDeltas();
 	void RefreshEdges();
 
 	std::vector<float> GetCurrentInput();
@@ -35,11 +35,11 @@ private:
 public:
 	BPNetGPU();
 	virtual ~BPNetGPU();
-/*
+
 	virtual float SetOutput(const std::vector<float> &vOutArray);
-	virtual float SetOutput(const std::vector<float> &outputArray, const unsigned int &layerID);
-	virtual float SetOutput(float *pOutArray, const unsigned int &size, const unsigned int &layerID);
-*/
+//	virtual float SetOutput(const std::vector<float> &outputArray, const unsigned int &layerID);
+//	virtual float SetOutput(float *pOutArray, const unsigned int &size, const unsigned int &layerID);
+
 	virtual void PropagateFW();
 	virtual void PropagateBW();
 	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress);

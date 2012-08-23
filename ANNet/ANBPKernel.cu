@@ -129,7 +129,7 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 std::vector<ANN::Matrix>
 hostBPPropagateBW(	const std::vector<ANN::Matrix> &vEdgeMatricesO,
 					std::vector<ANN::Matrix> &vEdgeMatricesI,
-					std::vector<std::vector<float> > &vErrors,
+					std::vector<thrust::device_vector<float> > vErrors,
 					const std::vector<thrust::device_vector<float> > &vNeuronValues,
 					const float &fLearningRate)
 {
@@ -140,36 +140,27 @@ hostBPPropagateBW(	const std::vector<ANN::Matrix> &vEdgeMatricesO,
 		vEdgeMomentums.push_back(matrix);
 	}
 	
-	thrust::device_vector	<float> 			dvErrors	(vErrors.back().begin(), vErrors.back().end());
-	std::vector<thrust::device_vector<float> > 	vErrorDeltas(1, dvErrors);
-	
 	for(int i = vEdgeMatricesO.size()-1; i >= 0; i--) {						// All layers except output!
 		unsigned int iWidth 	= vEdgeMatricesO.at(i).getW();							// Nr. of neurons in next layer
 		unsigned int iHeight 	= vEdgeMatricesO.at(i).getH();							// Nr. of neurons in this layer
-
-		std::vector<float> vCurrentErr = vErrors.at(i);
-		dvErrors 	= thrust::device_vector<float>(vCurrentErr.begin(), vCurrentErr.end() );
 		
-		if(vErrorDeltas.front().size() == iHeight) {
+		if(vErrors.front().size() == iHeight) {
 			// Calculate the result of the current layer
 			for(unsigned int y = 0; y < iHeight; y++) {	
 				thrust::transform(
 				vEdgeMatricesO.at(i).getRowBegin(y),
 				vEdgeMatricesO.at(i).getRowEnd(y),
-				dvErrors.begin(),
-				dvErrors.begin(),
-				saxpy_functor(vErrorDeltas.front()[y]) );
+				vErrors.at(i).begin(),
+				vErrors.at(i).begin(),
+				saxpy_functor(vErrors.at(i+1)[y]) ); // TODO
 			}
+
 			// Run values through transfer function
 			thrust::transform(
-					dvErrors.begin(),
-					dvErrors.end(),
-					dvErrors.begin(),
+					vErrors.at(i).begin(),
+					vErrors.at(i).end(),
+					vErrors.at(i).begin(),
 					devLogTransferFcn() );
-
-			// save in vector
-			thrust::copy(dvErrors.begin(), dvErrors.end(), vErrors.at(i).begin());
-			vErrorDeltas.insert(vErrorDeltas.begin(), dvErrors);
 		}
 	}
 	
@@ -189,8 +180,8 @@ hostBPPropagateBW(	const std::vector<ANN::Matrix> &vEdgeMatricesO,
 				// + m_fMomentum * pCurEdge->GetMomentum();
 
 			thrust::transform(
-					vErrorDeltas.at(i+1).begin(),
-					vErrorDeltas.at(i+1).end(),
+					vErrors.at(i+1).begin(),//vErrorDeltas.at(i+1).begin(),
+					vErrors.at(i+1).end(),//vErrorDeltas.at(i+1).end(),
 					dvMomentums.begin(),
 					sax_functor(fLearningRate*vNeuronValues.at(i)[x]) );
 

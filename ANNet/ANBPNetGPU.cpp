@@ -43,16 +43,27 @@ float BPNetGPU::SetOutput(const std::vector<float> &vOutArray) {
 }
 
 void BPNetGPU::GetErrorDeltas() {
-	m_vOutDeltas.clear();
 	m_dvOutDeltas.clear();
+
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		std::vector<float> vOutDelta;
 		for(unsigned int j = 0; j < m_lLayers.at(i)->GetNeurons().size(); j++) {
 			vOutDelta.push_back(m_lLayers.at(i)->GetNeuron(j)->GetErrorDelta() );
 		}
-		m_vOutDeltas.push_back(vOutDelta);
 		m_dvOutDeltas.push_back(thrust::device_vector<float>(vOutDelta.begin(), vOutDelta.end()) );
 	}
+}
+
+// time critical
+void BPNetGPU::UpdateErrorDeltas() {
+	std::vector<float> vOutDelta(m_pOPLayer->GetNeurons().size() );
+
+	#pragma omp parallel for
+	for(unsigned int j = 0; j < m_pOPLayer->GetNeurons().size(); j++) {
+		vOutDelta[j] = m_pOPLayer->GetNeuron(j)->GetErrorDelta();
+	}
+
+	m_dvOutDeltas.back() = thrust::device_vector<float>(vOutDelta.begin(), vOutDelta.end() );
 }
 
 void BPNetGPU::RefreshNeurons() {
@@ -63,6 +74,17 @@ void BPNetGPU::RefreshNeurons() {
 		for(unsigned int j = 0; j < m_lLayers.at(i)->GetNeurons().size(); j++) {
 			m_lLayers.at(i)->GetNeuron(j)->SetValue(vNeurVals.at(j) );
 		}
+	}
+}
+
+// time critical
+void BPNetGPU::UpdateNeurons() {
+	std::vector<float> vOutp(m_vNeuronVals.back().size() );
+	thrust::copy(m_vNeuronVals.back().begin(), m_vNeuronVals.back().end(), vOutp.begin());
+
+	#pragma omp parallel for
+	for(unsigned int j = 0; j < m_pOPLayer->GetNeurons().size(); j++) {
+		m_pOPLayer->GetNeuron(j)->SetValue(vOutp.at(j) );
 	}
 }
 
@@ -88,18 +110,14 @@ std::vector<float> BPNetGPU::GetCurrentInput() {
 
 void BPNetGPU::GetEdgeMatrices() {
 	// Copy edges in matrix
-	m_vEdgeMatricesO.clear();
 	m_vEdgeMatricesI.clear();
-	m_vBiasEdgeMatrices.clear();
+	m_vBiasEdges.clear();
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
-			m_vEdgeMatricesO.push_back(pLayer->ExpEdgesOut() );
-		}
 		if(!(pLayer->GetFlag() & ANLayerInput) ) {
 			m_vEdgeMatricesI.push_back(pLayer->ExpEdgesIn() );
 			if(pLayer->GetBiasNeuron() != NULL) {
-				m_vBiasEdgeMatrices.push_back(pLayer->ExpBiasEdgesOut() );
+				m_vBiasEdges.push_back(pLayer->ExpBiasEdgesOut() );
 			}
 		}
 	}
@@ -108,41 +126,39 @@ void BPNetGPU::GetEdgeMatrices() {
 void BPNetGPU::PropagateFW() {
 	m_vNeuronVals =	hostBPPropagateFW (
 		m_vEdgeMatricesI,				// const
-		m_vBiasEdgeMatrices,			// const
+		m_vBiasEdges,			// const
 		GetCurrentInput()				// const
 	);
 
-	/*
-	 * Write neurons back
-	 * TODO optimize, is very slow
-	 */
-	RefreshNeurons();
+	UpdateNeurons();
 }
 
 void BPNetGPU::PropagateBW() {
-	GetErrorDeltas();
+	UpdateErrorDeltas();
 
 	/*
 	 * Process
 	 */
-	m_vEdgeMomentumMatrices = hostBPPropagateBW	(
-		m_vEdgeMatricesO,				// -> changed due to training
+	hostBPPropagateBW	(
 		m_vEdgeMatricesI,
-		m_dvOutDeltas,//m_vOutDeltas,					// const
-		m_vNeuronVals,					// const
-		GetLearningRate()				// const
+		m_vMomentums,
+		m_dvOutDeltas,
+		m_vNeuronVals,
+		GetLearningRate(),
+		GetWeightDecay(),
+		GetMomentum()
 	);
 }
 
 std::vector<float> BPNetGPU::TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress) {
 	// Retrive weight matrices
 	GetEdgeMatrices();
-//	GetErrorDeltas();
+	GetErrorDeltas();
 	// Train the network and calc new weight matrices
 	std::vector<float> vRes = ANN::BPNet::TrainFromData(iCycles, fTolerance, bBreak, fProgress);
 	// Update the weights
 	RefreshEdges();
-	//RefreshNeurons();
+	RefreshNeurons();
 
 	// Return error deltas
 	return vRes;

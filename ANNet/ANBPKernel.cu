@@ -29,7 +29,6 @@ struct sax_functor {
 	}
 };
 
-// NEEDED: -arch=sm_20
 struct logTransferFcn {
     __host__ __device__
 	float operator()(const float& fVal, const float& fBias) const { 
@@ -44,9 +43,6 @@ struct devLogTransferFcn {
 	}
 };
 
-/*
- * THIS FUNCTION WORKS
- */
 std::vector<float>
 hostBPCalcDelta(	const thrust::device_vector<float> &dvNeurOut,	// from forward run
 					const std::vector<float> &vTrainOut ) 			// from training set
@@ -67,9 +63,6 @@ hostBPCalcDelta(	const thrust::device_vector<float> &dvNeurOut,	// from forward 
     return vRes;
 }
 
-/*
- * THIS FUNCTION WORKS AS WELL
- */
 std::vector<thrust::device_vector<float> >
 hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 					const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
@@ -103,7 +96,7 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 		    		saxpy_functor(hvInput[y]) );
 		}
 		
-		// TODO optimize that
+		// TODO Implement bias neurons
 		if(vBiasEdgeMatrices.size() > 0) {
 			dvBias = thrust::device_vector<float>(vBiasEdgeMatrices.at(i).getRowBegin(0), vBiasEdgeMatrices.at(i).getRowEnd(0));
 		}
@@ -126,42 +119,49 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 	return vNeuronValues;
 }
 
-std::vector<ANN::Matrix>
-hostBPPropagateBW(	const std::vector<ANN::Matrix> &vEdgeMatricesO,
-					std::vector<ANN::Matrix> &vEdgeMatricesI,
-					std::vector<thrust::device_vector<float> > vErrors,
+void
+hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesI,
+					std::vector<ANN::Matrix> &vMomentums,
+					std::vector<thrust::device_vector<float> > &vErrors,
 					const std::vector<thrust::device_vector<float> > &vNeuronValues,
-					const float &fLearningRate)
+					const float &fLearningRate,
+					const float &fWeightDecay,
+					const float &fMomentum)
 {
-	// Create matrix for momentums
-	std::vector<ANN::Matrix> vEdgeMomentums;
-	for(unsigned int i = 0; i < vEdgeMatricesI.size(); i++) {
-		ANN::Matrix matrix(vEdgeMatricesI.at(i).getW(), vEdgeMatricesI.at(i).getH(), 0.f);
-		vEdgeMomentums.push_back(matrix);
-	}
-	
-	for(int i = vEdgeMatricesO.size()-1; i >= 0; i--) {						// All layers except output!
-		unsigned int iWidth 	= vEdgeMatricesO.at(i).getW();							// Nr. of neurons in next layer
-		unsigned int iHeight 	= vEdgeMatricesO.at(i).getH();							// Nr. of neurons in this layer
-		
-		if(vErrors.front().size() == iHeight) {
-			// Calculate the result of the current layer
-			for(unsigned int y = 0; y < iHeight; y++) {	
-				thrust::transform(
-				vEdgeMatricesO.at(i).getRowBegin(y),
-				vEdgeMatricesO.at(i).getRowEnd(y),
-				vErrors.at(i).begin(),
-				vErrors.at(i).begin(),
-				saxpy_functor(vErrors.at(i+1)[y]) ); // TODO
-			}
+	for(int i = vEdgeMatricesI.size()-1; i >= 0; i--) {						// All layers except output!
+		unsigned int iWidth 	= vEdgeMatricesI.at(i).getW();				// Nr. of neurons in next layer
+		unsigned int iHeight 	= vEdgeMatricesI.at(i).getH();				// Nr. of neurons in this layer
 
-			// Run values through transfer function
+		// errors of this layer
+		assert(vErrors.at(i).size() == vNeuronValues.at(i).size());
+		thrust::device_vector<float> dvErrors(vErrors.at(i).size(), 0);
+		thrust::device_vector<float> dvNeurons(vNeuronValues.at(i).size(), 0);
+		thrust::device_vector<float> dvEdges(iWidth, 0);
+
+		// Calculate the result of the current layer
+		for(unsigned int y = 0; y < iHeight; y++) {
 			thrust::transform(
-					vErrors.at(i).begin(),
-					vErrors.at(i).end(),
-					vErrors.at(i).begin(),
-					devLogTransferFcn() );
+				vEdgeMatricesI.at(i).getRowBegin(y),
+				vEdgeMatricesI.at(i).getRowEnd(y),
+				vErrors.at(i+1).begin(),
+				dvEdges.begin(),
+				thrust::multiplies<float>() );
+
+			dvErrors[i] = thrust::reduce(dvEdges.begin(), dvEdges.end(), (float) 0, thrust::plus<float>());
 		}
+
+		thrust::transform(
+			vNeuronValues.at(i).begin(),
+			vNeuronValues.at(i).end(),
+			dvNeurons.begin(),
+			devLogTransferFcn() );
+
+		thrust::transform(
+			dvNeurons.begin(),
+			dvNeurons.end(),
+			dvErrors.begin(),
+			vErrors.at(i).begin(),
+			thrust::multiplies<float>() );
 	}
 	
 	// All layers except output ..
@@ -169,32 +169,70 @@ hostBPPropagateBW(	const std::vector<ANN::Matrix> &vEdgeMatricesO,
 		unsigned int iWidth 	= vEdgeMatricesI.at(i).getW();							// Nr. of neurons in next layer
 		unsigned int iHeight 	= vEdgeMatricesI.at(i).getH();							// Nr. of neurons in this layer
 
-		for(unsigned int x = 0; x < iHeight; x++) {
-			thrust::device_vector<float> dvMomentums(iWidth, 0.f);
+		/*
+		 * Quick standard implementation
+		 */
+		if(fWeightDecay == 0.f && fMomentum == 0.f) {
+			for(unsigned int y = 0; y < iHeight; y++) {
+				thrust::transform(
+					vErrors.at(i+1).begin(),
+					vErrors.at(i+1).end(),
+					vEdgeMatricesI.at(i).getRowBegin(y),
+					vEdgeMatricesI.at(i).getRowBegin(y),
+					saxpy_functor(fLearningRate*vNeuronValues.at(i)[y]) );
+			}
+			continue;
+		}
 
-			// standard back propagation algorithm
-				// fVal = pCurEdge->GetDestination(this)->GetErrorDelta() * m_fLearningRate * GetValue()
-			// TODO weight decay term
-				// - m_fWeightDecay * pCurEdge->GetValue()
-			// TODO momentum term
-				// + m_fMomentum * pCurEdge->GetMomentum();
+		/*
+		 * Slower but more complex one
+		 */
+		thrust::device_vector<float> dvMomentums(iWidth, 0.f);
+		ANN::Matrix matMomentums(iWidth, iHeight, 0);
+		if(!vMomentums.size()) {
+			vMomentums = std::vector<ANN::Matrix>(iHeight);
+		}
 
+		for(unsigned int y = 0; y < iHeight; y++) {
+			// standard term
 			thrust::transform(
-					vErrors.at(i+1).begin(),//vErrorDeltas.at(i+1).begin(),
-					vErrors.at(i+1).end(),//vErrorDeltas.at(i+1).end(),
+				vErrors.at(i+1).begin(),
+				vErrors.at(i+1).end(),
+				dvMomentums.begin(),
+				sax_functor(fLearningRate*vNeuronValues.at(i)[y]) );
+			// weight decay
+			if(fWeightDecay > 0.f) {
+				thrust::transform(
+					vEdgeMatricesI.at(i).getRowBegin(y),
+					vEdgeMatricesI.at(i).getRowEnd(y),
 					dvMomentums.begin(),
-					sax_functor(fLearningRate*vNeuronValues.at(i)[x]) );
+					dvMomentums.begin(),
+					saxpy_functor(-fWeightDecay) );
+			}
+			// momentum term
+			if(vMomentums.at(y).size() && fMomentum > 0.f) {
+				thrust::transform(
+					vMomentums.at(i).getRowBegin(y),
+					vMomentums.at(i).getRowEnd(y),
+					dvMomentums.begin(),
+					dvMomentums.begin(),
+					saxpy_functor(fMomentum) );
 
+				thrust::copy(dvMomentums.begin(), dvMomentums.end(), matMomentums.getRowBegin(y) );
+			}
+			// .. belongs to standard term and updates weights
 			thrust::transform(
-					dvMomentums.begin(),
-					dvMomentums.end(),
-					vEdgeMatricesI.at(i).getRowBegin(x),
-					vEdgeMatricesI.at(i).getRowBegin(x),
-					thrust::plus<float>() );
+				dvMomentums.begin(),
+				dvMomentums.end(),
+				vEdgeMatricesI.at(i).getRowBegin(y),
+				vEdgeMatricesI.at(i).getRowBegin(y),
+				thrust::plus<float>() );
+		}
+		// Safe momentums for the next run
+		if(fMomentum > 0.f) {
+			vMomentums[i] = matMomentums;
 		}
 	}
-	
-	return vEdgeMomentums;
 }
 
 #endif

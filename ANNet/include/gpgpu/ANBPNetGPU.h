@@ -17,20 +17,23 @@ namespace ANN {
 
 class BPNetGPU: public ANN::BPNet {
 private:
-	std::vector<thrust::device_vector<float> > m_vNeuronVals;
 	std::vector<ANN::Matrix> m_vEdgeMatricesI;
-	std::vector<ANN::Matrix> m_vEdgeMatricesO;
-	std::vector<ANN::Matrix> m_vEdgeMomentumMatrices;
-	std::vector<ANN::Matrix> m_vBiasEdgeMatrices;
-	std::vector<std::vector<float> > m_vOutDeltas;
+	std::vector<ANN::Matrix> m_vMomentums;
+	std::vector<ANN::Matrix> m_vBiasEdges;
+	std::vector<thrust::device_vector<float> > m_vNeuronVals;
 	std::vector<thrust::device_vector<float> > m_dvOutDeltas;
 
 	void RefreshNeurons();
+	void UpdateNeurons();		// only output layer (faster)
+
+
 	void RefreshEdges();
 
 	std::vector<float> GetCurrentInput();
 	void GetEdgeMatrices();
+
 	void GetErrorDeltas();
+	void UpdateErrorDeltas(); 	// only output layer (faster)
 
 public:
 	BPNetGPU();

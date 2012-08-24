@@ -35,13 +35,15 @@ hostBPPropagateFW(
 		const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
 		const std::vector<float> &vInput);
 
-std::vector<ANN::Matrix>
+void
 hostBPPropagateBW(
-		const std::vector<ANN::Matrix> &vEdgeMatricesO,
-		std::vector<ANN::Matrix> &vEdgeMatricesI,
-		std::vector<thrust::device_vector<float> > vErrorDeltas, //std::vector<std::vector<float> > &vErrorDeltas,
+		std::vector<ANN::Matrix> &dvEdgeMatricesI,
+		std::vector<ANN::Matrix> &dvMomentums,
+		std::vector<thrust::device_vector<float> > &vErrorDeltas,
 		const std::vector<thrust::device_vector<float> > &vNeuronValues,
-		const float &fLearningRate);
+		const float &fLearningRate,
+		const float &fWeightDecay,
+		const float &fMomentum);
 
 /*
  * SOM kernels

@@ -209,7 +209,7 @@ BPNet *BPNet::GetSubNet(const unsigned int &iStartID, const unsigned int &iStopI
 void BPNet::PropagateFW() {
 	for(unsigned int i = 1; i < m_lLayers.size(); i++) {
 		BPLayer *curLayer = ( (BPLayer*)GetLayer(i) );
-		//#pragma omp parallel for
+		#pragma omp parallel for
 		for(int j = 0; j < static_cast<int>( curLayer->GetNeurons().size() ); j++) {
 			curLayer->GetNeuron(j)->CalcValue();
 		}

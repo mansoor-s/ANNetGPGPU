@@ -146,31 +146,36 @@ public:
 	friend void SetEdgesToValue(AbsLayer *pSrcLayer, AbsLayer *pDestLayer, const float &fVal, const bool &bAdaptState = false);
 
 	/** \brief:
-	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
+	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1
+	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 2
+	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 3
+	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron i
 	 * ..
-	 * @return Returns a matrix with a column for each neuron in this layer and a row for each incoming weight from the previous layer
+	 * @return Returns a matrix: width=size_of_this_layer; height=size_previous_layer
 	 */
 	virtual F2DArray ExpEdgesIn() const;
+	virtual void ImpEdgesIn(const F2DArray &);
+
 	/** \brief:
-	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON[iStart]		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1
+	 * NEURON[iStart+1]		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 2
+	 * NEURON[..]	 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 3
+	 * NEURON[iStop] 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron i
 	 * ..
-	 * @return Returns a matrix with a column for each neuron in this layer and a row for each outgoing weight to the next layer
+	 * @return Returns a matrix: width=size_of_this_layer; height=iStop-iStart
+	 */
+	virtual F2DArray ExpEdgesIn(int iStart, int iStop) const;
+	virtual void ImpEdgesIn(const F2DArray &, int iStart, int iStop);
+
+	/** \brief:
+	 * NEURON1	 			: edge1, edge1, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON2 				: edge2, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON3	 			: edge3, edge3, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON[i < iHeight] 	: edge4, edge4, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * ..
+	 * @return Returns a matrix: width=size_this_layer; height=size_of_next_layer
 	 */
 	virtual F2DArray ExpEdgesOut() const;
-
-	/**
-	 * TODO
-	 */
-	virtual void ImpEdgesIn(const F2DArray &);
-	/**
-	 * TODO
-	 */
 	virtual void ImpEdgesOut(const F2DArray &);
 
 	/**

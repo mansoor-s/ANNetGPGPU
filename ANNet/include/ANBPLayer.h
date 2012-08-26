@@ -173,23 +173,13 @@ public:
 	friend std::ostream& operator << (std::ostream &os, BPLayer *op);
 
 	/** \brief:
-	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
-	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1, 2, n
+	 * Bias neuron 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * ..
-	 * @return Returns a vector like matrix with a row for each neuron and a column for each incoming weight from the previous layer
-	 */
-	virtual F2DArray ExpBiasEdgesIn() const;
-	/** \brief:
-	 * NEURON1	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON2 				: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON3	 			: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * ..
-	 * @return Returns a vector like matrix with a row for each neuron and a column for each outgoing weight to the next layer
+	 * @return Returns a vector like matrix with one row for each outgoing weight to the next layer
 	 */
 	virtual F2DArray ExpBiasEdgesOut() const;
+
+	virtual void ImpBiasEdgesOut(const F2DArray &) const;
 };
 
 }

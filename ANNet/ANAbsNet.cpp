@@ -457,7 +457,6 @@ void AbsNet::ImpFromFS(std::string path) {
  * OSTREAM
  */
 namespace ANN {
-
 	std::ostream& operator << (std::ostream &os, AbsNet &op) {
 		assert( op.GetOPLayer() != NULL );
 
@@ -482,31 +481,4 @@ namespace ANN {
 		}
 		return os;     // Ref. auf Stream
 	}
-
-	std::ostream& operator << (std::ostream &os, AbsNet *op) {
-		assert( op->GetOPLayer() != NULL );
-
-		/* if training data was set give out all samples */
-		if( op->GetTrainingSet() != NULL ) {
-			for( unsigned int i = 0; i < op->GetTrainingSet()->GetNrElements(); i++ ) {
-				std::cout << "Output: "<< i << std::endl;
-				op->SetInput( op->GetTrainingSet()->GetInput(i) );
-				op->PropagateFW();
-
-				for(unsigned int j = 0; j < op->GetOPLayer()->GetNeurons().size(); j++) {
-					AbsNeuron *pCurNeuron = op->GetOPLayer()->GetNeuron(j);
-					std::cout << pCurNeuron;
-				}
-				std::cout << std::endl;
-			}
-		}
-		else {
-			for(unsigned int i = 0; i < op->GetOPLayer()->GetNeurons().size(); i++) {
-				AbsNeuron *pCurNeuron = op->GetOPLayer()->GetNeuron(i);
-				std::cout << pCurNeuron;
-			}
-		}
-		return os;     // Ref. auf Stream
-	}
-
 }

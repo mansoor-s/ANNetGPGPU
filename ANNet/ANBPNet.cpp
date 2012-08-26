@@ -95,9 +95,12 @@ void BPNet::CreateNet(const ConTable &Net) {
 				pDstLayer 	= ( (BPLayer*)GetLayer(iDstLayerID) );
 				pSrcLayer 	= ( (BPLayer*)GetLayer(iSrcLayerID) );
 				pSrcNeur 	= ( (BPLayer*)pSrcLayer)->GetBiasNeuron();
-
 				pDstNeur 	= pDstLayer->GetNeuron(iDstNeurID);
-				Connect(pSrcNeur, pDstNeur, fEdgeValue, 0.f, true);
+
+				ANN:Edge *pEdge = new ANN::Edge(pSrcNeur, pDstNeur, fEdgeValue);
+				pSrcNeur->AddConO(pEdge);
+				pDstNeur->AddConI(pEdge);
+				pDstNeur->SetBiasEdge(pEdge);
 			}
 		}
 	}
@@ -120,9 +123,6 @@ void BPNet::AddLayer(BPLayer *pLayer) {
  * TODO better use of copy constructors
  */
 BPNet *BPNet::GetSubNet(const unsigned int &iStartID, const unsigned int &iStopID) {
-	std::cout<<"start: "<<iStartID<<std::endl;
-	std::cout<<"stop: "<<GetLayers().size()<<std::endl;
-
 	assert( iStopID < GetLayers().size() );
 	assert( iStartID >= 0 );
 
@@ -209,7 +209,7 @@ BPNet *BPNet::GetSubNet(const unsigned int &iStartID, const unsigned int &iStopI
 void BPNet::PropagateFW() {
 	for(unsigned int i = 1; i < m_lLayers.size(); i++) {
 		BPLayer *curLayer = ( (BPLayer*)GetLayer(i) );
-		#pragma omp parallel for
+		//#pragma omp parallel for
 		for(int j = 0; j < static_cast<int>( curLayer->GetNeurons().size() ); j++) {
 			curLayer->GetNeuron(j)->CalcValue();
 		}

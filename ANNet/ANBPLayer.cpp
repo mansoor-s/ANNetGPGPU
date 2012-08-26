@@ -219,31 +219,31 @@ int BPLayer::ImpFromFS(BZFILE* bz2in, int iBZ2Error, ConTable &Table) {
 	return iLayerID;
 }
 
-F2DArray BPLayer::ExpBiasEdgesIn() const {
-	unsigned int iWidth 	= m_lNeurons.size();
+F2DArray BPLayer::ExpBiasEdgesOut() const {
+	unsigned int iHeight 	= 1;
+	unsigned int iWidth 	= m_pBiasNeuron->GetConsO().size();
+
 	assert(iWidth > 0);
 
 	F2DArray vRes;
-	vRes.Alloc(iWidth, 1);
+	vRes.Alloc(iWidth, iHeight);
 
-	for(unsigned int x = 0; x < iWidth; x++) {
-		vRes[0][x] = m_lNeurons.at(x)->GetBiasEdge()->GetValue();
+	for(int x = 0; x < static_cast<int>(iWidth); x++) {
+		vRes[0][x] = m_pBiasNeuron->GetConO(x)->GetValue();
 	}
 	return vRes;
 }
 
-F2DArray BPLayer::ExpBiasEdgesOut() const {
-	unsigned int iHeight 	= m_pBiasNeuron->GetConsO().size();
+void BPLayer::ImpBiasEdgesOut(const F2DArray &mat) const {
+	unsigned int iWidth 	= m_pBiasNeuron->GetConsO().size();
 
-	assert(iHeight > 0);
+	assert(iWidth == mat.getW() );
 
-	F2DArray vRes;
-	vRes.Alloc(1, iHeight);
-
-	for(int y = 0; y < static_cast<int>(iHeight); y++) {
-		vRes[y][0] = m_pBiasNeuron->GetConO(y)->GetValue();
+	for(int x = 0; x < static_cast<int>(iWidth); x++) {
+		//std::cout<<"mat: "<<mat[0][x]<<std::endl;
+		m_pBiasNeuron->GetConO(x)->SetValue(mat[0][x]);
+		//std::cout<<"val: "<<m_pBiasNeuron->GetConO(x)->GetValue()<<std::endl;
 	}
-	return vRes;
 }
 
 void BPLayer::ImpMomentumsEdgesIn(const F2DArray &mat) {

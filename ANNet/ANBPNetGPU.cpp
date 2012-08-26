@@ -5,7 +5,7 @@
  *      Author: Daniel <dgrat> Frenzel
  */
 
-#include <ANAbsNeuron.h>
+#include <ANEdge.h>
 #include <ANBPNet.h>
 #include <ANBPNeuron.h>
 #include <ANBPLayer.h>
@@ -89,12 +89,23 @@ void BPNetGPU::UpdateNeurons() {
 }
 
 void BPNetGPU::RefreshEdges() {
-	// Use m_vEdgeMatricesI for import,
-	// because only that one got changed in "PropagateBW()"
+	// regular edges
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
 		if(!(pLayer->GetFlag() & ANLayerInput) ) {
-			pLayer->ImpEdgesIn(m_vEdgeMatricesI.at(i-1) );
+			ANN::AbsLayer *pPrevLayer = m_lLayers.at(i-1);
+			int iStop = pPrevLayer->GetNeurons().size();
+			pLayer->ImpEdgesIn(m_vEdgeMatricesI.at(i-1), 0, iStop);
+		}
+	}
+
+	// bias edges
+	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
+		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
+			if(pLayer->GetBiasNeuron() != NULL) {
+				pLayer->ImpBiasEdgesOut(m_vBiasEdges[i]);
+			}
 		}
 	}
 }
@@ -109,15 +120,25 @@ std::vector<float> BPNetGPU::GetCurrentInput() {
 }
 
 void BPNetGPU::GetEdgeMatrices() {
-	// Copy edges in matrix
+	// regular edges
 	m_vEdgeMatricesI.clear();
-	m_vBiasEdges.clear();
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
 		if(!(pLayer->GetFlag() & ANLayerInput) ) {
-			m_vEdgeMatricesI.push_back(pLayer->ExpEdgesIn() );
+			ANN::BPLayer *pPrevLayer = (ANN::BPLayer *)m_lLayers.at(i-1);
+			int iStop = pPrevLayer->GetNeurons().size();
+			m_vEdgeMatricesI.push_back(pLayer->ExpEdgesIn(0, iStop) );
+		}
+	}
+
+	// bias edges
+	m_vBiasEdges.clear();
+	m_vBiasEdges = std::vector<ANN::Matrix>(m_lLayers.size());
+	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
+		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
+		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
 			if(pLayer->GetBiasNeuron() != NULL) {
-				m_vBiasEdges.push_back(pLayer->ExpBiasEdgesOut() );
+				m_vBiasEdges[i] = pLayer->ExpBiasEdgesOut();
 			}
 		}
 	}
@@ -135,12 +156,24 @@ void BPNetGPU::PropagateFW() {
 
 void BPNetGPU::PropagateBW() {
 	UpdateErrorDeltas();
-
 	/*
-	 * Process
+	 * Process regular edges
 	 */
 	hostBPPropagateBW	(
 		m_vEdgeMatricesI,
+		m_vMomentums,
+		m_dvOutDeltas,
+		m_vNeuronVals,
+		GetLearningRate(),
+		GetWeightDecay(),
+		GetMomentum()
+	);
+
+	/*
+	 * Process bias edges
+	 */
+	hostBPPropagateBW	(
+		m_vBiasEdges,
 		m_vMomentums,
 		m_dvOutDeltas,
 		m_vNeuronVals,
@@ -155,7 +188,8 @@ std::vector<float> BPNetGPU::TrainFromData(const unsigned int &iCycles, const fl
 	GetEdgeMatrices();
 	GetErrorDeltas();
 	// Train the network and calc new weight matrices
-	std::vector<float> vRes = ANN::BPNet::TrainFromData(iCycles, fTolerance, bBreak, fProgress);
+	std::vector<float> vRes;
+	vRes = ANN::BPNet::TrainFromData(iCycles, fTolerance, bBreak, fProgress);
 	// Update the weights
 	RefreshEdges();
 	RefreshNeurons();

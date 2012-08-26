@@ -48,15 +48,15 @@ void BPNeuron::CalcValue() {
 	if(GetConsI().size() == 0)
 		return;
 
-	// bias neuron
+	// bias neuron/term
 	float fBias = 0.f;
 	SetValue( 0.f );
 	if(GetBiasEdge() ) {
 		fBias = GetBiasEdge()->GetValue();
-		SetValue(fBias);
+		SetValue(-1.f*fBias);
 	}
 
-	// sum from product of all incoming neurons with their weights
+	// sum from product of all incoming neurons with their weights (including bias neurons)
 	AbsNeuron *from;
 	for(unsigned int i = 0; i < GetConsI().size(); i++) {
 		from = GetConI(i)->GetDestination(this);

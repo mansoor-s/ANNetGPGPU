@@ -59,6 +59,16 @@ public:
 	unsigned int getH() const {
 		return iHeight;
 	}
+
+	Matrix getInverse() {
+		Matrix mat(iHeight, iWidth, 0);
+		for(unsigned int y = 0; y < iWidth; y++) {
+			mat.getRowBegin(y);
+			thrust::device_vector<float> col = getCol(y);
+			thrust::copy(col.begin(), col.end(), mat.getRowBegin(y) );
+		}
+		return mat;
+	}
 };
 
 }

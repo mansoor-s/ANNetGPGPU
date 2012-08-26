@@ -147,8 +147,8 @@ void SetEdgesToValue(AbsLayer *pSrcLayer, AbsLayer *pDestLayer, const float &fVa
 }
 
 F2DArray AbsLayer::ExpEdgesIn() const {
-	unsigned int iHeight = m_lNeurons.back()->GetConsI().size();
-	unsigned int iWidth = m_lNeurons.size();
+	unsigned int iHeight 	= m_lNeurons.front()->GetConsI().size();
+	unsigned int iWidth 	= m_lNeurons.size();
 
 	assert(iWidth > 0 && iHeight > 0);
 
@@ -157,6 +157,23 @@ F2DArray AbsLayer::ExpEdgesIn() const {
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
+		for(unsigned int x = 0; x < iWidth; x++) {
+			vRes[y][x] = m_lNeurons.at(x)->GetConI(y)->GetValue();
+		}
+	}
+	return vRes;
+}
+
+F2DArray AbsLayer::ExpEdgesIn(int iStart, int iStop) const {
+	unsigned int iWidth 	= m_lNeurons.size();
+
+	assert(iWidth > 0 && iStop-iStart > 0);
+
+	F2DArray vRes;
+	vRes.Alloc(iWidth, iStop-iStart);
+
+	#pragma omp parallel for
+	for(int y = iStart; y < static_cast<int>(iStop); y++) {
 		for(unsigned int x = 0; x < iWidth; x++) {
 			vRes[y][x] = m_lNeurons.at(x)->GetConI(y)->GetValue();
 		}
@@ -183,7 +200,7 @@ F2DArray AbsLayer::ExpEdgesOut() const {
 }
 
 void AbsLayer::ImpEdgesIn(const F2DArray &mat) {
-	unsigned int iHeight 	= m_lNeurons.back()->GetConsI().size();
+	unsigned int iHeight 	= m_lNeurons.front()->GetConsI().size();
 	unsigned int iWidth 	= m_lNeurons.size();
 
 	assert(iHeight == mat.GetH() );
@@ -191,6 +208,20 @@ void AbsLayer::ImpEdgesIn(const F2DArray &mat) {
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
+		for(unsigned int x = 0; x < iWidth; x++) {
+			m_lNeurons.at(x)->GetConI(y)->SetValue(mat[y][x]);
+		}
+	}
+}
+
+void AbsLayer::ImpEdgesIn(const F2DArray &mat, int iStart, int iStop) {
+	unsigned int iWidth 	= m_lNeurons.size();
+
+	assert(iStop-iStart == mat.GetH() );
+	assert(iWidth == mat.GetW() );
+
+	#pragma omp parallel for
+	for(int y = iStart; y < static_cast<int>(iStop); y++) {
 		for(unsigned int x = 0; x < iWidth; x++) {
 			m_lNeurons.at(x)->GetConI(y)->SetValue(mat[y][x]);
 		}

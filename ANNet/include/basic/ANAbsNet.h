@@ -263,10 +263,6 @@ public:
 	 * standard output of the net. Only usable if input/output layer was already set.
 	 */
 	friend std::ostream& operator << (std::ostream &os, AbsNet &op);
-	/**
-	 * standard output of the net. Only usable if input/output layer was already set.
-	 */
-	friend std::ostream& operator << (std::ostream &os, AbsNet *op);
 };
 
 }

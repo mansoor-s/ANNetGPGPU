@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
 
   std::vector<float> errors;
   net.SetLearningRate(0.2);
-  net.SetMomentum(0.9);
+  net.SetMomentum(0);
   net.SetWeightDecay(0);
   net.SetTrainingSet(input);
 

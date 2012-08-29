@@ -25,25 +25,24 @@
  * BP kernels
  */
 std::vector<float>
-hostBPCalcDelta(
-		const thrust::device_vector<float> &vNeurOut,
+hostBPCalcDelta(const thrust::device_vector<float> &vNeurOut,
 		const std::vector<float> &vTrainOut );
 
 std::vector<thrust::device_vector<float> >
-hostBPPropagateFW(
-		const std::vector<ANN::Matrix> &vEdgeMatrices,
+hostBPPropagateFW(const std::vector<ANN::Matrix> &vEdgeMatrices,
 		const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
-		const std::vector<float> &vInput);
+		const std::vector<float> &vInput,
+		const ANN::TransfFunction &function);
 
 void
-hostBPPropagateBW(
-		std::vector<ANN::Matrix> &dvEdgeMatricesI,
+hostBPPropagateBW(std::vector<ANN::Matrix> &dvEdgeMatricesI,
 		std::vector<ANN::Matrix> &dvMomentums,
 		std::vector<thrust::device_vector<float> > &vErrorDeltas,
 		const std::vector<thrust::device_vector<float> > &vNeuronValues,
 		const float &fLearningRate,
 		const float &fWeightDecay,
-		const float &fMomentum);
+		const float &fMomentum,
+		const ANN::TransfFunction &function);
 
 /*
  * SOM kernels
@@ -54,14 +53,12 @@ float hostGetMin(const thrust::device_vector<float>& vec, unsigned int &ID);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 unsigned int
-hostSOMFindBMNeuronID(
-		const ANN::Matrix &SOMEdgeMatrix,
+hostSOMFindBMNeuronID(const ANN::Matrix &SOMEdgeMatrix,
 		const thrust::device_vector<float> &InputVector );
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-hostSOMPropagateBW(
-		ANN::Matrix &SOMEdgeMatrix,
+hostSOMPropagateBW(ANN::Matrix &SOMEdgeMatrix,
 		const ANN::Matrix &SOMPositionMatrix,
 		const thrust::device_vector<float> &dvInputVector,
 		const unsigned int BMUID,
@@ -69,8 +66,7 @@ hostSOMPropagateBW(
 		const float &fLearningRate );
 
 void
-hostSOMTraining(
-		ANN::Matrix &SOMEdgeMatrix,
+hostSOMTraining(ANN::Matrix &SOMEdgeMatrix,
 		const ANN::Matrix &SOMPositionMatrix,
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,

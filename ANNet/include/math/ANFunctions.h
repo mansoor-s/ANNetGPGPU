@@ -30,21 +30,33 @@ namespace ANN {
  * Transfer functions for backpropagation networks
  */
 //////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_tanh_normal (const float& in, const float& theta) {
-		return (tanh (in - theta));
+	return (tanh (in - theta));
 }
 
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_tanh_derivate (const float& in, const float& theta) {
 	return (1.f - pow (tanh (in - theta), 2.f));
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_log_normal (const float& in, const float& theta) {
 	return (1.f / (1.f + exp (theta - in)));
 }
 
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_log_derivate (const float& in, const float& theta) {
 	float e_val;
@@ -52,42 +64,127 @@ fcn_log_derivate (const float& in, const float& theta) {
 	return (e_val / pow (e_val + 1.f, 2.f));
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_linear_normal (const float& in, const float& theta) {
 	return (in - theta);
 }
 
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_linear_derivate (const float& in, const float& theta) {
 	return (1.f);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_binary_normal (const float& in, const float& theta) {
-	if (in >= theta)
+	if (in >= theta) {
 		return (1.f);
+	}
 	return (-1.f);
 }
 
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_binary_derivate (const float& in, const float& theta) {
 	return (1.f);
 }
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	struct tanTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal, const float& fBias) const {
+			return ANN::fcn_tanh_normal(fVal, fBias);
+		}
+	};
+
+	struct devTanTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal) const {
+			return ANN::fcn_tanh_derivate(fVal, 0);
+		}
+	};
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+	struct binTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal, const float& fBias) const {
+			return ANN::fcn_binary_normal(fVal, fBias);
+		}
+	};
+
+	struct devBinTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal) const {
+			return ANN::fcn_binary_derivate(fVal, 0);
+		}
+	};
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+	struct linTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal, const float& fBias) const {
+			return ANN::fcn_linear_normal(fVal, fBias);
+		}
+	};
+
+	struct devLinTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal) const {
+			return ANN::fcn_linear_derivate(fVal, 0);
+		}
+	};
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+	struct logTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal, const float& fBias) const {
+			return ANN::fcn_log_normal(fVal, fBias);
+		}
+	};
+
+	struct devLogTransferFcn {
+		__host__ __device__
+		float operator()(const float& fVal) const {
+			return ANN::fcn_log_derivate(fVal, 0);
+		}
+	};
+#endif
+
 //////////////////////////////////////////////////////////////////////////////////////////////
 /**
  * Distance functions for self organizing maps
  */
 //////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_gaussian_bell (const float& dist, const float& sigmaT) {
 	return exp(-pow(dist, 2.f)/(2.f*pow(sigmaT, 2.f)));
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_mexican_hat (const float& dist, const float& sigmaT) {
 	return (2.f/sqrt(3.f) * pow(M_PI, -0.25f) ) * (1.f - pow(dist, 2.f)) * fcn_gaussian_bell(dist, sigmaT);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
 inline static float
 fcn_decay (const float& sigma0, const float& T, const float& lambda) {
 	return sigma0*exp(-T/lambda);

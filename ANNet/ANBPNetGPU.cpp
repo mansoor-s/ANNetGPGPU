@@ -17,11 +17,17 @@ namespace ANN {
 
 BPNetGPU::BPNetGPU() {
 	m_fTypeFlag 		= ANNetBP;
-	SetTransfFunction(&ANN::Functions::fcn_log);	// TODO not nice
+	SetTransfFunction(&ANN::Functions::fcn_log);
 }
 
 BPNetGPU::~BPNetGPU() {
-	// TODO Auto-generated destructor stub
+}
+
+void BPNetGPU::CreateNet(const ConTable &Net) {
+	// called when loading a new net from fs
+	BPNet::CreateNet(Net);
+	// export network and make it ready for gpu calculations
+	GetEdgeMatrices();
 }
 
 float BPNetGPU::SetOutput(const std::vector<float> &vOutArray) {
@@ -35,7 +41,6 @@ float BPNetGPU::SetOutput(const std::vector<float> &vOutArray) {
 	float fError = 0.f;
 	for(int i = 0; i < vOutDelta.size(); i++) {
 		fError += pow(vOutDelta[i], 2) / 2.f;
-		// TODO very slow
 		m_pOPLayer->GetNeuron(i)->SetErrorDelta(vOutDelta[i]);
 	}
 
@@ -59,7 +64,7 @@ void BPNetGPU::UpdateErrorDeltas() {
 	std::vector<float> vOutDelta(m_pOPLayer->GetNeurons().size() );
 
 	#pragma omp parallel for
-	for(unsigned int j = 0; j < m_pOPLayer->GetNeurons().size(); j++) {
+	for(int j = 0; j < static_cast<int>(m_pOPLayer->GetNeurons().size() ); j++) {
 		vOutDelta[j] = m_pOPLayer->GetNeuron(j)->GetErrorDelta();
 	}
 
@@ -83,7 +88,7 @@ void BPNetGPU::UpdateNeurons() {
 	thrust::copy(m_vNeuronVals.back().begin(), m_vNeuronVals.back().end(), vOutp.begin());
 
 	#pragma omp parallel for
-	for(unsigned int j = 0; j < m_pOPLayer->GetNeurons().size(); j++) {
+	for(int j = 0; j < static_cast<int>(m_pOPLayer->GetNeurons().size() ); j++) {
 		m_pOPLayer->GetNeuron(j)->SetValue(vOutp.at(j) );
 	}
 }
@@ -146,9 +151,10 @@ void BPNetGPU::GetEdgeMatrices() {
 
 void BPNetGPU::PropagateFW() {
 	m_vNeuronVals =	hostBPPropagateFW (
-		m_vEdgeMatricesI,				// const
-		m_vBiasEdges,			// const
-		GetCurrentInput()				// const
+		m_vEdgeMatricesI,
+		m_vBiasEdges,
+		GetCurrentInput(),
+		*GetTransfFunction()
 	);
 
 	UpdateNeurons();
@@ -166,7 +172,8 @@ void BPNetGPU::PropagateBW() {
 		m_vNeuronVals,
 		GetLearningRate(),
 		GetWeightDecay(),
-		GetMomentum()
+		GetMomentum(),
+		*GetTransfFunction()
 	);
 
 	/*
@@ -179,7 +186,8 @@ void BPNetGPU::PropagateBW() {
 		m_vNeuronVals,
 		GetLearningRate(),
 		GetWeightDecay(),
-		GetMomentum()
+		GetMomentum(),
+		*GetTransfFunction()
 	);
 }
 

@@ -11,7 +11,7 @@
 #include <ANBPNet.h>
 #include <gpgpu/ANKernels.h>
 #include <gpgpu/ANMatrix.h>
-
+#include <math/ANFunctions.h>
 
 namespace ANN {
 
@@ -23,25 +23,25 @@ private:
 	std::vector<thrust::device_vector<float> > m_vNeuronVals;
 	std::vector<thrust::device_vector<float> > m_dvOutDeltas;
 
-	void RefreshNeurons();
-	void UpdateNeurons();		// only output layer (faster)
-
+public:
+	void GetEdgeMatrices();
+	void GetErrorDeltas();
 
 	void RefreshEdges();
+	void RefreshNeurons();
+
+	void UpdateNeurons();		// only output layer (faster)
+	void UpdateErrorDeltas(); 	// only output layer (faster)
 
 	std::vector<float> GetCurrentInput();
-	void GetEdgeMatrices();
-
-	void GetErrorDeltas();
-	void UpdateErrorDeltas(); 	// only output layer (faster)
 
 public:
 	BPNetGPU();
 	virtual ~BPNetGPU();
 
+	virtual void CreateNet(const ConTable &Net);
+
 	virtual float SetOutput(const std::vector<float> &vOutArray);
-//	virtual float SetOutput(const std::vector<float> &outputArray, const unsigned int &layerID);
-//	virtual float SetOutput(float *pOutArray, const unsigned int &size, const unsigned int &layerID);
 
 	virtual void PropagateFW();
 	virtual void PropagateBW();

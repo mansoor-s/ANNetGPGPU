@@ -18,6 +18,7 @@ namespace ANN {
 
 SOMNeuron::SOMNeuron(SOMLayer *parent) : AbsNeuron(parent) {
 	m_fLearningRate = 0.5f;
+	m_fConscience = 0.f;
 
 	// a standard sigmoid transfer function for the network
 	SetTransfFunction(&Functions::fcn_log);
@@ -83,6 +84,18 @@ float SOMNeuron::GetDistance2Neur(const SOMNeuron &pNeurDst) {
 		fDist += pow(pNeurDst.GetPosition().at(i) - this->GetPosition().at(i), 2);
 	}
 	return sqrt(fDist);
+}
+
+void SOMNeuron::SetConscience(float &fVal) {
+	m_fConscience = fVal;
+}
+
+void SOMNeuron::AddConscience(float &fVal) {
+	m_fConscience += fVal;
+}
+
+float SOMNeuron::GetConscience() {
+	return m_fConscience;
 }
 
 /*

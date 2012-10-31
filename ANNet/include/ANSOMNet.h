@@ -33,6 +33,9 @@ protected:
 	float 			m_fSigmaT;	// radius of the lattice at tx
 	float 			m_fLambda;	// time constant
 	float 			m_fLearningRateT;
+	
+	// Conscience mechanism
+	float 			m_fConscienceRate;
 
 	/* first Ctor */
 	std::vector<unsigned int> m_vDimI; // dimensions of the input layer (Cartesian coordinates)
@@ -155,6 +158,18 @@ public:
 	 * @return Return the kind of function the net has to use while back-/propagating.
 	 */
 	const DistFunction *GetDistFunction() const;
+	
+	/**
+	 * Sets the rate for the application of the conscience mechanism. 
+	 * A value of zero leads to the standard kohonen implementation.
+	 * Value must be: 0.f < fVal < 1.f
+	 */
+	void SetConscienceRate(const float &fVal);
+	
+	/**
+	 * 
+	 */
+	float GetConscienceRate();
 };
 
 }

@@ -35,15 +35,12 @@ SOMNet::SOMNet() {
 	m_iCycle 		= 0;
 	m_fSigma0 		= 0.f;
 	m_fSigmaT 		= 0.f;
-	m_fLearningRate 	= 0.5f;
+	m_fLearningRate = 0.5f;
 
 	m_iWidthI 		= 0.f;
 	m_iHeightI 		= 0.f;
 	m_iWidthO 		= 0.f;
 	m_iHeightO 		= 0.f;
-	
-	// Conscience mechanism
-	m_fConscienceRate 	= 0.f;
 
 	// mexican hat shaped function for this SOM
 	SetDistFunction(&Functions::fcn_gaussian);
@@ -337,19 +334,13 @@ void SOMNet::FindBMNeuron() {
 	#pragma omp parallel for
 	for(int i = 0; i < static_cast<int>(m_pOPLayer->GetNeurons().size() ); i++) {
 		((SOMNeuron*)m_pOPLayer->GetNeuron(i))->CalcDistance2Inp();
-		// with implementation of conscience mechanism (2nd term)
-		float fConscienceBias = m_fSigmaT * (1.f/m_pOPLayer->GetNeurons().size() - ((SOMNeuron*)m_pOPLayer->GetNeuron(i))->GetConscience() );
-		fCurVal = *m_pOPLayer->GetNeuron(i) - fConscienceBias;
+		fCurVal = *m_pOPLayer->GetNeuron(i);	// float() operator
 
 		if(fSmallest > fCurVal) {
 			fSmallest = fCurVal;
 			m_pBMNeuron = (SOMNeuron*)m_pOPLayer->GetNeuron(i);
 		}
 	}
-
-	// implementation of conscience mechanism
-	float fConscience = m_fConscienceRate * (*m_pBMNeuron - m_pBMNeuron->GetConscience() );
-	m_pBMNeuron->AddConscience(fConscience);
 
 	assert(m_pBMNeuron != NULL);
 }
@@ -360,14 +351,6 @@ void SOMNet::SetDistFunction (const DistFunction *pFCN) {
 
 const DistFunction *SOMNet::GetDistFunction() const {
 	return (m_DistFunction);
-}
-
-void SOMNet::SetConscienceRate(const float &fVal) {
-	m_fConscienceRate = fVal;
-}
-  
-float SOMNet::GetConscienceRate() {
-	return m_fConscienceRate;
 }
 
 }

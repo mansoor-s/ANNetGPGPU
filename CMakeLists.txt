@@ -28,15 +28,12 @@ if(DOXYGEN_FOUND)
 endif(DOXYGEN_FOUND)
 
 if (CUDA_FOUND)
-  cuda_add_executable (SOMNetGPU examples/SOMNetGPU.cpp)
-  target_link_libraries (SOMNetGPU ANNet ANNetGUI) 
+  cuda_add_executable (SOMNet examples/SOMNet.cpp)
+  target_link_libraries (SOMNet ANNet ANNetGUI) 
 
   cuda_add_executable (BPNetGPU examples/BPNetGPU.cpp)
   target_link_libraries (BPNetGPU ANNet) 
 endif(CUDA_FOUND)
-
-add_executable (SOMNetCPU examples/SOMNetCPU.cpp)
-target_link_libraries (SOMNetCPU ANNet ANNetGUI) 
 
 add_executable (LoadBPNet examples/LoadBPNet.cpp)
 target_link_libraries (LoadBPNet ANNet) 

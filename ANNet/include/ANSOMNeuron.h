@@ -24,8 +24,9 @@ class SOMLayer;
 
 class SOMNeuron : public AbsNeuron {
 protected:
-	float 				m_fLearningRate;
-	float 				m_fInfluence;
+	float 				m_fLearningRate;	// learning rate
+	float 				m_fInfluence;		// distance of neurons in neighborhood to alterate
+	float 				m_fConscience;		// bias for conscience mechanism
 
 public:
 	SOMNeuron(SOMLayer *parent = 0);
@@ -78,6 +79,21 @@ public:
 	 * @return Returns the current distance of the neuron to its input vector.
 	 */
 	friend float GetDistance2Neur(const SOMNeuron &pNeurSrc, const SOMNeuron &pNeurDst);
+	
+	/**
+	 * Sets the bias for the conscience mechanism
+	 */
+	void SetConscience(float &fVal);
+	
+	/**
+	 * Adds the given value to the bias for the conscience mechanism
+	 */
+	void AddConscience(float &fVal);
+	
+	/**
+	 * @return Get the bias for the conscience mechanism
+	 */
+	float GetConscience();
 };
 
 }

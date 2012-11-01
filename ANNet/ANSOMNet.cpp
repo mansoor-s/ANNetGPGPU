@@ -283,7 +283,10 @@ void SOMNet::Training(const unsigned int &iCycles) {
 		FindBMNeuron();
 
 		// Calculate the width of the neighborhood for this time step
-		m_fSigmaT = m_DistFunction->decay(m_fSigma0, m_iCycle, m_fLambda);
+		if(m_fConscienceRate <= 0.f)	// without conscience mechanism
+			m_fSigmaT = m_DistFunction->decay(m_fSigma0, m_iCycle, m_fLambda);
+		else m_fSigmaT = sqrt(2.f);		// with conscience mechanism for taking the 8 nearest neurons in the neighborhood
+
 		m_fLearningRateT = m_DistFunction->decay(m_fLearningRate, m_iCycle, m_iCycles);
 
 		// Adjust the weight vector of the BMU and its neighbors
@@ -337,8 +340,9 @@ void SOMNet::FindBMNeuron() {
 	#pragma omp parallel for
 	for(int i = 0; i < static_cast<int>(m_pOPLayer->GetNeurons().size() ); i++) {
 		((SOMNeuron*)m_pOPLayer->GetNeuron(i))->CalcDistance2Inp();
+
 		// with implementation of conscience mechanism (2nd term)
-		float fConscienceBias = m_fSigmaT * (1.f/m_pOPLayer->GetNeurons().size() - ((SOMNeuron*)m_pOPLayer->GetNeuron(i))->GetConscience() );
+		float fConscienceBias = (1.f/m_pOPLayer->GetNeurons().size() - ((SOMNeuron*)m_pOPLayer->GetNeuron(i))->GetConscience() );
 		fCurVal = *m_pOPLayer->GetNeuron(i) - fConscienceBias;
 
 		if(fSmallest > fCurVal) {

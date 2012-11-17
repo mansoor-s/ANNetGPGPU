@@ -80,6 +80,7 @@ int main(int argc, char *argv[]) {
   SOMap.SetTrainingSet(input);
   SOMap.CreateSOM(3, 1, w1,w1);
 
+  SOMap.SetConscienceRate(0);
   SOMap.Training(500);
 
   SOMReader w(w1, w1, w2);

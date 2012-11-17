@@ -9,6 +9,18 @@
 #include <cmath>
 
 
+struct saxmy_functor {
+	const float a;
+
+	saxmy_functor(float _a) : a(_a) {}
+
+	__host__ __device__
+	float operator()(const float& x, const float& y) const { 
+		return a * (x - y);
+	}
+};
+
+
 // return the biggest of two tuples
 struct bigger_tuple_functor {
     __device__ __host__
@@ -94,9 +106,10 @@ struct sqrt_functor {
  * ROW3		toNeur3	toNeur3	toNeur3	..
  * ROW(n+1)	..		..		..
  */
-unsigned int hostSOMFindBMNeuronID(
+unsigned int hostSOMFindBMNeuronID( thrust::device_vector<float> &ConscienceVector,
 		const ANN::Matrix &SOMEdgeMatrix, 
-		const thrust::device_vector<float> &InputVector) 
+		const thrust::device_vector<float> &InputVector,
+		const float &fConscienceRate) 
 {
 	unsigned int BMUID 		= 0;
 	unsigned int iWidth 	= SOMEdgeMatrix.getW();
@@ -106,6 +119,7 @@ unsigned int hostSOMFindBMNeuronID(
 	assert(iHeight > 0);
 	
 	thrust::device_vector<float> dvRes(iWidth, 0.f);
+	thrust::device_vector<float> dvConscience(iWidth, -1.f / (float)iWidth);
 	thrust::device_vector<float> dvTmp(iWidth, 0.f); // temporary
 	
 	for(unsigned int y = 0; y < iHeight; y++) {
@@ -114,7 +128,7 @@ unsigned int hostSOMFindBMNeuronID(
 				SOMEdgeMatrix.getRowEnd(y), 		// input
 				dvTmp.begin(), 						// result
 				minus_pow_functor(InputVector[y]) ); // functor
-		
+
 		thrust::transform(
 				dvRes.begin(), 						// input
 				dvRes.end(), 						// input
@@ -122,6 +136,31 @@ unsigned int hostSOMFindBMNeuronID(
 				dvRes.begin(), 						// result
 				thrust::plus<float>() );			// functor
 	}
+
+	// implementation of conscience mechanism
+	dvTmp = dvRes;
+	if(fConscienceRate > 0.f) {
+		thrust::transform(
+			ConscienceVector.begin(), 
+			ConscienceVector.end(), 
+			dvConscience.begin(), 
+			dvConscience.begin(), 
+			thrust::plus<float>() );
+
+		thrust::transform(
+				dvConscience.begin(),
+				dvConscience.end(),
+				dvRes.begin(),
+				dvRes.begin(),
+				thrust::plus<float>() );
+	}
+
+	thrust::transform(
+		dvTmp.begin(),
+		dvTmp.end(),
+		ConscienceVector.begin(),
+		ConscienceVector.begin(),
+		saxmy_functor(fConscienceRate) );
 
 /*
 	thrust::transform(
@@ -187,7 +226,7 @@ void hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
 		const thrust::device_vector<float> &dvInputVector,
 		const unsigned int BMUID, 
 		const float &fSigmaT, 
-		const float &fLearningRate 
+		const float &fLearningRate
 		) 
 {
 	unsigned int iWidth 	= SOMPositionMatrix.getW();
@@ -262,14 +301,15 @@ void hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
 //	dvDist.clear(); 								// cleanup
 }
 
-void hostSOMTraining( ANN::Matrix &SOMEdgeMatrix,
+void hostSOMTraining( thrust::device_vector<float> &ConscienceVector,
+		ANN::Matrix &SOMEdgeMatrix,
 		const ANN::Matrix &SOMPositionMatrix, 
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,
 		const float &fSigma0, 
 		const float &fLearningRate0,
-		float (*pfnDecay)(const float &, const float &, const float &)
-		) 
+		const float &fConscienceRate,
+		float (*pfnDecay)(const float &, const float &, const float &) )
 {
 	float fLambda 	= iCycles / log(fSigma0);
 	
@@ -293,18 +333,21 @@ void hostSOMTraining( ANN::Matrix &SOMEdgeMatrix,
 		thrust::copy(vCurInput.begin(), vCurInput.end(), dvInputVector.begin() );
 		
 		// Find BMNeuron
-		unsigned int BMUID = hostSOMFindBMNeuronID(SOMEdgeMatrix, dvInputVector);
-		
-		// Calc m_fSigmaT
-		float fSigmaT 		= pfnDecay(fSigma0, i, fLambda);
+		unsigned int BMUID = hostSOMFindBMNeuronID(ConscienceVector, SOMEdgeMatrix, dvInputVector, fConscienceRate);
+
+		// use 8 proximal neurons as standard 
+		float fSigmaT = sqrt(2.f);
+		// Calc m_fSigmaT if conscience is _not_ used
+		if(fConscienceRate == 0.f)
+			fSigmaT = pfnDecay(fSigma0, i, fLambda);
 		float fLearningRate = pfnDecay(fLearningRate0, i, iCycles);
 		
 		// Propagate BW
 		hostSOMPropagateBW( SOMEdgeMatrix,
 				SOMPositionMatrix, 	// const
 				dvInputVector,		// const
-				BMUID,				// const
-				fSigmaT,			// const
+				BMUID,			// const
+				fSigmaT,		// const
 				fLearningRate ); 	// const
 	}
 }

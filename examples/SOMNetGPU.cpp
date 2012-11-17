@@ -75,7 +75,7 @@ int main(int argc, char *argv[]) {
   input.AddInput(white);
 
   std::vector<float> vCol(3);
-  int w1 = 128;
+  int w1 = 32;
   int w2 = 4;
 
   ANN::SOMNet SOMap;
@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
   //	gpu.SetTrainingSet(input);
   //	gpu.CreateSOM(3, 1, w1,w1);
 
-  SOMap.Training(9);
+  //SOMap.Training(9);
 
   SOMReader w(w1, w1, w2);
   //for(int x = 0; x < w1*w1; x++) {
@@ -102,7 +102,8 @@ int main(int argc, char *argv[]) {
   //w.Save("CPU.png");
 
   // GPU
-  gpu.Training(1000);
+  gpu.SetConscienceRate(0);
+  gpu.Training(500);
 
   for(int x = 0; x < w1*w1; x++) {
 	  ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);
@@ -117,7 +118,7 @@ int main(int argc, char *argv[]) {
 
   //gpu.ExpToFS("foo1.bar");
   //gpu.ImpFromFS("foo1.bar");
-
+/*
   gpu.ExpToFS("foo2.bar");
   gpu.ImpFromFS("foo2.bar");
   gpu2.ImpFromFS("foo2.bar");
@@ -132,5 +133,6 @@ int main(int argc, char *argv[]) {
   }
 
   w.Save("GPU_2.png");
+*/
   return 0;
 }

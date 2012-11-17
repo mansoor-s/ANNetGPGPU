@@ -35,7 +35,7 @@ SOMNet::SOMNet() {
 	m_iCycle 		= 0;
 	m_fSigma0 		= 0.f;
 	m_fSigmaT 		= 0.f;
-	m_fLearningRate 	= 0.5f;
+	m_fLearningRate = 0.5f;
 
 	m_iWidthI 		= 0.f;
 	m_iHeightI 		= 0.f;
@@ -285,7 +285,6 @@ void SOMNet::Training(const unsigned int &iCycles) {
 		// Calculate the width of the neighborhood for this time step
 		if(m_fConscienceRate <= 0.f)	// without conscience mechanism
 			m_fSigmaT = m_DistFunction->decay(m_fSigma0, m_iCycle, m_fLambda);
-		else m_fSigmaT = sqrt(2.f);		// with conscience mechanism for taking the 8 nearest neurons in the neighborhood
 
 		m_fLearningRateT = m_DistFunction->decay(m_fLearningRate, m_iCycle, m_iCycles);
 
@@ -368,6 +367,9 @@ const DistFunction *SOMNet::GetDistFunction() const {
 
 void SOMNet::SetConscienceRate(const float &fVal) {
 	m_fConscienceRate = fVal;
+
+	// standard radius for conscience mechanism (8 proximal nodes around BMU)
+	m_fSigmaT = sqrt(2.f);
 }
   
 float SOMNet::GetConscienceRate() {

@@ -53,8 +53,10 @@ float hostGetMin(const thrust::device_vector<float>& vec, unsigned int &ID);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 unsigned int
-hostSOMFindBMNeuronID(const ANN::Matrix &SOMEdgeMatrix,
-		const thrust::device_vector<float> &InputVector );
+hostSOMFindBMNeuronID(thrust::device_vector<float> &ConscienceVector,
+		const ANN::Matrix &SOMEdgeMatrix,
+		const thrust::device_vector<float> &InputVector,
+		const float &fConscienceRate);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
@@ -66,12 +68,14 @@ hostSOMPropagateBW(ANN::Matrix &SOMEdgeMatrix,
 		const float &fLearningRate );
 
 void
-hostSOMTraining(ANN::Matrix &SOMEdgeMatrix,
+hostSOMTraining( thrust::device_vector<float> &ConscienceVector,
+		ANN::Matrix &SOMEdgeMatrix,
 		const ANN::Matrix &SOMPositionMatrix,
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,
 		const float &fSigma0,
 		const float &fLearningRate0,
-		float (*pfnDecay)(const float &, const float &, const float &) );
+		const float &fConscienceRate,
+		float (*pfnDecay)(const float &, const float &, const float &) ) ;
 
 #endif /* ANKERNELS_H_ */

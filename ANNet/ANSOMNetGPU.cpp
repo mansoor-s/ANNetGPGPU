@@ -8,6 +8,7 @@
 #include <gpgpu/ANSOMNetGPU.h>
 #include <math/ANFunctions.h>
 #include <ANSOMLayer.h>
+#include <basic/ANAbsNeuron.h>
 
 
 namespace ANN {
@@ -27,6 +28,9 @@ SOMNetGPU::SOMNetGPU() {
 	m_iWidthO 		= 0.f;
 	m_iHeightO 		= 0.f;
 
+	// Conscience mechanism
+	m_fConscienceRate 	= 0.f;
+	
 	// mexican hat shaped function for this SOM
 	SetDistFunction(&Functions::fcn_gaussian);
 
@@ -63,19 +67,34 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 	m_EdgeMat = m_pOPLayer->ExpEdgesIn();
 	m_PosiMat = ((SOMLayer*)m_pOPLayer)->ExpPositions();
 
+	unsigned int iSize = m_pOPLayer->GetNeurons().size();
+	thrust::host_vector<float> hvConscience(iSize);
+	thrust::device_vector<float> dvConscience;
+	for(unsigned int i = 0; i < iSize; i++) {
+		hvConscience[i] = m_pOPLayer->GetNeuron(i)->GetValue();
+	}
+	dvConscience = hvConscience;
+	
 	std::cout<< "Process the SOM now" <<std::endl;
-	hostSOMTraining(m_EdgeMat,
+	hostSOMTraining(dvConscience,
+			m_EdgeMat,
 			m_PosiMat,
 			*GetTrainingSet(),
 			iCycles,
 			m_fSigma0,
 			m_fLearningRate,
+			m_fConscienceRate,
 			&ANN::fcn_decay);
 
 	std::cout<<"Training cycles finished properly"<<std::endl;
 	// Write edge matrix back
 	std::cout<<"Copy device memory back .."<<std::endl;
 	m_pOPLayer->ImpEdgesIn(m_EdgeMat);
+	
+	for(unsigned int i = 0; i < iSize; i++) {
+		m_pOPLayer->GetNeuron(i)->SetValue(dvConscience[i]);
+	}
+	
 	std::cout<<".. Finished"<<std::endl;
 }
 

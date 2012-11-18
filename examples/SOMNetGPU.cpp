@@ -103,7 +103,7 @@ int main(int argc, char *argv[]) {
 
   // GPU
   gpu.SetConscienceRate(0.1);
-  gpu.Training(500);
+  gpu.Training(1000);
 
   for(int x = 0; x < w1*w1; x++) {
 	  ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);

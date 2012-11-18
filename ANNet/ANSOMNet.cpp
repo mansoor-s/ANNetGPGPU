@@ -339,21 +339,35 @@ void SOMNet::FindBMNeuron() {
 
 	#pragma omp parallel for
 	for(int i = 0; i < static_cast<int>(m_pOPLayer->GetNeurons().size() ); i++) {
-		((SOMNeuron*)m_pOPLayer->GetNeuron(i))->CalcDistance2Inp();
+		SOMNeuron *pNeuron = (SOMNeuron*)m_pOPLayer->GetNeuron(i);
+		pNeuron->CalcDistance2Inp();
+		fCurVal = pNeuron->GetValue();
 
 		// with implementation of conscience mechanism (2nd term)
-		float fConscienceBias = 1.f/fNrOfNeurons - ((SOMNeuron*)m_pOPLayer->GetNeuron(i))->GetConscience();
-		fCurVal = *m_pOPLayer->GetNeuron(i);
+		float fConscienceBias = 1.f/fNrOfNeurons - pNeuron->GetConscience();
+		if(m_fConscienceRate > 0.f)
+			fCurVal -= fConscienceBias;
+		// end of implementation of conscience mechanism
 
-		if(fSmallest > fCurVal - fConscienceBias) {
+		if(fSmallest > fCurVal) {
 			fSmallest = fCurVal;
-			m_pBMNeuron = (SOMNeuron*)m_pOPLayer->GetNeuron(i);
+			m_pBMNeuron = pNeuron;
 		}
 	}
 
 	// implementation of conscience mechanism
-	float fConscience = m_fConscienceRate * (fCurVal - m_pBMNeuron->GetConscience() );
-	m_pBMNeuron->AddConscience(fConscience);
+	//float fConscience = m_fConscienceRate * (m_pBMNeuron->GetValue() - m_pBMNeuron->GetConscience() ); 	// standard implementation seems to have some problems
+	//m_pBMNeuron->AddConscience(fConscience); 																// standard implementation seems to have some problems
+
+	if(m_fConscienceRate > 0.f) {
+		#pragma omp parallel for
+		for(int i = 0; i < static_cast<int>(m_pOPLayer->GetNeurons().size() ); i++) {
+			SOMNeuron *pNeuron = (SOMNeuron*)m_pOPLayer->GetNeuron(i);
+			float fConscience = m_fConscienceRate * (pNeuron->GetValue() - pNeuron->GetConscience() );
+			pNeuron->SetConscience(fConscience);
+		}
+	}
+	// end of implementation of conscience mechanism
 
 	assert(m_pBMNeuron != NULL);
 }

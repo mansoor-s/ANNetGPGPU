@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
   SOMap.CreateSOM(3, 1, w1,w1);
 
   SOMap.SetConscienceRate(0.1);
-  SOMap.Training(5000);
+  SOMap.Training(50000);
 
   SOMReader w(w1, w1, w2);
   for(int x = 0; x < w1*w1; x++) {

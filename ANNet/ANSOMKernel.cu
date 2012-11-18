@@ -119,40 +119,42 @@ unsigned int hostSOMFindBMNeuronID( thrust::device_vector<float> &ConscienceVect
 	assert(iHeight > 0);
 	
 	thrust::device_vector<float> dvRes(iWidth, 0.f);
-	thrust::device_vector<float> dvConscience(iWidth, -1.f / (float)iWidth);
 	thrust::device_vector<float> dvTmp(iWidth, 0.f); // temporary
 	
 	for(unsigned int y = 0; y < iHeight; y++) {
 		thrust::transform(
-				SOMEdgeMatrix.getRowBegin(y),		// input
-				SOMEdgeMatrix.getRowEnd(y), 		// input
-				dvTmp.begin(), 						// result
-				minus_pow_functor(InputVector[y]) ); // functor
+			SOMEdgeMatrix.getRowBegin(y),		// input
+			SOMEdgeMatrix.getRowEnd(y), 		// input
+			dvTmp.begin(), 						// result
+			minus_pow_functor(InputVector[y]) ); // functor
 
 		thrust::transform(
-				dvRes.begin(), 						// input
-				dvRes.end(), 						// input
-				dvTmp.begin(),						// input
-				dvRes.begin(), 						// result
-				thrust::plus<float>() );			// functor
+			dvRes.begin(), 						// input
+			dvRes.end(), 						// input
+			dvTmp.begin(),						// input
+			dvRes.begin(), 						// result
+			thrust::plus<float>() );			// functor
 	}
 
-	// implementation of conscience mechanism
 	dvTmp = dvRes;
+
+	// implementation of conscience mechanism
 	if(fConscienceRate > 0.f) {
-		thrust::transform(
-			ConscienceVector.begin(), 
-			ConscienceVector.end(), 
-			dvConscience.begin(), 
-			dvConscience.begin(), 
-			thrust::plus<float>() );
+		thrust::device_vector<float> dvConscience(iWidth, 1.f / (float)iWidth);
 
 		thrust::transform(
-				dvConscience.begin(),
-				dvConscience.end(),
-				dvRes.begin(),
-				dvRes.begin(),
-				thrust::plus<float>() );
+			dvConscience.begin(),
+			dvConscience.end(),
+			ConscienceVector.begin(),
+			dvConscience.begin(),
+			thrust::minus<float>() );
+
+		thrust::transform(
+			dvRes.begin(),
+			dvRes.end(),
+			dvConscience.begin(),
+			dvRes.begin(),
+			thrust::minus<float>() );
 	}
 
 	thrust::transform(
@@ -161,13 +163,14 @@ unsigned int hostSOMFindBMNeuronID( thrust::device_vector<float> &ConscienceVect
 		ConscienceVector.begin(),
 		ConscienceVector.begin(),
 		saxmy_functor(fConscienceRate) );
+	// end of implementation of conscience mechanism
 
 /*
 	thrust::transform(
-			dvRes.begin(),							// input
-			dvRes.end(), 							// input
-			dvRes.begin(), 							// result
-			sqrt_functor() );						// functor
+		dvRes.begin(),							// input
+		dvRes.end(), 							// input
+		dvRes.begin(), 							// result
+		sqrt_functor() );						// functor
 */
 	hostGetMin(dvRes, BMUID);
 	
@@ -242,40 +245,40 @@ void hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
 	// Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) );
 	for(unsigned int y = 0; y < iHeight; y++) { 	// for each coordinate position of the neuron
 		thrust::transform(
-				SOMPositionMatrix.getRowBegin(y),	// input
-				SOMPositionMatrix.getRowEnd(y), 	// input
-				dvTmp.begin(), 						// result
-				minus_pow_functor(dvBMUPos[y]) ); 	// functor
+			SOMPositionMatrix.getRowBegin(y),	// input
+			SOMPositionMatrix.getRowEnd(y), 	// input
+			dvTmp.begin(), 						// result
+			minus_pow_functor(dvBMUPos[y]) ); 	// functor
 		
 		thrust::transform(
-				dvDist.begin(), 					// input
-				dvDist.end(), 						// input
-				dvTmp.begin(),						// input
-				dvDist.begin(), 					// result
-				thrust::plus<float>() );			// functor
+			dvDist.begin(), 					// input
+			dvDist.end(), 						// input
+			dvTmp.begin(),						// input
+			dvDist.begin(), 					// result
+			thrust::plus<float>() );			// functor
 	}
 	thrust::transform(
-			dvDist.begin(),							// input
-			dvDist.end(), 							// input
-			dvDist.begin(), 						// result
-			sqrt_functor() );						// functor
+		dvDist.begin(),							// input
+		dvDist.end(), 							// input
+		dvDist.begin(), 						// result
+		sqrt_functor() );						// functor
 	
 	// 2. Calculate the influence for each neuron
 	thrust::transform(
-			dvDist.begin(),							// input
-			dvDist.end(), 							// input
-			dvInfluence.begin(), 					// result
-			gaussian_bell_functor(fSigmaT) );		// functor
+		dvDist.begin(),							// input
+		dvDist.end(), 							// input
+		dvInfluence.begin(), 					// result
+		gaussian_bell_functor(fSigmaT) );		// functor
 	
 	// 3. Only handle neurons in radius:
 	// 3a. Make stencil
 	dvTmp.assign(iWidth, fSigmaT);
 	thrust::transform(
-			dvDist.begin(), 						// input 1
-			dvDist.end(),							// input 1
-			dvTmp.begin(),							// input 1
-			dvTmp.begin(), 							// result
-			thrust::less_equal<float>() 			// functor
+		dvDist.begin(), 						// input 1
+		dvDist.end(),							// input 1
+		dvTmp.begin(),							// input 1
+		dvTmp.begin(), 							// result
+		thrust::less_equal<float>() 			// functor
 	);
 	
 	// 3b. Use stencil to modify only neurons inside the radius
@@ -285,13 +288,13 @@ void hostSOMPropagateBW( ANN::Matrix &SOMEdgeMatrix,
 
 	for(unsigned int y = 0; y < iHeight; y++) {		// for each edge of the neuron   	
 		thrust::transform_if(
-				SOMEdgeMatrix.getRowBegin(y),		// input 1
-				SOMEdgeMatrix.getRowEnd(y), 		// input 1
-				dvInfluence.begin(),				// input 2
-				dvTmp.begin(),						// stencil
-				SOMEdgeMatrix.getRowBegin(y), 		// result
-				hebbian_functor(fLearningRate, dvInputVector[y]), // functor
-				thrust::identity<int>() ); 			// predicate
+			SOMEdgeMatrix.getRowBegin(y),		// input 1
+			SOMEdgeMatrix.getRowEnd(y), 		// input 1
+			dvInfluence.begin(),				// input 2
+			dvTmp.begin(),						// stencil
+			SOMEdgeMatrix.getRowBegin(y), 		// result
+			hebbian_functor(fLearningRate, dvInputVector[y]), // functor
+			thrust::identity<int>() ); 			// predicate
 	}
 	
 	// 4. Clean!
@@ -317,6 +320,9 @@ void hostSOMTraining( thrust::device_vector<float> &ConscienceVector,
 	int iMax 		= InputSet.GetNrElements()-1;
 	unsigned int iProgCount = 1;
 	
+	// use 8 proximal neurons as standard
+	float fSigmaT = sqrt(2.f);
+
 	for(unsigned int i = 0; i < iCycles; i++) {
 		if(iCycles >= 10) {
 			if(((i+1) / (iCycles/10)) == iProgCount && (i+1) % (iCycles/10) == 0) {
@@ -335,10 +341,8 @@ void hostSOMTraining( thrust::device_vector<float> &ConscienceVector,
 		// Find BMNeuron
 		unsigned int BMUID = hostSOMFindBMNeuronID(ConscienceVector, SOMEdgeMatrix, dvInputVector, fConscienceRate);
 
-		// use 8 proximal neurons as standard 
-		float fSigmaT = sqrt(2.f);
 		// Calc m_fSigmaT if conscience is _not_ used
-		if(fConscienceRate == 0.f)
+		if(fConscienceRate <= 0.f)
 			fSigmaT = pfnDecay(fSigma0, i, fLambda);
 		float fLearningRate = pfnDecay(fLearningRate0, i, iCycles);
 		

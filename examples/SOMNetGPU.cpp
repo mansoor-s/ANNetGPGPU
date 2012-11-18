@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
   //w.Save("CPU.png");
 
   // GPU
-  gpu.SetConscienceRate(0);
+  gpu.SetConscienceRate(0.1);
   gpu.Training(500);
 
   for(int x = 0; x < w1*w1; x++) {

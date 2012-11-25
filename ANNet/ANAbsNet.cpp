@@ -320,24 +320,34 @@ float AbsNet::SetOutput(float *outputArray, const unsigned int &size, const unsi
 }
 
 void AbsNet::SetTrainingSet(TrainingSet *pData) {
+	assert(pData);
+
 	if( pData != NULL ) {
 		m_pTrainingData = pData;
 	}
 }
 
 void AbsNet::SetTrainingSet(const TrainingSet &pData) {
+	assert(pData);
+
 	m_pTrainingData = (TrainingSet*)&pData;
 }
 
 TrainingSet *AbsNet::GetTrainingSet() const {
+	assert(m_pTrainingData);
+
 	return m_pTrainingData;
 }
 
 const AbsLayer *AbsNet::GetIPLayer() const {
+	assert(m_pIPLayer);
+
 	return m_pIPLayer;
 }
 
 const AbsLayer *AbsNet::GetOPLayer() const {
+	assert(m_pOPLayer);
+
 	return m_pOPLayer;
 }
 

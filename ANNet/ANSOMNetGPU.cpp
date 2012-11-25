@@ -63,6 +63,10 @@ SOMNetGPU::~SOMNetGPU() {
 void SOMNetGPU::Training(const unsigned int &iCycles) {
 	assert(iCycles > 0);
 	assert(m_fSigma0 > 0.f);
+	if(GetTrainingSet() == NULL) {
+		std::cout<<"No training set available!"<<std::endl;
+		return;
+	}
 
 	m_EdgeMat = m_pOPLayer->ExpEdgesIn();
 	m_PosiMat = ((SOMLayer*)m_pOPLayer)->ExpPositions();

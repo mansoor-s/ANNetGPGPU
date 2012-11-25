@@ -11,6 +11,7 @@
 #include <ANSOMNeuron.h>
 #include <basic/ANEdge.h>
 
+
 namespace ANN {
 
 SOMLayer::SOMLayer() {

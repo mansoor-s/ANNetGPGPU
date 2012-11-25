@@ -75,15 +75,17 @@ int main(int argc, char *argv[]) {
   input.AddInput(white);
 
   std::vector<float> vCol(3);
-  int w1 = 32;
+  int w1 = 128;
   int w2 = 4;
-
+/*
   ANN::SOMNet SOMap;
   SOMap.SetTrainingSet(input);
   SOMap.CreateSOM(3, 1, w1,w1);
-
-  ANN::SOMNetGPU gpu(&SOMap);
-  ANN::SOMNetGPU gpu2(&SOMap);
+*/
+  ANN::SOMNetGPU gpu;
+  gpu.SetTrainingSet(input);
+  gpu.CreateSOM(3, 1, w1,w1);
+  //ANN::SOMNetGPU gpu2(&SOMap);
   //	ANN::SOMNetGPU gpu;
   //	gpu.SetTrainingSet(input);
   //	gpu.CreateSOM(3, 1, w1,w1);
@@ -103,7 +105,7 @@ int main(int argc, char *argv[]) {
 
   // GPU
   gpu.SetConscienceRate(0.1);
-  gpu.Training(1000);
+  gpu.Training(5000);
 
   for(int x = 0; x < w1*w1; x++) {
 	  ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);

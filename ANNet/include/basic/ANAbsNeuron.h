@@ -14,7 +14,7 @@
 #ifndef ABSNEURON_H_
 #define ABSNEURON_H_
 
-//#include <list>
+//#include <basic/ANList.h>
 #include <vector>
 #include <string>
 
@@ -56,8 +56,8 @@ protected:
 
 	Edge *m_pBias;							// Pointer to the bias edge (or connection to bias neuron)
 
-//	std::list<Edge*> m_lOutgoingConnections;
-//	std::list<Edge*> m_lIncomingConnections;
+	//ANN::list<Edge*> m_lOutgoingConnections;
+	//ANN::list<Edge*> m_lIncomingConnections;
 
 	std::vector<Edge*> m_lOutgoingConnections;
 	std::vector<Edge*> m_lIncomingConnections;
@@ -113,10 +113,12 @@ public:
 	 * @return Array of pointers of all incoming edges
 	 */
 	virtual std::vector<Edge*> GetConsI() const;
+	//virtual ANN::list<Edge*> GetConsI() const;
 	/**
 	 * @return Array of pointers of all outgoing edges
 	 */
 	virtual std::vector<Edge*> GetConsO() const;
+	//virtual ANN::list<Edge*> GetConsO() const;
 	/**
 	 * @param iID New index of this neuron.
 	 */

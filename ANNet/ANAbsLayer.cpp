@@ -56,10 +56,18 @@ void AbsLayer::EraseAll() {
 }
 
 AbsNeuron *AbsLayer::GetNeuron(const unsigned int &iID) const {
-	for(unsigned int i = 0; i < m_lNeurons.size(); i++) {
-		if(m_lNeurons.at(i)->GetID() == iID)
-			return m_lNeurons.at(i);
+	// quick try
+	if(m_lNeurons.at(iID)->GetID() == iID) {
+		return m_lNeurons.at(iID);
 	}
+	// fall back scenario
+	else {
+		for(unsigned int i = 0; i < m_lNeurons.size(); i++) {
+			if(m_lNeurons.at(i)->GetID() == iID)
+				return m_lNeurons.at(i);
+		}
+	}
+
 	return NULL;
 }
 

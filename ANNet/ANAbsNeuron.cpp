@@ -114,6 +114,15 @@ void AbsNeuron::SetID(const int ID) {
 	m_iNeuronID = ID;
 }
 
+/*
+ANN::list<Edge*> AbsNeuron::GetConsI() const{
+	return m_lIncomingConnections;
+}
+ANN::list<Edge*> AbsNeuron::GetConsO() const{
+	return m_lOutgoingConnections;
+}
+*/
+
 std::vector<Edge*> AbsNeuron::GetConsI() const{
 	return m_lIncomingConnections;
 }

@@ -73,15 +73,15 @@ int main(int argc, char *argv[]) {
   input.AddInput(white);
 
   std::vector<float> vCol(3);
-  int w1 = 32;
-  int w2 = 8;
+  int w1 = 40;
+  int w2 = 4;
 
   ANN::SOMNet SOMap;
   SOMap.SetTrainingSet(input);
   SOMap.CreateSOM(3, 1, w1,w1);
 
   SOMap.SetConscienceRate(0.1);
-  SOMap.Training(50000);
+  SOMap.Training(5000);
 
   SOMReader w(w1, w1, w2);
   for(int x = 0; x < w1*w1; x++) {

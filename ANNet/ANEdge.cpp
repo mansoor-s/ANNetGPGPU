@@ -15,7 +15,15 @@
 using namespace ANN;
 
 
+Edge::Edge() {
+	float 	fValue 		= 0.f;
+	float 	fMomentum 	= 0.f;
+	bool 	bAdapt 		= true;
+}
+
 Edge::Edge(Edge *pEdge) {
+	assert(pEdge);
+
 	float 	fValue 		= pEdge->GetValue();
 	float 	fMomentum 	= pEdge->GetMomentum();
 	bool 	bAdapt 		= pEdge->GetAdaptationState();
@@ -60,11 +68,11 @@ AbsNeuron *Edge::GetDestination(AbsNeuron *source) const {
 		return m_pNeuronSecond;
 	}
 	else if(m_pNeuronFirst != source && m_pNeuronSecond != source) {
-		std::cout<<"FEHLER: Quellneuron gehört nicht zur Kette"<<std::endl;
+		std::cout<<"error: neuron does not belong to this chain"<<std::endl;
 		return NULL;
 	}
 	else {
-		std::cout<<"FEHLER: Edge enthält zwei gleiche Neuronen"<<std::endl;
+		std::cout<<"error: edge contains two identical neurons"<<std::endl;
 		return NULL;
 	}
 }

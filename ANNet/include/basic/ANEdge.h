@@ -26,8 +26,7 @@ class AbsNeuron;
  *
  * @author Daniel "dgrat" Frenzel
  */
-class Edge
-{
+class Edge {
 private:
 	float m_fWeight;
 	float m_fMomentum;
@@ -38,6 +37,11 @@ private:
 	bool m_bAllowAdaptation;
 
 public:
+	/**
+	 * Creating a "weight" connecting two neurons.
+	 */
+	Edge();
+
 	/**
 	 * Creating a "weight" with the properties of: *pEdge
 	 * this constructor can't copy connections (edges), because they normally have dependencies to other neurons.
@@ -64,24 +68,24 @@ public:
 	 * @param pSource Pointer to a neuron building this edge.
 	 * @return Returns a pointer to the neuron != pSource.
 	 */
-	virtual AbsNeuron *GetDestination(AbsNeuron *pSource) const;
+	AbsNeuron *GetDestination(AbsNeuron *pSource) const;
 	/**
 	 * Looking from neuron pSource. Is returning an index to the other neuron.
 	 * @param pSource Pointer to a neuron building this edge.
 	 * @return Returns the index of the neuron != pSource.
 	 */
-	virtual int GetDestinationID(AbsNeuron *pSource) const;
+	int GetDestinationID(AbsNeuron *pSource) const;
 
 	/**
 	 * Value of this edge.
 	 * @return Returns the value of this edge.
 	 */
-	virtual const float &GetValue() const;
+	const float &GetValue() const;
 	/**
 	 * Sets the value of this edge.
 	 * @param fValue New value of this edge.
 	 */
-	virtual void SetValue(float fValue);
+	void SetValue(float fValue);
 
 	/**
 	 * Momentum of this edge.
@@ -92,21 +96,21 @@ public:
 	 * Sets the momentum of this edge.
 	 * @param fValue New momentum of this edge.
 	 */
-	virtual void SetMomentum(float fValue);
+	void SetMomentum(float fValue);
 
 	/**
 	 * Returns whether weight is changeable or not.
 	 */
-	virtual bool GetAdaptationState() const;
+	bool GetAdaptationState() const;
 	/**
 	 * Switch the state whether changeable or not.
 	 */
-	virtual void SetAdaptationState(const bool &bAdapt);
+	void SetAdaptationState(const bool &bAdapt);
 
 	/**
 	 * Returns the value of the Edge.
 	 */
-	virtual operator float() const;
+	operator float() const;
 };
 
 }

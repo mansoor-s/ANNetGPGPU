@@ -257,6 +257,10 @@ void SOMNet::CreateSOM(	const unsigned int &iWidthI, const unsigned int &iHeight
 void SOMNet::Training(const unsigned int &iCycles) {
 	assert(iCycles > 0);
 	assert(m_fSigma0 > 0.f);
+	if(GetTrainingSet() == NULL) {
+		std::cout<<"No training set available!"<<std::endl;
+		return;
+	}
 
 	m_iCycles 	= iCycles;
 	m_fLambda 	= m_iCycles / log(m_fSigma0);

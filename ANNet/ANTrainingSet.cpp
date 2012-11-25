@@ -14,6 +14,8 @@ using namespace ANN;
 
 
 TrainingSet::TrainingSet() {
+	m_vInputList.resize(0);
+	m_vOutputList.resize(0);
 }
 
 TrainingSet::~TrainingSet() {
@@ -47,10 +49,14 @@ unsigned int TrainingSet::GetNrElements() const {
 }
 
 std::vector<float> TrainingSet::GetInput(const unsigned int &iID) const {
+	assert(iID < GetNrElements() );
+
 	return m_vInputList.at(iID);
 }
 
 std::vector<float> TrainingSet::GetOutput(const unsigned int &iID) const {
+	assert(iID < GetNrElements() );
+
 	return m_vOutputList.at(iID);
 }
 

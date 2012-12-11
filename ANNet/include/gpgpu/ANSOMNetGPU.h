@@ -26,6 +26,9 @@ private:
 	ANN::Matrix m_EdgeMat;
 	ANN::Matrix m_PosiMat;
 
+	int GetCudaDeviceCount();
+	void SplitDeviceData(const int &iDeviceCount);
+
 public:
 	SOMNetGPU();
 	SOMNetGPU(AbsNet *pNet);

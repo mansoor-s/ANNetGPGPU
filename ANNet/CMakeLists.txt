@@ -12,7 +12,7 @@ FIND_PACKAGE(OpenMP)
 FIND_PACKAGE(CUDA)
 FIND_PACKAGE(CUDAThrust)
 
-#include(FindOpenMP)
+include(FindOpenMP)
 if(OPENMP_FOUND)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
@@ -137,7 +137,7 @@ endif(QT4_FOUND)
 
 if (CUDA_FOUND)
   INCLUDE(FindCUDA)
-  set(CUDA_NVCC_FLAGS "-arch=sm_20")
+  set(CUDA_NVCC_FLAGS "-arch=sm_13")
   include_directories (${CUDA_SDK_ROOT_DIR}/C/common/inc/)
 
   if (CUDATHRUST_FOUND)

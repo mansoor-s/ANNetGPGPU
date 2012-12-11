@@ -341,7 +341,7 @@ void SOMNet::FindBMNeuron() {
 	float fSmallest = std::numeric_limits<float>::max();
 	float fNrOfNeurons 	= (float)(m_pOPLayer->GetNeurons().size() );
 
-	#pragma omp parallel for
+	//#pragma omp parallel for
 	for(int i = 0; i < static_cast<int>(m_pOPLayer->GetNeurons().size() ); i++) {
 		SOMNeuron *pNeuron = (SOMNeuron*)m_pOPLayer->GetNeuron(i);
 		pNeuron->CalcDistance2Inp();
@@ -349,8 +349,9 @@ void SOMNet::FindBMNeuron() {
 
 		// with implementation of conscience mechanism (2nd term)
 		float fConscienceBias = 1.f/fNrOfNeurons - pNeuron->GetConscience();
-		if(m_fConscienceRate > 0.f)
+		if(m_fConscienceRate > 0.f) {
 			fCurVal -= fConscienceBias;
+		}
 		// end of implementation of conscience mechanism
 
 		if(fSmallest > fCurVal) {

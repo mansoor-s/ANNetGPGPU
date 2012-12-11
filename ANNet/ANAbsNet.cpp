@@ -328,8 +328,6 @@ void AbsNet::SetTrainingSet(TrainingSet *pData) {
 }
 
 void AbsNet::SetTrainingSet(const TrainingSet &pData) {
-	assert(pData);
-
 	m_pTrainingData = (TrainingSet*)&pData;
 }
 

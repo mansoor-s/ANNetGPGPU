@@ -9,9 +9,31 @@
 #include <math/ANFunctions.h>
 #include <ANSOMLayer.h>
 #include <basic/ANAbsNeuron.h>
+#include <cuda.h>
 
 
 namespace ANN {
+
+int SOMNetGPU::GetCudaDeviceCount() {
+	int iCount = 0;
+
+	if(cudaGetDeviceCount(&iCount) != cudaSuccess)
+		return 0;
+
+	std::cout<<iCount<<" cuda-capable device(s) found."<<std::endl;
+	return iCount;
+}
+
+void SOMNetGPU::SplitDeviceData(const int &iDeviceCount) {
+	for(unsigned int i = 0; i < iDeviceCount; i++) {
+		if(cudaSetDevice(i) != cudaSuccess) {
+			return;
+		}
+		else {
+			// TODO SPLIT
+		}
+	}
+}
 
 SOMNetGPU::SOMNetGPU() {
 	m_pIPLayer 		= NULL;
@@ -35,6 +57,8 @@ SOMNetGPU::SOMNetGPU() {
 	SetDistFunction(&Functions::fcn_gaussian);
 
 	m_fTypeFlag 	= ANNetSOM;
+
+	GetCudaDeviceCount();
 }
 
 SOMNetGPU::SOMNetGPU(AbsNet *pNet) {
@@ -54,6 +78,8 @@ SOMNetGPU::SOMNetGPU(AbsNet *pNet) {
 	SetTrainingSet(pNet->GetTrainingSet() );
 
 	m_fTypeFlag 	= ANNetSOM;
+
+	GetCudaDeviceCount();
 }
 
 SOMNetGPU::~SOMNetGPU() {

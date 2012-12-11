@@ -75,38 +75,17 @@ int main(int argc, char *argv[]) {
   input.AddInput(white);
 
   std::vector<float> vCol(3);
-  int w1 = 128;
+  int w1 = 40;
   int w2 = 4;
-/*
-  ANN::SOMNet SOMap;
-  SOMap.SetTrainingSet(input);
-  SOMap.CreateSOM(3, 1, w1,w1);
-*/
+
   ANN::SOMNetGPU gpu;
-  gpu.SetTrainingSet(input);
   gpu.CreateSOM(3, 1, w1,w1);
-  //ANN::SOMNetGPU gpu2(&SOMap);
-  //	ANN::SOMNetGPU gpu;
-  //	gpu.SetTrainingSet(input);
-  //	gpu.CreateSOM(3, 1, w1,w1);
+  gpu.SetTrainingSet(input);
 
-  //SOMap.Training(9);
-
-  SOMReader w(w1, w1, w2);
-  //for(int x = 0; x < w1*w1; x++) {
-  //	ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)SOMap.GetOPLayer())->GetNeuron(x);
-  //	vCol[0] = pNeur->GetConI(0)->GetValue();
-  //	vCol[1] = pNeur->GetConI(1)->GetValue();
-  //	vCol[2] = pNeur->GetConI(2)->GetValue();
-
-  //	w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
-  //}
-  //w.Save("CPU.png");
-
-  // GPU
   gpu.SetConscienceRate(0.1);
   gpu.Training(5000);
 
+  SOMReader w(w1, w1, w2);
   for(int x = 0; x < w1*w1; x++) {
 	  ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);
 	  vCol[0] = pNeur->GetConI(0)->GetValue();
@@ -116,25 +95,7 @@ int main(int argc, char *argv[]) {
 	  w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
   }
 
-  w.Save("GPU_1.png");
+  w.Save("SOMGPU.png");
 
-  //gpu.ExpToFS("foo1.bar");
-  //gpu.ImpFromFS("foo1.bar");
-/*
-  gpu.ExpToFS("foo2.bar");
-  gpu.ImpFromFS("foo2.bar");
-  gpu2.ImpFromFS("foo2.bar");
-
-  for(int x = 0; x < w1*w1; x++) {
-	  ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu2.GetOPLayer())->GetNeuron(x);
-	  vCol[0] = pNeur->GetConI(0)->GetValue();
-	  vCol[1] = pNeur->GetConI(1)->GetValue();
-	  vCol[2] = pNeur->GetConI(2)->GetValue();
-
-	  w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
-  }
-
-  w.Save("GPU_2.png");
-*/
   return 0;
 }

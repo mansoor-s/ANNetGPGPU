@@ -77,8 +77,8 @@ int main(int argc, char *argv[]) {
   int w2 = 4;
 
   ANN::SOMNet SOMap;
-  SOMap.SetTrainingSet(input);
   SOMap.CreateSOM(3, 1, w1,w1);
+  SOMap.SetTrainingSet(input);
 
   SOMap.SetConscienceRate(0.1);
   SOMap.Training(5000);
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 
   	w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
   }
-  w.Save("CPU.png");
+  w.Save("SOMCPU.png");
 
   return 0;
 }

@@ -17,9 +17,39 @@
 #include <cassert>
 #include <vector>
 #include <containers/ANTrainingSet.h>
+#include <containers/AN2DArray.h>
 #include <thrust/device_vector.h>
 #include <gpgpu/ANMatrix.h>
 #include <math/ANFunctions.h>
+
+
+class BMUExport {
+public:
+	BMUExport() {};
+	BMUExport(unsigned int iUID, unsigned int iDID, thrust::host_vector<float> vPos) {
+		iBMUID 			= iUID;
+		iDeviceID 		= iDID;
+		dvBMUPos 		= vPos;
+	}
+
+	unsigned int iBMUID;
+	unsigned int iDeviceID;
+	thrust::host_vector<float> dvBMUPos;
+};
+
+class SplittedNetExport {
+public:
+	SplittedNetExport() {};
+	SplittedNetExport(const ANN::Matrix &mEdgeMat, const ANN::Matrix &mPosMat, const thrust::device_vector<float> &vConscience) {
+		f2dEdges 		= mEdgeMat;
+		f2dPositions 	= mPosMat;
+		dvConscience 	= vConscience;
+	}
+  
+	ANN::Matrix f2dEdges;
+	ANN::Matrix f2dPositions;
+	thrust::device_vector<float> dvConscience;
+};
 
 /*
  * BP kernels
@@ -52,25 +82,21 @@ float hostGetMax(const thrust::device_vector<float>& vec, unsigned int &ID);
 float hostGetMin(const thrust::device_vector<float>& vec, unsigned int &ID);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-unsigned int
-hostSOMFindBMNeuronID(thrust::device_vector<float> &ConscienceVector,
-		const ANN::Matrix &SOMEdgeMatrix,
+BMUExport
+hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
 		const thrust::device_vector<float> &InputVector,
 		const float &fConscienceRate);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-hostSOMPropagateBW(ANN::Matrix &SOMEdgeMatrix,
-		const ANN::Matrix &SOMPositionMatrix,
+hostSOMPropagateBW(std::vector<SplittedNetExport> &SExp,
 		const thrust::device_vector<float> &dvInputVector,
-		const unsigned int BMUID,
+		const BMUExport &,
 		const float &fSigmaT,
 		const float &fLearningRate );
-
+		
 void
-hostSOMTraining( thrust::device_vector<float> &ConscienceVector,
-		ANN::Matrix &SOMEdgeMatrix,
-		const ANN::Matrix &SOMPositionMatrix,
+hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,
 		const float &fSigma0,

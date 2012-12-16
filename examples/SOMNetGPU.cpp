@@ -82,7 +82,7 @@ int main(int argc, char *argv[]) {
   gpu.CreateSOM(3, 1, w1,w1);
   gpu.SetTrainingSet(input);
 
-  gpu.SetConscienceRate(0.1);
+  gpu.SetConscienceRate(0);
   gpu.Training(5000);
 
   SOMReader w(w1, w1, w2);

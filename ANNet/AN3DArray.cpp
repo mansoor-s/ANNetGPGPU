@@ -24,9 +24,11 @@ F3DArray::F3DArray() {
 }
 
 F3DArray::~F3DArray() {
+/*
 	if(m_iX*m_iY*m_iZ > 0) {
 		delete [] m_pArray;
 	}
+*/
 }
 
 void F3DArray::Alloc(const int &iX, const int &iY, const int &iZ) {

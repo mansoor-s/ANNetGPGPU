@@ -62,12 +62,14 @@ F2DArray::F2DArray(float *pArray, const int &iSizeX, const int &iSizeY) {
 }
 
 F2DArray::~F2DArray() {
+/*
 	if(m_bAllocated) {
 		if( m_pArray != NULL )
 			delete [] m_pArray;
 //		if(m_pSubArray != NULL)
 //			delete [] m_pSubArray;
 	}
+*/
 }
 
 void F2DArray::Alloc(const int &iSize) {

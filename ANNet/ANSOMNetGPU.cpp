@@ -14,7 +14,7 @@
 
 namespace ANN {
 
-int SOMNetGPU::GetCudaDeviceCount() {
+int SOMNetGPU::GetCudaDeviceCount() const {
 	int iCount = 0;
 
 	if(cudaGetDeviceCount(&iCount) != cudaSuccess)
@@ -24,13 +24,62 @@ int SOMNetGPU::GetCudaDeviceCount() {
 	return iCount;
 }
 
-void SOMNetGPU::SplitDeviceData(const int &iDeviceCount) {
+std::vector<SplittedNetExport> SOMNetGPU::SplitDeviceData() const {
+	std::vector<SplittedNetExport> vRes;
+  
+	unsigned int iStart 		= 0;
+	unsigned int iStop 		= 0;
+	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
+
+	unsigned int iDeviceCount = GetCudaDeviceCount();
 	for(unsigned int i = 0; i < iDeviceCount; i++) {
 		if(cudaSetDevice(i) != cudaSuccess) {
-			return;
+			std::cout<<"SplitDeviceData(): Setting new cuda-capable device failed."<<std::endl;
+			break;
 		}
-		else {
-			// TODO SPLIT
+
+		iStart = i*(iSizeOfLayer/iDeviceCount);
+		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
+
+		// Copy weights between neurons of the input and output layer
+		ANN::Matrix f2dEdges 		= GetOPLayer()->ExpEdgesIn(iStart, iStop);
+		// Copy positions of the neurons in the output layer
+		ANN::Matrix f2dPositions 	= GetOPLayer()->ExpPositions(iStart, iStop);
+
+		// Copy conscience information
+		thrust::host_vector<float> hvConscience(iStop-iStart+1);
+		thrust::device_vector<float> dvConscience;
+		for(unsigned int j = 0; j <= iStop-iStart; j++) {
+			hvConscience[j] = m_pOPLayer->GetNeuron(j+iStart)->GetValue();
+		}
+		dvConscience = hvConscience;
+
+		SplittedNetExport SExp(f2dEdges, f2dPositions, dvConscience);
+		vRes.push_back(SExp);
+	}
+	return vRes;
+}
+
+void SOMNetGPU::CombineDeviceData(const std::vector<SplittedNetExport> &SExp) {
+	unsigned int iStart 		= 0;
+	unsigned int iStop 		= 0;
+	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
+
+	unsigned int iDeviceCount = GetCudaDeviceCount();
+	for(unsigned int i = 0; i < iDeviceCount; i++) {
+		if(cudaSetDevice(i) != cudaSuccess) {
+			std::cout<<"CombineDeviceData(): Setting new cuda-capable device failed."<<std::endl;
+			break;
+		}
+		
+		iStart = i*(iSizeOfLayer/iDeviceCount);
+		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
+		
+		// Copy weights between neurons of the input and output layer
+		GetOPLayer()->ImpEdgesIn(SExp.at(i).f2dEdges, iStart, iStop);
+		// Copy back conscience
+		for(unsigned int j = 0; j <= iStop-iStart; j++) {
+			m_pOPLayer->GetNeuron(j+iStart)->SetValue(SExp.at(i).dvConscience[j]);
 		}
 	}
 }
@@ -38,12 +87,12 @@ void SOMNetGPU::SplitDeviceData(const int &iDeviceCount) {
 SOMNetGPU::SOMNetGPU() {
 	m_pIPLayer 		= NULL;
 	m_pOPLayer 		= NULL;
-	m_pBMNeuron 	= NULL;
+	m_pBMNeuron 		= NULL;
 
 	m_iCycle 		= 0;
 	m_fSigma0 		= 0.f;
 	m_fSigmaT 		= 0.f;
-	m_fLearningRate = 0.5f;
+	m_fLearningRate 	= 0.5f;
 
 	m_iWidthI 		= 0.f;
 	m_iHeightI 		= 0.f;
@@ -57,8 +106,6 @@ SOMNetGPU::SOMNetGPU() {
 	SetDistFunction(&Functions::fcn_gaussian);
 
 	m_fTypeFlag 	= ANNetSOM;
-
-	GetCudaDeviceCount();
 }
 
 SOMNetGPU::SOMNetGPU(AbsNet *pNet) {
@@ -78,8 +125,6 @@ SOMNetGPU::SOMNetGPU(AbsNet *pNet) {
 	SetTrainingSet(pNet->GetTrainingSet() );
 
 	m_fTypeFlag 	= ANNetSOM;
-
-	GetCudaDeviceCount();
 }
 
 SOMNetGPU::~SOMNetGPU() {
@@ -94,37 +139,20 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 		return;
 	}
 
-	m_EdgeMat = m_pOPLayer->ExpEdgesIn();
-	m_PosiMat = ((SOMLayer*)m_pOPLayer)->ExpPositions();
-
-	unsigned int iSize = m_pOPLayer->GetNeurons().size();
-	thrust::host_vector<float> hvConscience(iSize);
-	thrust::device_vector<float> dvConscience;
-	for(unsigned int i = 0; i < iSize; i++) {
-		hvConscience[i] = m_pOPLayer->GetNeuron(i)->GetValue();
-	}
-	dvConscience = hvConscience;
-	
-	std::cout<< "Process the SOM now" <<std::endl;
-	hostSOMTraining(dvConscience,
-			m_EdgeMat,
-			m_PosiMat,
-			*GetTrainingSet(),
-			iCycles,
-			m_fSigma0,
-			m_fLearningRate,
-			m_fConscienceRate,
-			&ANN::fcn_decay);
+	std::vector<SplittedNetExport> SExp = SplitDeviceData();
+	hostSOMTraining(SExp,
+		*GetTrainingSet(),
+		iCycles,
+		m_fSigma0,
+		m_fLearningRate,
+		m_fConscienceRate,
+		&ANN::fcn_decay);
 
 	std::cout<<"Training cycles finished properly"<<std::endl;
 	// Write edge matrix back
 	std::cout<<"Copy device memory back .."<<std::endl;
-	m_pOPLayer->ImpEdgesIn(m_EdgeMat);
-	
-	for(unsigned int i = 0; i < iSize; i++) {
-		m_pOPLayer->GetNeuron(i)->SetValue(dvConscience[i]);
-	}
-	
+	// Copy data from device to host
+	CombineDeviceData(SExp);	
 	std::cout<<".. Finished"<<std::endl;
 }
 

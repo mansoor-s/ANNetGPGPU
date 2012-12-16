@@ -337,6 +337,18 @@ TrainingSet *AbsNet::GetTrainingSet() const {
 	return m_pTrainingData;
 }
 
+AbsLayer *AbsNet::GetIPLayer() const {
+	assert(m_pIPLayer);
+
+	return m_pIPLayer;
+}
+
+AbsLayer *AbsNet::GetOPLayer() const {
+	assert(m_pOPLayer);
+
+	return m_pOPLayer;
+}
+/*
 const AbsLayer *AbsNet::GetIPLayer() const {
 	assert(m_pIPLayer);
 
@@ -348,7 +360,7 @@ const AbsLayer *AbsNet::GetOPLayer() const {
 
 	return m_pOPLayer;
 }
-
+*/
 void AbsNet::SetIPLayer(const unsigned int iID) {
 	assert (iID >= 0);
 	assert (iID < GetLayers().size() );

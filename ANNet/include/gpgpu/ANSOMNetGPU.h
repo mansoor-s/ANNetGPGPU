@@ -26,8 +26,11 @@ private:
 	ANN::Matrix m_EdgeMat;
 	ANN::Matrix m_PosiMat;
 
-	int GetCudaDeviceCount();
-	void SplitDeviceData(const int &iDeviceCount);
+	std::vector<SplittedNetExport> m_vSExp;
+
+	int GetCudaDeviceCount() const;
+	std::vector<SplittedNetExport> SplitDeviceData() const;
+	void CombineDeviceData(const std::vector<SplittedNetExport> &SExp);
 
 public:
 	SOMNetGPU();

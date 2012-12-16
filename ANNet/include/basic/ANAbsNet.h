@@ -43,11 +43,11 @@ class Edge;
 
 
 enum {
-	ANNetSOM 		= 1 << 0,	// type of layer
-	ANNetBP 		= 1 << 1,	// type of layer
+	ANNetSOM 	= 1 << 0,	// type of layer
+	ANNetBP 	= 1 << 1,	// type of layer
 	ANNetHopfield 	= 1 << 2,	// type of layer
 
-	ANNetUndefined = 1 << 3
+	ANNetUndefined 	= 1 << 3
 };
 typedef uint32_t NetTypeFlag;
 
@@ -216,13 +216,24 @@ public:
 	 * Pointer to the input layer (If input layer was already defined).
 	 * @return Returns a pointer to the input layer.
 	 */
-	virtual const AbsLayer *GetIPLayer() const;
+	//virtual const AbsLayer *GetIPLayer() const;
 	/**
 	 * Pointer to the output layer (If output layer was already defined).
 	 * @return Returns a pointer to the output layer.
 	 */
-	virtual const AbsLayer *GetOPLayer() const;
+	//virtual const AbsLayer *GetOPLayer() const;
 
+		/**
+	 * Pointer to the input layer (If input layer was already defined).
+	 * @return Returns a pointer to the input layer.
+	 */
+	virtual AbsLayer *GetIPLayer() const;
+	/**
+	 * Pointer to the output layer (If output layer was already defined).
+	 * @return Returns a pointer to the output layer.
+	 */
+	virtual AbsLayer *GetOPLayer() const;
+	
 	/**
 	 * Sets the input layer
 	 * @param iID ID of the layer.

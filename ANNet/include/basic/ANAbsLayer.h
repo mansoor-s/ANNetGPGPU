@@ -168,9 +168,9 @@ public:
 	virtual void ImpEdgesIn(const F2DArray &, int iStart, int iStop);
 
 	/** \brief:
-	 * NEURON1	 			: edge1, edge1, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON2 				: edge2, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON3	 			: edge3, edge3, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON1				: edge1, edge1, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON2				: edge2, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * NEURON3				: edge3, edge3, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * NEURON[i < iHeight] 	: edge4, edge4, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * ..
 	 * @return Returns a matrix: width=size_this_layer; height=size_of_next_layer
@@ -180,13 +180,23 @@ public:
 
 	/**
 	 * pPositions:
-	 * NEURON1	 			: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON2 				: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON3	 			: X, Y, POS[n < iWidth] ==> directing to input
+	 * NEURON1				: X, Y, POS[n < iWidth] ==> directing to input
+	 * NEURON2				: X, Y, POS[n < iWidth] ==> directing to input
+	 * NEURON3				: X, Y, POS[n < iWidth] ==> directing to input
 	 * NEURON[i < iHeight] 	: X, Y, POS[n < iWidth] ==> directing to input
 	 */
 	virtual F2DArray ExpPositions() const;
 	virtual void ImpPositions(const F2DArray &f2dPos);
+	
+	/**
+	 * pPositions:
+	 * NEURON1				: X, Y, POS[n < iWidth] ==> directing to input
+	 * NEURON2				: X, Y, POS[n < iWidth] ==> directing to input
+	 * NEURON3				: X, Y, POS[n < iWidth] ==> directing to input
+	 * NEURON[i < iHeight] 	: X, Y, POS[n < iWidth] ==> directing to input
+	 */
+	virtual F2DArray ExpPositions(int iStart, int iStop) const;
+	virtual void ImpPositions(const F2DArray &f2dPos, int iStart, int iStop);
 };
 
 }

@@ -15,7 +15,7 @@ namespace ANN {
 			ostrs << fVal << std::endl;
 
 			c_str = new char[ostrs.str().length()+1];
-			std::strcpy(c_str, ostrs.str().c_str());
+			strcpy(c_str, ostrs.str().c_str());
 			return c_str;
 		}
 	}

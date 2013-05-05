@@ -14,7 +14,9 @@
 #ifndef ANHFLAYER_H_
 #define ANHFLAYER_H_
 
+#ifndef SWIG
 #include <basic/ANAbsLayer.h>
+#endif
 
 namespace ANN {
 
@@ -41,6 +43,16 @@ public:
 	 *
 	 */
 	virtual void AddNeurons(const unsigned int &iSize);
+
+	/**
+	 * @return Returns the width of the layer.
+	 */
+	unsigned int GetWidth();
+
+	/**
+	 * @return Returns the height of the layer.
+	 */
+	unsigned int GetHeight();
 
 	/**
 	 * Resizes the layer. Deletes old neurons and adds new ones (initialized with random values).

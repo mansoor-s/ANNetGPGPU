@@ -14,7 +14,9 @@
 #ifndef ANHFNEURON_H_
 #define ANHFNEURON_H_
 
+#ifndef SWIG
 #include <basic/ANAbsNeuron.h>
+#endif
 
 namespace ANN {
 

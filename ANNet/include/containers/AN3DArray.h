@@ -14,12 +14,13 @@
 #ifndef PLAINNETARRAY_H_
 #define PLAINNETARRAY_H_
 
+#ifndef SWIG
 #include <vector>
+#endif 
 
 namespace ANN {
 
 class F2DArray;
-
 
 /**
  * \brief Pseudo 3D-array as a container for the weights of the network.

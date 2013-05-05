@@ -11,6 +11,16 @@ FIND_PACKAGE(Qt4)
 FIND_PACKAGE(OpenMP)
 FIND_PACKAGE(CUDA)
 FIND_PACKAGE(CUDAThrust)
+FIND_PACKAGE(SWIG)
+FIND_PACKAGE(PythonLibs)
+
+if(SWIG_FOUND)
+  INCLUDE(${SWIG_USE_FILE})
+  SET(CMAKE_SWIG_FLAGS "")
+endif()
+if(PYTHONLIBS_FOUND)
+  INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_PATH})
+endif()
 
 include(FindOpenMP)
 if(OPENMP_FOUND)
@@ -21,11 +31,16 @@ endif()
 
 # Make sure the compiler can find include files from our ANNet library.
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/python)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/basic)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/math)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gui)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/containers)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gpgpu)
+
+set( ANPythonInterfaceFiles
+  include/ANPyNet.i
+)
 
 set( ANSourceFiles 
   AN2DArray.cpp
@@ -150,6 +165,7 @@ endif (CUDA_FOUND)
 # Create a library called "ANNet" which includes the source files listed in "ANSourceFiles".
 # The extension is already found. Any number of sources could be listed here.
 if (BZIP2_FOUND)
+
   if (CUDA_FOUND)
     cuda_add_library (ANNet SHARED ${ANSourceFiles} ${ANCUDASourceFiles} ${BZIP_INCLUDE_DIRS}) 
   elseif (NOT CUDA_FOUND)
@@ -163,8 +179,16 @@ if (BZIP2_FOUND)
     target_link_libraries (ANNet ${BZIP2_LIBRARIES})
   endif(OPENMP_FOUND)
 
+  if(SWIG_FOUND AND PYTHONLIBS_FOUND)
+    SET_SOURCE_FILES_PROPERTIES(${ANPythonInterfaceFiles} PROPERTIES CPLUSPLUS ON)
+    SET_SOURCE_FILES_PROPERTIES(${ANPythonInterfaceFiles} PROPERTIES SWIG_FLAGS "-includeall")
+    SWIG_ADD_MODULE(ANPyNet python ${ANPythonInterfaceFiles})
+    SWIG_LINK_LIBRARIES(ANPyNet ${PYTHON_LIBRARIES} ${BZIP2_LIBRARIES} ANNet)
+  endif()
+
   if (QT4_FOUND)
     add_library (ANNetGUI SHARED ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
     target_link_libraries (ANNetGUI ANNet ${QT_LIBRARIES})
   endif (QT4_FOUND)
+
 endif (BZIP2_FOUND)

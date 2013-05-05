@@ -14,19 +14,17 @@
 #ifndef ANABSNET_H_
 #define ANABSNET_H_
 
+#ifndef SWIG
 #include <vector>
 #include <string>
 #include <bzlib.h>
 #include <sstream>
 #include <iostream>
-
 #include <basic/ANAbsLayer.h>
-
-//#include <basic/ANExporter.h>
-//#include <basic/ANImporter.h>
+#endif
 
 namespace ANN {
-
+ 
 // containers
 class F2DArray;
 class F3DArray;
@@ -40,7 +38,6 @@ class Layer;
 class Neuron;
 class AbsNeuron;
 class Edge;
-
 
 enum {
 	ANNetSOM 	= 1 << 0,	// type of layer

@@ -14,10 +14,11 @@
 #ifndef SIMPLENET_H_
 #define SIMPLENET_H_
 
+#ifndef SWIG
 #include <vector>
 #include <string>
-
 #include <basic/ANAbsNet.h>
+#endif
 
 namespace ANN {
 

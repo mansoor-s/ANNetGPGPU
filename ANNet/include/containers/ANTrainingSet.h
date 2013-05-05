@@ -14,13 +14,13 @@
 #ifndef TRAININGDATA_H_
 #define TRAININGDATA_H_
 
+#ifndef SWIG
 #include <utility>
 #include <vector>
-
 #include <bzlib.h>
+#endif
 
 namespace ANN {
-
 
 /**
  * \brief Storage of simple input/output samples usable for training.

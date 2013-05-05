@@ -5,9 +5,10 @@
  *      Author: dgrat
  */
 
+#ifndef SWIG
 #include <list>
 #include <cassert>
-
+#endif
 
 #ifndef ANNLIST_H_
 #define ANNLIST_H_

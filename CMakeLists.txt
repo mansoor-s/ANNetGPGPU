@@ -28,15 +28,14 @@ if(DOXYGEN_FOUND)
 endif(DOXYGEN_FOUND)
 
 if (CUDA_FOUND)
-  cuda_add_executable (SOMNetGPU examples/SOMNetGPU.cpp)
-  target_link_libraries (SOMNetGPU ANNet ANNetGUI) 
-
+  if (QT4_FOUND)
+    cuda_add_executable (SOMNetGPU examples/SOMNetGPU.cpp)
+    target_link_libraries (SOMNetGPU ANNet ANNetGUI) 
+  endif (QT4_FOUND)
+  
   cuda_add_executable (BPNetGPU examples/BPNetGPU.cpp)
   target_link_libraries (BPNetGPU ANNet) 
 endif(CUDA_FOUND)
-
-add_executable (SOMNetCPU examples/SOMNetCPU.cpp)
-target_link_libraries (SOMNetCPU ANNet ANNetGUI) 
 
 add_executable (LoadBPNet examples/LoadBPNet.cpp)
 target_link_libraries (LoadBPNet ANNet) 
@@ -48,6 +47,12 @@ add_executable (HFNet examples/HFNet.cpp)
 target_link_libraries (HFNet ANNet) 
 
 if (QT4_FOUND)
+  add_executable (SOMNetCPU examples/SOMNetCPU.cpp)
+  target_link_libraries (SOMNetCPU ANNet ANNetGUI) 
+    
+  add_executable (SOMNetClusteringApproach examples/SOMNetClusteringApproach.cpp)
+  target_link_libraries (SOMNetClusteringApproach ANNet ANNetGUI) 
+
   if (WIN32)
     add_executable (ANNetDesigner WIN32 ANNetDesigner.cpp)
   elseif(NOT WIN32)

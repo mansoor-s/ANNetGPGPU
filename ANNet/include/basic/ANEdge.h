@@ -18,7 +18,6 @@ namespace ANN {
 
 class AbsNeuron;
 
-
 /**
  * \brief Represents an edge in the network. Always connecting two neurons.
  *

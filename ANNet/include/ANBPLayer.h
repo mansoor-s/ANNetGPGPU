@@ -14,11 +14,12 @@
 #ifndef SIMPLELAYER_H_
 #define SIMPLELAYER_H_
 
+#ifndef SWIG
 #include <iostream>
 #include <vector>
 #include <stdint.h>
-
 #include <basic/ANAbsLayer.h>
+#endif
 
 namespace ANN {
 

@@ -14,9 +14,11 @@
 #ifndef TRANSFERFUNCTIONS_H_
 #define TRANSFERFUNCTIONS_H_
 
+#ifndef SWIG
 #include <cmath>
 #include <stdio.h>
 #include <string.h>
+#endif
 
 namespace ANN {
 

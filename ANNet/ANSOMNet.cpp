@@ -24,18 +24,19 @@
 
 #include <containers/ANTrainingSet.h>
 #include <containers/ANConTable.h>
+#include <containers/ANCentroid.h>
 
 namespace ANN {
 
 SOMNet::SOMNet() {
 	m_pIPLayer 		= NULL;
 	m_pOPLayer 		= NULL;
-	m_pBMNeuron 	= NULL;
+	m_pBMNeuron 		= NULL;
 
 	m_iCycle 		= 0;
 	m_fSigma0 		= 0.f;
 	m_fSigmaT 		= 0.f;
-	m_fLearningRate = 0.5f;
+	m_fLearningRate 	= 0.5f;
 
 	m_iWidthI 		= 0.f;
 	m_iHeightI 		= 0.f;
@@ -68,6 +69,60 @@ SOMNet::SOMNet(AbsNet *pNet) {
 	SetTrainingSet(pNet->GetTrainingSet() );
 
 	m_fTypeFlag 	= ANNetSOM;
+}
+
+SOMNet::SOMNet(const std::vector<unsigned int> &vDimI, const std::vector<unsigned int> &vDimO) {
+  	m_pIPLayer 		= NULL;
+	m_pOPLayer 		= NULL;
+	m_pBMNeuron 		= NULL;
+
+	m_iCycle 		= 0;
+	m_fSigma0 		= 0.f;
+	m_fSigmaT 		= 0.f;
+	m_fLearningRate 	= 0.5f;
+
+	m_iWidthI 		= 0.f;
+	m_iHeightI 		= 0.f;
+	m_iWidthO 		= 0.f;
+	m_iHeightO 		= 0.f;
+	
+	// Conscience mechanism
+	m_fConscienceRate 	= 0.f;
+
+	// mexican hat shaped function for this SOM
+	SetDistFunction(&Functions::fcn_gaussian);
+
+	m_fTypeFlag 	= ANNetSOM;
+	
+	CreateSOM(vDimI, vDimO);
+}
+
+SOMNet::SOMNet(	const unsigned int &iWidthI, const unsigned int &iHeightI,
+		const unsigned int &iWidthO, const unsigned int &iHeightO) 
+{
+	m_pIPLayer 		= NULL;
+	m_pOPLayer 		= NULL;
+	m_pBMNeuron 		= NULL;
+
+	m_iCycle 		= 0;
+	m_fSigma0 		= 0.f;
+	m_fSigmaT 		= 0.f;
+	m_fLearningRate 	= 0.5f;
+
+	m_iWidthI 		= 0.f;
+	m_iHeightI 		= 0.f;
+	m_iWidthO 		= 0.f;
+	m_iHeightO 		= 0.f;
+	
+	// Conscience mechanism
+	m_fConscienceRate 	= 0.f;
+
+	// mexican hat shaped function for this SOM
+	SetDistFunction(&Functions::fcn_gaussian);
+
+	m_fTypeFlag 	= ANNetSOM;
+	
+	CreateSOM(iWidthI, iHeightI, iWidthO, iHeightO);
 }
 
 void SOMNet::AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType) {
@@ -261,7 +316,7 @@ void SOMNet::Training(const unsigned int &iCycles) {
 		std::cout<<"No training set available!"<<std::endl;
 		return;
 	}
-
+	
 	m_iCycles 	= iCycles;
 	m_fLambda 	= m_iCycles / log(m_fSigma0);
 
@@ -280,21 +335,53 @@ void SOMNet::Training(const unsigned int &iCycles) {
 			std::cout<<"Current training progress calculated by the CPU is: "<<(float)(m_iCycle+1.f)/(float)m_iCycles*100.f<<"%/Step="<<m_iCycle+1<<std::endl;
 		}
 
-	    // The input vectors are presented to the network at random
-	    SetInput( GetTrainingSet()->GetInput(RandInt(iMin, iMax) ) );
+		// The input vectors are presented to the network at random
+		int iRandID = RandInt(iMin, iMax);
+		SetInput(GetTrainingSet()->GetInput(iRandID) );
 
 		// Present the input vector to each node and determine the BMU
 		FindBMNeuron();
 
 		// Calculate the width of the neighborhood for this time step
-		if(m_fConscienceRate <= 0.f)	// without conscience mechanism
-			m_fSigmaT = m_DistFunction->decay(m_fSigma0, m_iCycle, m_fLambda);
+		if(m_fConscienceRate <= 0.f) {	// without conscience mechanism
+			m_fSigmaT = std::floor(m_DistFunction->decay(m_fSigma0, m_iCycle, m_fLambda) + 0.5f);
+		}
 
 		m_fLearningRateT = m_DistFunction->decay(m_fLearningRate, m_iCycle, m_iCycles);
 
 		// Adjust the weight vector of the BMU and its neighbors
 		PropagateBW();
 	}
+}
+
+std::vector<Centroid> SOMNet::CalcCentroids() {
+	// Ensure that direct access to centroid-array is possible
+	//m_vCentroids = std::vector<Centroid>(GetTrainingSet()->GetNrElements() );
+	
+	unsigned int iNrClusters = 0;
+	for(unsigned int i = 0; i < GetTrainingSet()->GetNrElements(); i++) {
+		m_vCentroids.push_back(Centroid() );
+	  
+		SetInput(GetTrainingSet()->GetInput(i) );
+		
+		// Present the input vector to each node and determine the BMU
+		FindBMNeuron();
+		
+		m_vCentroids[i].m_iBMUID 	= m_pBMNeuron->GetID();
+		m_vCentroids[i].m_vCentroid 	= m_pBMNeuron->GetConsI();
+		m_vCentroids[i].m_fDistance 	= m_pBMNeuron->GetValue();
+	}
+	
+	// Count the number of centroids
+	std::sort(m_vCentroids.begin(), m_vCentroids.end() );
+	std::vector<Centroid> vCounter = m_vCentroids;
+	vCounter.erase(std::unique(vCounter.begin(), vCounter.end()), vCounter.end() );
+	std::cout<<"Number of clusters found: "<<vCounter.size()<<std::endl;
+	
+	// Calculate summed squared error
+	// TODO
+	
+	return m_vCentroids;
 }
 
 void SOMNet::PropagateFW() {
@@ -310,14 +397,14 @@ void SOMNet::PropagateBW() {
 		float fDist 		= pNeuron->GetDistance2Neur(*m_pBMNeuron);
 
 		//std::cout<<"CPU influence: "<< m_DistFunction->distance(fDist, m_fSigmaT) <<std::endl;
-		if(fDist <= m_fSigmaT) {
+		if(fDist < m_fSigmaT) {
 			//calculate by how much weights get adjusted ..
 			float fInfluence = m_DistFunction->distance(fDist, m_fSigmaT);
 			pNeuron->SetInfluence(fInfluence);
 			// .. and adjust them
 			pNeuron->AdaptEdges();
 		}
-	    //reduce the learning rate
+		//reduce the learning rate
 		pNeuron->SetLearningRate(m_fLearningRateT);
 	}
 }

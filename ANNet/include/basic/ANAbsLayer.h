@@ -14,12 +14,13 @@
 #ifndef ANBASICLAYER_H_
 #define ANBASICLAYER_H_
 
+#ifndef SWIG
 #include <iostream>
 #include <vector>
 #include <stdint.h>
 #include <containers/AN2DArray.h>
-
 #include <bzlib.h>
+#endif
 
 namespace ANN {
 
@@ -27,7 +28,6 @@ namespace ANN {
 class AbsNeuron;
 class TransfFunction;
 class ConTable;
-
 
 enum {
 	ANLayerInput 	= 1 << 0,	// type of layer

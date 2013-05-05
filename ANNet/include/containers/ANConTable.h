@@ -14,11 +14,13 @@
 #ifndef NETCONNECTIONTABLE_H_
 #define NETCONNECTIONTABLE_H_
 
+#ifndef SWIG
 #include <string>
 #include <stdint.h>
+#endif
 
 namespace ANN {
-
+  
 typedef uint32_t LayerTypeFlag;
 typedef uint32_t NetTypeFlag;
 

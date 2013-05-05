@@ -14,19 +14,21 @@
 #ifndef SOMNEURON_H_
 #define SOMNEURON_H_
 
+#ifndef SWIG
 #include <vector>
 #include <basic/ANAbsNeuron.h>
+#endif
+
 
 namespace ANN {
 
 class SOMLayer;
 
-
 class SOMNeuron : public AbsNeuron {
 protected:
-	float 				m_fLearningRate;	// learning rate
-	float 				m_fInfluence;		// distance of neurons in neighborhood to alterate
-	float 				m_fConscience;		// bias for conscience mechanism
+	float 	m_fLearningRate; 	// learning rate
+	float 	m_fInfluence; 		// distance of neurons in neighborhood to alterate
+	float 	m_fConscience; 		// bias for conscience mechanism
 
 public:
 	SOMNeuron(SOMLayer *parent = 0);

@@ -14,9 +14,12 @@
 #ifndef SOMLAYER_H_
 #define SOMLAYER_H_
 
+#ifndef SWIG
 #include <containers/AN2DArray.h>
 #include <basic/ANAbsLayer.h>
 #include <vector>
+#endif
+
 
 namespace ANN {
 

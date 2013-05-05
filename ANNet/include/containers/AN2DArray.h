@@ -14,16 +14,17 @@
 #ifndef NEURONARRAY_H_
 #define NEURONARRAY_H_
 
+#ifndef SWIG
 #include <iostream>
 #include <vector>
 #ifdef CUDA
-#include <gpgpu/ANMatrix.h>
+	#include <gpgpu/ANMatrix.h>
+#endif
 #endif
 
 namespace ANN {
 
 class F3DArray;
-
 
 /**
  * \brief Pseudo 2D-array as a container for the neurons and error deltas of the network.

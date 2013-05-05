@@ -14,12 +14,15 @@
 #ifndef SOMNET_H_
 #define SOMNET_H_
 
+#ifndef SWIG
 #include <basic/ANAbsNet.h>
-
+#include <vector>
+#endif
 
 namespace ANN {
 
 class SOMNeuron;
+class Centroid;
 class DistFunction;
 
 class SOMNet : public AbsNet {
@@ -29,22 +32,26 @@ protected:
 
 	unsigned int 	m_iCycle;	// current cycle step in learning progress
 	unsigned int 	m_iCycles;	// maximum of cycles
-	float 			m_fSigma0;	// radius of the lattice at t0
-	float 			m_fSigmaT;	// radius of the lattice at tx
-	float 			m_fLambda;	// time constant
-	float 			m_fLearningRateT;
+	float 		m_fSigma0;	// radius of the lattice at t0
+	float 		m_fSigmaT;	// radius of the lattice at tx
+	float 		m_fLambda;	// time constant
+	float 		m_fLearningRateT;
 	
 	// Conscience mechanism
-	float 			m_fConscienceRate;
+	float 		m_fConscienceRate;
 
 	/* first Ctor */
 	std::vector<unsigned int> m_vDimI; // dimensions of the input layer (Cartesian coordinates)
 	std::vector<unsigned int> m_vDimO; // dimensions of the output layer (Cartesian coordinates)
+	
+	/* Saves the corresponding centroid to each input pattern */
+	std::vector<Centroid> m_vCentroids; // Array with size equal to number of input patterns
+	
 	/* second Ctor */
 	unsigned int 	m_iWidthI;	// width of the input layer
 	unsigned int 	m_iHeightI;	// height of the input layer
 	unsigned int 	m_iWidthO;	// width of the output layer
-	unsigned int 	m_iHeightO; // height of the output layer
+	unsigned int 	m_iHeightO; 	// height of the output layer
 
 protected:
 	/**
@@ -60,19 +67,19 @@ protected:
 	/**
 	 * Implement to determine back propagation ( == learning ) behavior
 	 */
-	virtual void PropagateBW();
+	void PropagateBW();
 
 	/**
 	 * TODO Implement to determine propagation behavior
 	 */
-	virtual void PropagateFW();
+	void PropagateFW();
 
 	/**
 	 * Adds a layer to the network.
 	 * @param iSize Number of neurons of the layer.
 	 * @param flType Flag describing the type of the net.
 	 */
-	virtual void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
+	void AddLayer(const unsigned int &iSize, const LayerTypeFlag &flType);
 
 public:
 	/**
@@ -96,15 +103,20 @@ public:
 	 * @param iHeightO Height of the output layer
 	 */
 	SOMNet(	const unsigned int &iWidthI, const unsigned int &iHeightI,
-			const unsigned int &iWidthO, const unsigned int &iHeightO);
+		const unsigned int &iWidthO, const unsigned int &iHeightO);
 
 	virtual ~SOMNet();
 
-	/*
-	 *
+	/**
+	 * Creates the network based on a connection table.
+	 * @param ConTable is the connection table
 	 */
-	virtual void CreateNet(const ConTable &Net);
+	void CreateNet(const ConTable &Net);
 
+	/**
+	 * Returns a pointer to the SOM.
+	 * @return the pointer to the SOM
+	 */
 	SOMNet *GetNet();
 
 	/**
@@ -115,12 +127,12 @@ public:
 	 * @param vDimO vector inheriting the dimensions of the output layer: vDim[X], vDim[Y], vDim[Z], vDim[DimN], ..
 	 */
 	void CreateSOM(	const std::vector<unsigned int> &vDimI,
-					const std::vector<unsigned int> &vDimO);
+			const std::vector<unsigned int> &vDimO);
 
 	void CreateSOM(	const std::vector<unsigned int> &vDimI,
-					const std::vector<unsigned int> &vDimO,
-					const F2DArray &f2dEdgeMat,
-					const F2DArray &f2dNeurPos);
+			const std::vector<unsigned int> &vDimO,
+			const F2DArray &f2dEdgeMat,
+			const F2DArray &f2dNeurPos);
 
 	/**
 	 * Creates a double layered network.
@@ -130,14 +142,19 @@ public:
 	 * @param iHeightO Height of the output layer
 	 */
 	void CreateSOM(	const unsigned int &iWidthI, const unsigned int &iHeightI,
-					const unsigned int &iWidthO, const unsigned int &iHeightO);
+			const unsigned int &iWidthO, const unsigned int &iHeightO);
 
 	/**
 	 * Trains the network with given input until iCycles is reached.
 	 * @param iCycles Maximum number of training cycles.
 	 */
-	virtual void Training(const unsigned int &iCycles = 1000);
+	void Training(const unsigned int &iCycles = 1000);
 
+	/**
+	 * Clustering results of the network.
+	 * @return std::vector<Centroid> Returns the obtained centroids with the euclidean distances to the input.
+	 */
+	std::vector<Centroid> CalcCentroids();
 
 	/**
 	 * Sets learning rate scalar of the network.
@@ -167,7 +184,9 @@ public:
 	void SetConscienceRate(const float &fVal);
 	
 	/**
-	 * 
+	 * @return Returns the rate for the application of the conscience mechanism. 
+	 * A value of zero leads to the standard kohonen implementation. 
+	 * Value must be: 0.f < fVal < 1.f
 	 */
 	float GetConscienceRate();
 };

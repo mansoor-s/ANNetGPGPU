@@ -34,6 +34,14 @@ HFLayer::~HFLayer() {
 	// TODO Auto-generated destructor stub
 }
 
+unsigned int HFLayer::GetWidth() {
+	return m_iWidth;
+}
+
+unsigned int HFLayer::GetHeight() {
+	return m_iHeight;
+}
+
 void HFLayer::Resize(const unsigned int &iSize) {
 	EraseAll();
 	AddNeurons(iSize);

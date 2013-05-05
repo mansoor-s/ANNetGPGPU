@@ -14,11 +14,12 @@
 #ifndef ANHFNET_H_
 #define ANHFNET_H_
 
+#ifndef SWIG
 #include <vector>
 #include <string>
-
 #include <basic/ANAbsNet.h>
 #include <basic/ANAbsLayer.h>
+#endif
 
 namespace ANN {
 

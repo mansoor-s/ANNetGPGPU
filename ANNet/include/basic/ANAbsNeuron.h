@@ -14,14 +14,14 @@
 #ifndef ABSNEURON_H_
 #define ABSNEURON_H_
 
-//#include <basic/ANList.h>
+#ifndef SWIG
 #include <vector>
 #include <string>
-
 #include <bzlib.h>
+#endif
 
 namespace ANN {
-
+  
 // containers
 class F2DArray;
 class F3DArray;
@@ -34,7 +34,6 @@ class AbsLayer;
 class AbsNeuron;
 class Edge;
 
-
 /**
  * \brief Abstract class describing a basic neuron in a network.
  *
@@ -46,15 +45,15 @@ class Edge;
  */
 class AbsNeuron {
 protected:
-	std::vector<float> 	m_vPosition;		// x, y, z, .. coordinates of the neuron (e.g. SOM)
-	float m_fValue;							// value of the neuron in the net
+	std::vector<float> m_vPosition;			// x, y, z, .. coordinates of the neuron (e.g. SOM)
+	float m_fValue;					// value of the neuron in the net
 
-	float m_fErrorDelta;					// Current error delta of this neuron
+	float m_fErrorDelta;				// Current error delta of this neuron
 
-	AbsLayer *m_pParentLayer;				// layer which is inheriting this neuron
-	int m_iNeuronID;						// ID of this neuron in the layer
+	AbsLayer *m_pParentLayer;			// layer which is inheriting this neuron
+	int m_iNeuronID;				// ID of this neuron in the layer
 
-	Edge *m_pBias;							// Pointer to the bias edge (or connection to bias neuron)
+	Edge *m_pBias;					// Pointer to the bias edge (or connection to bias neuron)
 
 	//ANN::list<Edge*> m_lOutgoingConnections;
 	//ANN::list<Edge*> m_lIncomingConnections;

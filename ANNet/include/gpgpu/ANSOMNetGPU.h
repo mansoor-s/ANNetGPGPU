@@ -14,10 +14,11 @@
 #ifndef ANSOMNETGPU_H_
 #define ANSOMNETGPU_H_
 
+#ifndef SWIG
 #include <ANSOMNet.h>
 #include <gpgpu/ANKernels.h>
 #include <gpgpu/ANMatrix.h>
-
+#endif
 
 namespace ANN {
 

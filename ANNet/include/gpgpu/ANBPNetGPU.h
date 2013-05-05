@@ -8,10 +8,12 @@
 #ifndef ANBPNETGPU_H_
 #define ANBPNETGPU_H_
 
+#ifndef SWIG
 #include <ANBPNet.h>
 #include <gpgpu/ANKernels.h>
 #include <gpgpu/ANMatrix.h>
 #include <math/ANFunctions.h>
+#endif
 
 namespace ANN {
 

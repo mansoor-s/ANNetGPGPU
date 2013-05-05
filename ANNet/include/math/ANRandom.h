@@ -14,10 +14,11 @@
 #ifndef RANDOMIZER_H_
 #define RANDOMIZER_H_
 
+#ifndef SWIG
 #include <cstdlib>
 #include <cmath>
 #include <ctime>
-
+#endif
 
 #ifdef __linux__
 	#include <sys/times.h>

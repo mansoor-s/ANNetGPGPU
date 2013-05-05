@@ -243,17 +243,17 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 			// Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) );
 			for(unsigned int y = 0; y < iHeight; y++) { 	// for each coordinate position of the neuron
 				thrust::transform(
-					SExp.at(iDev).f2dPositions.getRowBegin(y),	// input
-					SExp.at(iDev).f2dPositions.getRowEnd(y), 	// input
+					SExp.at(iDev).f2dPositions.getRowBegin(y),		// input
+					SExp.at(iDev).f2dPositions.getRowEnd(y), 		// input
 					dvTmp.begin(), 						// result
-					minus_pow_functor(dvBMUPos[y]) ); 	// functor
+					minus_pow_functor(dvBMUPos[y]) ); 			// functor
 
 				thrust::transform(
 					dvDist.begin(), 					// input
 					dvDist.end(), 						// input
 					dvTmp.begin(),						// input
 					dvDist.begin(), 					// result
-					thrust::plus<float>() );			// functor
+					thrust::plus<float>() );				// functor
 			}
 			thrust::transform(
 				dvDist.begin(),							// input
@@ -265,8 +265,8 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 			thrust::transform(
 				dvDist.begin(),							// input
 				dvDist.end(), 							// input
-				dvInfluence.begin(), 					// result
-				gaussian_bell_functor(fSigmaT) );		// functor
+				dvInfluence.begin(), 						// result
+				gaussian_bell_functor(fSigmaT) );				// functor
 
 			// 3. Only handle neurons in radius:
 			// 3a. Make stencil
@@ -276,7 +276,7 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 				dvDist.end(),							// input 1
 				dvTmp.begin(),							// input 1
 				dvTmp.begin(), 							// result
-				thrust::less_equal<float>() 			// functor
+				thrust::less<float>() 						// functor
 			);
 
 			// 3b. Use stencil to modify only neurons inside the radius
@@ -325,6 +325,7 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		else {
 			std::cout<<"Current training progress calculated by the CPU is: "<<(float)(i+1.f)/(float)iCycles*100.f<<"%/Step="<<i+1<<std::endl;
 		}
+
 		// Set input
 		std::vector<float> vCurInput = InputSet.GetInput(ANN::RandInt(iMin, iMax) );
 		thrust::device_vector<float> dvInputVector(vCurInput.size() );
@@ -335,8 +336,9 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		BMUExp = hostSOMFindBMNeuronID(SExp, dvInputVector, fConscienceRate);
 
 		// Calc m_fSigmaT if conscience is _not_ used
-		if(fConscienceRate <= 0.f)
-			fSigmaT = pfnDecay(fSigma0, i, fLambda);
+		if(fConscienceRate <= 0.f) {
+			fSigmaT = std::floor(pfnDecay(fSigma0, i, fLambda) + 0.5f);
+		}
 		float fLearningRate = pfnDecay(fLearningRate0, i, iCycles);
 
 		// Propagate BW

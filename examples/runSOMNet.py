@@ -1,4 +1,4 @@
-from ANPyNet import *
+from ANPyNetCPU import *
 red = vectorFLT(3)
 black = vectorFLT(3)
 white = vectorFLT(3)

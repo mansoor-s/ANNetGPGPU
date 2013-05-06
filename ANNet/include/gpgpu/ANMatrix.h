@@ -14,9 +14,10 @@
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
+#ifndef SWIG
 #include <thrust/device_vector.h>
 #include <cassert>
-
+#endif
 
 namespace ANN {
 

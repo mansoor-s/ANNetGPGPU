@@ -14,6 +14,7 @@
 #ifndef ANKERNELS_H_
 #define ANKERNELS_H_
 
+#ifndef SWIG
 #include <cassert>
 #include <vector>
 #include <containers/ANTrainingSet.h>
@@ -21,7 +22,7 @@
 #include <thrust/device_vector.h>
 #include <gpgpu/ANMatrix.h>
 #include <math/ANFunctions.h>
-
+#endif
 
 class BMUExport {
 public:

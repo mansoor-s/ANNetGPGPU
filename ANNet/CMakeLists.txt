@@ -2,9 +2,10 @@
 # refer to the root source directory of the project as ${ANNetGPU_SOURCE_DIR} and
 # to the root binary directory of the project as ${ANNetGPU_SOURCE_DIR}.
 cmake_minimum_required (VERSION 2.8)
-project (ANNetGPGPU)
+PROJECT (ANNetGPGPU)
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 FIND_PACKAGE(BZip2 REQUIRED)
 FIND_PACKAGE(Qt4)
@@ -24,9 +25,9 @@ endif()
 
 include(FindOpenMP)
 if(OPENMP_FOUND)
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
 endif()
 
 # Make sure the compiler can find include files from our ANNet library.
@@ -38,8 +39,12 @@ INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gui)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/containers)
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include/gpgpu)
 
-set( ANPythonInterfaceFiles
-  include/ANPyNet.i
+set( ANPythonCPUInterfaceFiles
+  include/ANPyNetCPU.i
+)
+
+set( ANPythonGPUInterfaceFiles
+  include/ANPyNetGPU.i
 )
 
 set( ANSourceFiles 
@@ -165,30 +170,43 @@ endif (CUDA_FOUND)
 # Create a library called "ANNet" which includes the source files listed in "ANSourceFiles".
 # The extension is already found. Any number of sources could be listed here.
 if (BZIP2_FOUND)
-
+ 
+  # Build ANNet C library
   if (CUDA_FOUND)
-    cuda_add_library (ANNet SHARED ${ANSourceFiles} ${ANCUDASourceFiles} ${BZIP_INCLUDE_DIRS}) 
+    cuda_add_library (ANNet STATIC ${ANSourceFiles} ${ANCUDASourceFiles} ${BZIP_INCLUDE_DIRS}) 
   elseif (NOT CUDA_FOUND)
-    add_library (ANNet SHARED ${ANSourceFiles} ${BZIP_INCLUDE_DIRS})
+    add_library (ANNet STATIC ${ANSourceFiles} ${BZIP_INCLUDE_DIRS})
   endif(CUDA_FOUND)
 
-  # -fopenmp necessary for mingw NOT gcc
+  # Linke OpenMP to ANNet library
   if(OPENMP_FOUND)
     target_link_libraries (ANNet ${BZIP2_LIBRARIES} -fopenmp)
   elseif(NOT OPENMP_FOUND)
     target_link_libraries (ANNet ${BZIP2_LIBRARIES})
   endif(OPENMP_FOUND)
 
-  if(SWIG_FOUND AND PYTHONLIBS_FOUND)
-    SET_SOURCE_FILES_PROPERTIES(${ANPythonInterfaceFiles} PROPERTIES CPLUSPLUS ON)
-    SET_SOURCE_FILES_PROPERTIES(${ANPythonInterfaceFiles} PROPERTIES SWIG_FLAGS "-includeall")
-    SWIG_ADD_MODULE(ANPyNet python ${ANPythonInterfaceFiles})
-    SWIG_LINK_LIBRARIES(ANPyNet ${PYTHON_LIBRARIES} ${BZIP2_LIBRARIES} ANNet)
-  endif()
+  # Build python interface
+  if (SWIG_FOUND AND PYTHONLIBS_FOUND)
+    # Create sub directory for the interface intermediate
+    FILE(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/include)
 
-  if (QT4_FOUND)
-    add_library (ANNetGUI SHARED ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
-    target_link_libraries (ANNetGUI ANNet ${QT_LIBRARIES})
-  endif (QT4_FOUND)
+    SET_SOURCE_FILES_PROPERTIES(${ANPythonCPUInterfaceFiles} PROPERTIES CPLUSPLUS ON)
+    SET_SOURCE_FILES_PROPERTIES(${ANPythonCPUInterfaceFiles} PROPERTIES CMAKE_SWIG_FLAGS "-includeall")
+    SWIG_ADD_MODULE(ANPyNetCPU python ${ANPythonCPUInterfaceFiles})
+    SWIG_LINK_LIBRARIES(ANPyNetCPU ${PYTHON_LIBRARIES} ANNet)
+
+    if (CUDA_FOUND)
+      SET_SOURCE_FILES_PROPERTIES(${ANPythonGPUInterfaceFiles} PROPERTIES CPLUSPLUS ON)
+      SET_SOURCE_FILES_PROPERTIES(${ANPythonGPUInterfaceFiles} PROPERTIES CMAKE_SWIG_FLAGS "-includeall")
+      SWIG_ADD_MODULE(ANPyNetGPU python ${ANPythonGPUInterfaceFiles})
+      SWIG_LINK_LIBRARIES(ANPyNetGPU ${PYTHON_LIBRARIES} ANNet)
+    endif(CUDA_FOUND)
+  endif(SWIG_FOUND AND PYTHONLIBS_FOUND)
+
+#  # Build Qt library
+#   if (QT4_FOUND)
+#     add_library (ANNetGUI STATIC ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
+#     target_link_libraries (ANNetGUI ANNet ${QT_LIBRARIES})
+#   endif (QT4_FOUND)
 
 endif (BZIP2_FOUND)

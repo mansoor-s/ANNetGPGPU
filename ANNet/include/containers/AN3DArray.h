@@ -31,39 +31,31 @@ class F3DArray {
 	friend class F2DArray;
 
 private:
-	int m_iX;	// nr. of neuron in layer m_iY
-	int m_iY;	// nr. of layer in net
-	int m_iZ;	// nr. of axon/weight of neuron m:iX in layer m_iY
+	unsigned int m_iX;	// nr. of neuron in layer m_iY
+	unsigned int m_iY;	// nr. of layer in net
+	unsigned int m_iZ;	// nr. of axon/weight of neuron m:iX in layer m_iY
 
-public:
-	// Public Access for CUDA
-	/**
-	 * Weights:
-	 *
-	 * m_fWeights[y] 		== LAYERS
-	 * m_fWeights[y][x] 	== NEURONS
-	 * m_fWeights[y][x][z] 	== EDGES
-	 */
 	float *m_pArray;
 
+public:
 	// Standard C++ "conventions"
 	F3DArray();
-	~F3DArray();
+	virtual ~F3DArray();
 
-	void Alloc(const int &iX, const int &iY, const int &iZ);
+	void Alloc(const unsigned int &iX, const unsigned int &iY, const unsigned int &iZ);
 
-	const int &GetW() const;	// X
-	const int &GetH() const;	// Y
-	const int &GetD() const;	// Z
-	int GetTotalSize() const; 	// X*Y*Z
+	unsigned int GetW() const;	// X
+	unsigned int GetH() const;	// Y
+	unsigned int GetD() const;	// Z
+
+	unsigned int GetTotalSize() const; 	// X*Y*Z
 
 	/* return a pointer to the subarray at: Y,X */
-	F2DArray GetSubArrayYZ(const int &iX) const;
-	F2DArray GetSubArrayXZ(const int &iY) const;
-	F2DArray GetSubArrayXY(const int &iZ) const;
+	F2DArray GetSubArrayYZ(const unsigned int &iX) const;
+	F2DArray GetSubArrayXZ(const unsigned int &iY) const;
+	F2DArray GetSubArrayXY(const unsigned int &iZ) const;
 
-	void SetValue(const float &fVal,
-			const int &iX, const int &iY, const int &iZ);
+	void SetValue(const float &fVal, const int &iX, const int &iY, const int &iZ);
 	float GetValue(const int &iX, const int &iY, const int &iZ) const;
 
 //OPERATORS

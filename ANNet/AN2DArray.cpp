@@ -111,11 +111,11 @@ void F2DArray::Alloc(const unsigned int &iX, const unsigned int &iY) {
 	m_bAllocated = true;
 }
 
-const unsigned int &F2DArray::GetW() const {
+unsigned int F2DArray::GetW() const {
 	return m_iX;
 }
 
-const unsigned int &F2DArray::GetH() const {
+unsigned int F2DArray::GetH() const {
 	return m_iY;
 }
 

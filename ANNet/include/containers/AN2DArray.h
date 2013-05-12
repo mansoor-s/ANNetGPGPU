@@ -58,8 +58,8 @@ public:
 	void Alloc(const unsigned int &iSize);
 	void Alloc(const unsigned int &iX, const unsigned int &iY);
 
-	const unsigned int &GetW() const;
-	const unsigned int &GetH() const;
+	unsigned int GetW() const;
+	unsigned int GetH() const;
 	
 	unsigned int GetTotalSize() const;
 

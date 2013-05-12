@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
   int w1 = 40;
   int w2 = 4;
 
-  ANN::SOMNetGPU gpu;
+  ANNGPGPU::SOMNetGPU gpu;
   gpu.CreateSOM(3, 1, w1,w1);
   gpu.SetTrainingSet(input);
 

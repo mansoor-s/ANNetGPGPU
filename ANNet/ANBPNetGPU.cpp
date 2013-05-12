@@ -13,17 +13,17 @@
 #include <gpgpu/ANBPNetGPU.h>
 
 
-namespace ANN {
+namespace ANNGPGPU {
 
 BPNetGPU::BPNetGPU() {
-	m_fTypeFlag 		= ANNetBP;
+	m_fTypeFlag 		= ANN::ANNetBP;
 	SetTransfFunction(&ANN::Functions::fcn_log);
 }
 
 BPNetGPU::~BPNetGPU() {
 }
 
-void BPNetGPU::CreateNet(const ConTable &Net) {
+void BPNetGPU::CreateNet(const ANN::ConTable &Net) {
 	// called when loading a new net from fs
 	BPNet::CreateNet(Net);
 	// export network and make it ready for gpu calculations
@@ -97,7 +97,7 @@ void BPNetGPU::RefreshEdges() {
 	// regular edges
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		if(!(pLayer->GetFlag() & ANLayerInput) ) {
+		if(!(pLayer->GetFlag() & ANN::ANLayerInput) ) {
 			ANN::AbsLayer *pPrevLayer = m_lLayers.at(i-1);
 			int iStop = pPrevLayer->GetNeurons().size();
 			pLayer->ImpEdgesIn(m_vEdgeMatricesI.at(i-1), 0, iStop);
@@ -107,7 +107,7 @@ void BPNetGPU::RefreshEdges() {
 	// bias edges
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
+		if(!(pLayer->GetFlag() & ANN::ANLayerOutput) ) {
 			if(pLayer->GetBiasNeuron() != NULL) {
 				pLayer->ImpBiasEdgesOut(m_vBiasEdges[i]);
 			}
@@ -129,7 +129,7 @@ void BPNetGPU::GetEdgeMatrices() {
 	m_vEdgeMatricesI.clear();
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		if(!(pLayer->GetFlag() & ANLayerInput) ) {
+		if(!(pLayer->GetFlag() & ANN::ANLayerInput) ) {
 			ANN::BPLayer *pPrevLayer = (ANN::BPLayer *)m_lLayers.at(i-1);
 			int iStop = pPrevLayer->GetNeurons().size();
 			m_vEdgeMatricesI.push_back(pLayer->ExpEdgesIn(0, iStop) );
@@ -138,10 +138,10 @@ void BPNetGPU::GetEdgeMatrices() {
 
 	// bias edges
 	m_vBiasEdges.clear();
-	m_vBiasEdges = std::vector<ANN::Matrix>(m_lLayers.size());
+	m_vBiasEdges = std::vector<ANNGPGPU::F2DArray>(m_lLayers.size());
 	for(unsigned int i = 0; i < m_lLayers.size(); i++) {
 		ANN::BPLayer *pLayer = (ANN::BPLayer *)m_lLayers.at(i);
-		if(!(pLayer->GetFlag() & ANLayerOutput) ) {
+		if(!(pLayer->GetFlag() & ANN::ANLayerOutput) ) {
 			if(pLayer->GetBiasNeuron() != NULL) {
 				m_vBiasEdges[i] = pLayer->ExpBiasEdgesOut();
 			}

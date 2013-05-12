@@ -18,7 +18,7 @@
 #include <iostream>
 #include <vector>
 #ifdef CUDA
-	#include <gpgpu/ANMatrix.h>
+	#include <gpgpu/AN2DArray.h>
 #endif
 #endif
 
@@ -35,61 +35,51 @@ class F2DArray {
 	friend class F3DArray;
 
 private:
-	//std::vector<float> 	m_pSubArray;
-	bool 	m_bAllocated;
+	bool m_bAllocated;
+	
+	unsigned int m_iX;	// nr. of neurons in layer m_iY
+	unsigned int m_iY;	// nr. of layer in net
+	float *m_pArray;	// value of neuron
 
 protected:
-	void SetArray(float *pArray, const int &iX, const int &iY);
+	void GetOutput();
+  
+	void SetArray(const unsigned int &iX, const unsigned int &iY, const float &fVal);
+	void SetArray(const unsigned int &iX, const unsigned int &iY, float *pArray);
 	float *GetArray() const;
 
 public:
-	// Public Access for CUDA
-	int 	m_iX;		// nr. of neurons in layer m_iY
-	int 	m_iY;		// nr. of layer in net
-	float 	*m_pArray;	// value of neuron
-
 	// Standard C++ "conventions"
 	F2DArray();
-	F2DArray(float *pArray, const int &iSizeX, const int &iSizeY);
+	F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const float &fVal);
+	F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, float *pArray);
 	virtual ~F2DArray();
 
-	void Alloc(const int &iSize);
-	void Alloc(const int &iX, const int &iY);
+	void Alloc(const unsigned int &iSize);
+	void Alloc(const unsigned int &iX, const unsigned int &iY);
 
-	const int &GetW() const;
-	const int &GetH() const;
-	int GetTotalSize() const; //X*Y
+	const unsigned int &GetW() const;
+	const unsigned int &GetH() const;
+	
+	unsigned int GetTotalSize() const;
 
-//	float *GetSubArrayX(const int &iY) const;
-//	float *GetSubArrayY(const int &iX) const;
+	std::vector<float> GetSubArrayX(const unsigned int &iY) const;
+	std::vector<float> GetSubArrayY(const unsigned int &iX) const;
 
-	std::vector<float> GetSubArrayX(const int &iY) const;
-	std::vector<float> GetSubArrayY(const int &iX) const;
+	void SetValue(const unsigned int &iX, const unsigned int &iY, const float &fVal);
+	float GetValue(const unsigned int &iX, const unsigned int &iY) const;
 
-	/**
-	 * Returns a sub array beginning at position [iX][iY]
-	 * Running from line to line until iSize ints got copied
-	 */
-	F2DArray GetSubarray(const int &iX, const int &iY, const int &iSize);
-
-	void SetValue(const float &fVal, const int &iX, const int &iY);
-	float GetValue(const int &iX, const int &iY) const;
-
-	void GetOutput();
-
-//OPERATORS
+	/* Operators */
 	operator float*();
-	float *operator[] (const int &iY) const;
-
-#ifdef CUDA
-	/**
-	 * CUDA THRUST compatibility
-	 * host_vector<float>: Contains one row of the matrix
-	 * host_vector< host_vector<float> >: Contains all rows  of the matrix
-	 */
-	F2DArray(const Matrix &);
-	operator Matrix ();
-#endif
+	operator const float*() const;
+	
+	float *operator[] (int iY);
+	const float *operator[] (int iY) const;
+	
+	#ifdef CUDA
+	F2DArray(const ANNGPGPU::F2DArray &);
+	operator ANNGPGPU::F2DArray ();
+	#endif
 };
 
 }

@@ -302,7 +302,7 @@ void AbsLayer::ImpPositions(const F2DArray &f2dPos) {
 	for(int x = 0; x < static_cast<int>(iWidth); x++) {
 		std::vector<float> vPos(iHeight);
 		for(unsigned int y = 0; y < iHeight; y++) {
-			vPos[y] = f2dPos.m_pArray[y*iWidth+x];
+			vPos[y] = f2dPos.GetValue(x, y);
 		}
 		m_lNeurons.at(x)->SetPosition(vPos);
 	}
@@ -318,7 +318,7 @@ void AbsLayer::ImpPositions(const F2DArray &f2dPos, int iStart, int iStop) {
 	for(int x = iStart; x <= static_cast<int>(iStop); x++) {
 		std::vector<float> vPos(iHeight);
 		for(unsigned int y = 0; y < iHeight; y++) {
-			vPos[y] = f2dPos.m_pArray[y*iWidth+x];
+			vPos[y] = f2dPos.GetValue(x, y);
 		}
 		m_lNeurons.at(x)->SetPosition(vPos);
 	}

@@ -94,7 +94,7 @@ F2DArray F3DArray::GetSubArrayXY(const int &iZ) const {
 	assert( iZ < m_iZ );
 
 	float *pSubArray = &m_pArray[iZ*m_iX*m_iY];
-	return F2DArray(pSubArray, m_iX, m_iY);
+	return F2DArray(m_iX, m_iY, pSubArray);
 }
 
 void F3DArray::SetValue(const float &fVal,

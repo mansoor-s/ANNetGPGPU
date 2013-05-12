@@ -29,9 +29,9 @@ F2DArray::F2DArray() {
   * host_vector<float>: Contains one row of the matrix
   * host_vector< host_vector<float> >: Contains all rows  of the matrix
   */
-F2DArray::F2DArray(const Matrix &mat) {
-	unsigned int iHeight 	= mat.getH();
-	unsigned int iWidth 	= mat.getW();
+F2DArray::F2DArray(const ANNGPGPU::F2DArray &mat) {
+	unsigned int iHeight 	= mat.GetH();
+	unsigned int iWidth 	= mat.GetW();
 
 	Alloc(iWidth, iHeight);
 
@@ -42,11 +42,11 @@ F2DArray::F2DArray(const Matrix &mat) {
 	}
 }
 
-F2DArray::operator Matrix () {
-	Matrix dmRes(GetW(), GetH(), 0.f);
+F2DArray::operator ANNGPGPU::F2DArray () {
+	ANNGPGPU::F2DArray dmRes(GetW(), GetH(), 0.f);
 
-	for(int y = 0; y < GetH(); y++) {
-		for(int x = 0; x < GetW(); x++) {
+	for(unsigned int y = 0; y < GetH(); y++) {
+		for(unsigned int x = 0; x < GetW(); x++) {
 			dmRes[y*GetW()+x] = m_pArray[y*GetW()+x];
 		}
 	}
@@ -55,10 +55,12 @@ F2DArray::operator Matrix () {
 }
 #endif
 
-F2DArray::F2DArray(float *pArray, const int &iSizeX, const int &iSizeY) {
-	SetArray(pArray, iSizeX, iSizeY);
-	SetArray(pArray, iSizeX, iSizeY);
-	m_bAllocated = false;
+F2DArray::F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const float &fVal) {
+	SetArray(iSizeX, iSizeY, fVal);
+}
+
+F2DArray::F2DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, float *pArray) {
+	SetArray(iSizeX, iSizeY, pArray);
 }
 
 F2DArray::~F2DArray() {
@@ -72,7 +74,7 @@ F2DArray::~F2DArray() {
 */
 }
 
-void F2DArray::Alloc(const int &iSize) {
+void F2DArray::Alloc(const unsigned int &iSize) {
 	assert( iSize > 0 );
 /*
 	if(m_bAllocated) {
@@ -90,7 +92,7 @@ void F2DArray::Alloc(const int &iSize) {
 	m_bAllocated = true;
 }
 
-void F2DArray::Alloc(const int &iX, const int &iY) {
+void F2DArray::Alloc(const unsigned int &iX, const unsigned int &iY) {
 	assert( iY > 0 );
 	assert( iX > 0 );
 /*
@@ -109,19 +111,19 @@ void F2DArray::Alloc(const int &iX, const int &iY) {
 	m_bAllocated = true;
 }
 
-const int &F2DArray::GetW() const {
+const unsigned int &F2DArray::GetW() const {
 	return m_iX;
 }
 
-const int &F2DArray::GetH() const {
+const unsigned int &F2DArray::GetH() const {
 	return m_iY;
 }
 
-int F2DArray::GetTotalSize() const {
+unsigned int F2DArray::GetTotalSize() const {
 	return m_iY * m_iX;
 }
 
-std::vector<float> F2DArray::GetSubArrayX(const int &iY) const {
+std::vector<float> F2DArray::GetSubArrayX(const unsigned int &iY) const {
 	assert(iY < m_iY);
 
 	std::vector<float> vSubArray(GetW() );
@@ -129,51 +131,40 @@ std::vector<float> F2DArray::GetSubArrayX(const int &iY) const {
 	return vSubArray; //return &m_pArray[iY*m_iX];
 }
 
-std::vector<float> F2DArray::GetSubArrayY(const int &iX) const {
+std::vector<float> F2DArray::GetSubArrayY(const unsigned int &iX) const {
 	assert(iX < m_iX);
 
 	std::vector<float> vSubArray(GetH() );
-	for(int y = 0; y < m_iY; y++) {
+	for(unsigned int y = 0; y < m_iY; y++) {
 		vSubArray[y] = GetValue(iX, y);
 	}
 	return vSubArray;
 }
 
-F2DArray F2DArray::GetSubarray(const int &iX, const int &iY, const int &iSize) {
-	assert(iY < m_iY);
-	assert(iX < m_iX);
-
-	F2DArray f2dArray;
-	f2dArray.Alloc(iSize);
-
-	int iC = iSize;
-	for(int y = iY; y < m_iY; y++) {
-		for(int x = iX; x < m_iX; x++) {
-			if(iC > 0) {
-				f2dArray.SetValue(this->GetValue(x, y), x, y);
-			}
-			else break;
-			iC--;
-		}
-	}
-	return f2dArray;
-}
-
-void F2DArray::SetValue(const float &fVal, const int &iX, const int &iY) {
+void F2DArray::SetValue(const unsigned int &iX, const unsigned int &iY, const float &fVal) {
 	assert(iY < m_iY);
 	assert(iX < m_iX);
 
 	m_pArray[iX + iY*m_iX] = fVal;
 }
 
-float F2DArray::GetValue(const int &iX, const int &iY) const {
+float F2DArray::GetValue(const unsigned int &iX, const unsigned int &iY) const {
 	assert(iY < m_iY);
 	assert(iX < m_iX);
 
 	return m_pArray[iX + iY*m_iX];
 }
 
-void F2DArray::SetArray(float *pArray, const int &iSizeX, const int &iSizeY) {
+void F2DArray::SetArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const float &fVal) {
+	Alloc(iSizeX, iSizeY);
+	for(unsigned int y = 0; y < m_iY; y++) {
+		for(unsigned int x = 0; x < m_iX; x++) {
+			SetValue(x, y, fVal);
+		}
+	}
+}
+
+void F2DArray::SetArray(const unsigned int &iSizeX, const unsigned int &iSizeY, float *pArray) {
 	assert( pArray != NULL );
 
 	m_pArray = pArray;
@@ -190,13 +181,21 @@ F2DArray::operator float*() {
 	return m_pArray;
 }
 
-float *F2DArray::operator[] (const int &iY) const {
+F2DArray::operator const float*() const {
+	return m_pArray;
+}
+
+float *F2DArray::operator[] (int iY) {
+	return &m_pArray[iY*m_iX];
+}
+
+const float *F2DArray::operator[] (int iY) const {
 	return &m_pArray[iY*m_iX];
 }
 
 void F2DArray::GetOutput() {
-	for(int y = 0; y < GetH(); y++) {
-		for(int x = 0; x < GetW(); x++) {
+	for(unsigned int y = 0; y < GetH(); y++) {
+		for(unsigned int x = 0; x < GetW(); x++) {
 			std::cout << "Array["<<x<<"]["<<y<<"]=" << GetValue(x, y) << std::endl;
 		}
 	}

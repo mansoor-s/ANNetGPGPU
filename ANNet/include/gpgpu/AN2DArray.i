@@ -1,11 +1,11 @@
 %{
-#include <ANMatrix.h>
+#include <AN2DArray.h>
 %}
 
-%include <ANMatrix.h>  
+%include <AN2DArray.h>  
 
 namespace ANN {
-	%extend Matrix {
+	%extend AN2DArray {
 		char *__str__() {
 			std::ostringstream ostrs;
 			char *c_str;

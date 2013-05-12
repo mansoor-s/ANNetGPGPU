@@ -20,9 +20,12 @@
 #include <containers/ANTrainingSet.h>
 #include <containers/AN2DArray.h>
 #include <thrust/device_vector.h>
-#include <gpgpu/ANMatrix.h>
+#include <gpgpu/AN2DArray.h>
 #include <math/ANFunctions.h>
 #endif
+
+
+namespace ANNGPGPU {
 
 class BMUExport {
 public:
@@ -41,16 +44,18 @@ public:
 class SplittedNetExport {
 public:
 	SplittedNetExport() {};
-	SplittedNetExport(const ANN::Matrix &mEdgeMat, const ANN::Matrix &mPosMat, const thrust::device_vector<float> &vConscience) {
+	SplittedNetExport(const ANNGPGPU::F2DArray &mEdgeMat, const ANNGPGPU::F2DArray &mPosMat, const thrust::device_vector<float> &vConscience) {
 		f2dEdges 		= mEdgeMat;
 		f2dPositions 	= mPosMat;
 		dvConscience 	= vConscience;
 	}
   
-	ANN::Matrix f2dEdges;
-	ANN::Matrix f2dPositions;
+	ANNGPGPU::F2DArray f2dEdges;
+	ANNGPGPU::F2DArray f2dPositions;
 	thrust::device_vector<float> dvConscience;
 };
+
+}
 
 /*
  * BP kernels
@@ -60,14 +65,14 @@ hostBPCalcDelta(const thrust::device_vector<float> &vNeurOut,
 		const std::vector<float> &vTrainOut );
 
 std::vector<thrust::device_vector<float> >
-hostBPPropagateFW(const std::vector<ANN::Matrix> &vEdgeMatrices,
-		const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
+hostBPPropagateFW(const std::vector<ANNGPGPU::F2DArray> &vEdgeMatrices,
+		const std::vector<ANNGPGPU::F2DArray> &vBiasEdgeMatrices,
 		const std::vector<float> &vInput,
 		const ANN::TransfFunction &function);
 
 void
-hostBPPropagateBW(std::vector<ANN::Matrix> &dvEdgeMatricesI,
-		std::vector<ANN::Matrix> &dvMomentums,
+hostBPPropagateBW(std::vector<ANNGPGPU::F2DArray> &dvEdgeMatricesI,
+		std::vector<ANNGPGPU::F2DArray> &dvMomentums,
 		std::vector<thrust::device_vector<float> > &vErrorDeltas,
 		const std::vector<thrust::device_vector<float> > &vNeuronValues,
 		const float &fLearningRate,
@@ -83,21 +88,21 @@ float hostGetMax(const thrust::device_vector<float>& vec, unsigned int &ID);
 float hostGetMin(const thrust::device_vector<float>& vec, unsigned int &ID);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-BMUExport
-hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
+ANNGPGPU::BMUExport
+hostSOMFindBMNeuronID(std::vector<ANNGPGPU::SplittedNetExport> &SExp,
 		const thrust::device_vector<float> &InputVector,
 		const float &fConscienceRate);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 void
-hostSOMPropagateBW(std::vector<SplittedNetExport> &SExp,
+hostSOMPropagateBW(std::vector<ANNGPGPU::SplittedNetExport> &SExp,
 		const thrust::device_vector<float> &dvInputVector,
-		const BMUExport &,
+		const ANNGPGPU::BMUExport &,
 		const float &fSigmaT,
 		const float &fLearningRate );
 		
 void
-hostSOMTraining( std::vector<SplittedNetExport> &SExp,
+hostSOMTraining( std::vector<ANNGPGPU::SplittedNetExport> &SExp,
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,
 		const float &fSigma0,

@@ -5,6 +5,7 @@
 #include <gpgpu/ANKernels.h>
 #include <math/ANFunctions.h>
 
+using namespace ANNGPGPU;
 
 // Y <- A * X + Y
 struct saxpy_functor {
@@ -152,8 +153,8 @@ hostBPCalcDelta(	const thrust::device_vector<float> &dvNeurOut,	// from forward 
 ///////////////////////////////////////////////////////////////////////
 
 std::vector<thrust::device_vector<float> >
-hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
-					const std::vector<ANN::Matrix> &vBiasEdgeMatrices,
+hostBPPropagateFW(	const std::vector<ANNGPGPU::F2DArray> &vEdgeMatrices,
+					const std::vector<ANNGPGPU::F2DArray> &vBiasEdgeMatrices,
 					const std::vector<float> &vInput,
 					const ANN::TransfFunction &function)
 {
@@ -168,16 +169,16 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 	unsigned int iHeight 	= 0;
 
 	for(unsigned int i = 0; i < vEdgeMatrices.size(); i++) {	
-		iWidth 		= vEdgeMatrices.at(i).getW();
-		iHeight 	= vEdgeMatrices.at(i).getH();
+		iWidth 		= vEdgeMatrices.at(i).GetW();
+		iHeight 	= vEdgeMatrices.at(i).GetH();
 		
 		// Alloc memory
 		dvLayer 	= thrust::device_vector<float>(iWidth, 0.f);
 		dvBias 		= thrust::device_vector<float>(iWidth, 0.f);
 	
-		if(vBiasEdgeMatrices.at(i).getW() > 0) {
-			dvLayer = thrust::device_vector<float>(vBiasEdgeMatrices.at(i).getRowBegin(0), vBiasEdgeMatrices.at(i).getRowEnd(0));
-			dvBias 	= thrust::device_vector<float>(vBiasEdgeMatrices.at(i).getRowBegin(0), vBiasEdgeMatrices.at(i).getRowEnd(0));
+		if(vBiasEdgeMatrices.at(i).GetW() > 0) {
+			dvLayer = thrust::device_vector<float>(vBiasEdgeMatrices.at(i).GetRowBegin(0), vBiasEdgeMatrices.at(i).GetRowEnd(0));
+			dvBias 	= thrust::device_vector<float>(vBiasEdgeMatrices.at(i).GetRowBegin(0), vBiasEdgeMatrices.at(i).GetRowEnd(0));
 
 			// initial bias term
 			thrust::transform(dvBias.begin(),
@@ -196,8 +197,8 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 		// Calculate the result of the current layer
 		for(unsigned int y = 0; y < iHeight; y++) {
 		    // Y <- A * X + Y
-		    thrust::transform( vEdgeMatrices.at(i).getRowBegin(y),
-		    		vEdgeMatrices.at(i).getRowEnd(y),
+		    thrust::transform( vEdgeMatrices.at(i).GetRowBegin(y),
+		    		vEdgeMatrices.at(i).GetRowEnd(y),
 		    		dvLayer.begin(),
 		    		dvLayer.begin(),
 		    		saxpy_functor(dvInput[y]) );
@@ -210,9 +211,9 @@ hostBPPropagateFW(	const std::vector<ANN::Matrix> &vEdgeMatrices,
 ///////////////////////////////////////////////////////////////////////
 
 inline void
-AdadtEdges(	std::vector<ANN::Matrix> &vEdgeMatricesI,
+AdadtEdges(	std::vector<ANNGPGPU::F2DArray> &vEdgeMatricesI,
 			std::vector<thrust::device_vector<float> > &vErrors,
-			std::vector<ANN::Matrix> &vMomentums,
+			std::vector<ANNGPGPU::F2DArray> &vMomentums,
 			const std::vector<thrust::device_vector<float> > &vNeuronValues,
 			const float &fLearningRate,
 			const float &fWeightDecay,
@@ -226,8 +227,8 @@ AdadtEdges(	std::vector<ANN::Matrix> &vEdgeMatricesI,
 		for(unsigned int y = 0; y < iHeight; y++) {
 			thrust::transform( vErrors.at(i+1).begin(),
 				vErrors.at(i+1).end(),
-				vEdgeMatricesI.at(i).getRowBegin(y),
-				vEdgeMatricesI.at(i).getRowBegin(y),
+				vEdgeMatricesI.at(i).GetRowBegin(y),
+				vEdgeMatricesI.at(i).GetRowBegin(y),
 				saxpy_functor(fLearningRate*vNeuronValues.at(i)[y]) );
 		}
 		return;
@@ -237,9 +238,9 @@ AdadtEdges(	std::vector<ANN::Matrix> &vEdgeMatricesI,
 	 * Slower but more complex one
 	 */
 	thrust::device_vector<float> dvMomentums(iWidth, 0.f);
-	ANN::Matrix matMomentums(iWidth, iHeight, 0);
+	ANNGPGPU::F2DArray matMomentums(iWidth, iHeight, 0);
 	if(!vMomentums.size()) {
-		vMomentums = std::vector<ANN::Matrix>(iHeight);
+		vMomentums = std::vector<ANNGPGPU::F2DArray>(iHeight);
 	}
 
 	for(unsigned int y = 0; y < iHeight; y++) {
@@ -250,27 +251,27 @@ AdadtEdges(	std::vector<ANN::Matrix> &vEdgeMatricesI,
 			sax_functor(fLearningRate*vNeuronValues.at(i)[y]) );
 		// weight decay
 		if(fWeightDecay > 0.f) {
-			thrust::transform( vEdgeMatricesI.at(i).getRowBegin(y),
-				vEdgeMatricesI.at(i).getRowEnd(y),
+			thrust::transform( vEdgeMatricesI.at(i).GetRowBegin(y),
+				vEdgeMatricesI.at(i).GetRowEnd(y),
 				dvMomentums.begin(),
 				dvMomentums.begin(),
 				saxpy_functor(-fWeightDecay) );
 		}
 		// momentum term
 		if(vMomentums.at(y).size() && fMomentum > 0.f) {
-			thrust::transform( vMomentums.at(i).getRowBegin(y),
-				vMomentums.at(i).getRowEnd(y),
+			thrust::transform( vMomentums.at(i).GetRowBegin(y),
+				vMomentums.at(i).GetRowEnd(y),
 				dvMomentums.begin(),
 				dvMomentums.begin(),
 				saxpy_functor(fMomentum) );
 
-			thrust::copy(dvMomentums.begin(), dvMomentums.end(), matMomentums.getRowBegin(y) );
+			thrust::copy(dvMomentums.begin(), dvMomentums.end(), matMomentums.GetRowBegin(y) );
 		}
 		// .. belongs to standard term and updates weights
 		thrust::transform( dvMomentums.begin(),
 			dvMomentums.end(),
-			vEdgeMatricesI.at(i).getRowBegin(y),
-			vEdgeMatricesI.at(i).getRowBegin(y),
+			vEdgeMatricesI.at(i).GetRowBegin(y),
+			vEdgeMatricesI.at(i).GetRowBegin(y),
 			thrust::plus<float>() );
 	}
 	// Safe momentums for the next run
@@ -280,8 +281,8 @@ AdadtEdges(	std::vector<ANN::Matrix> &vEdgeMatricesI,
 }
 
 void
-hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesI,
-					std::vector<ANN::Matrix> &vMomentums,
+hostBPPropagateBW(	std::vector<ANNGPGPU::F2DArray> &vEdgeMatricesI,
+					std::vector<ANNGPGPU::F2DArray> &vMomentums,
 					std::vector<thrust::device_vector<float> > &vErrors,
 					const std::vector<thrust::device_vector<float> > &vNeuronValues,
 					const float &fLearningRate,
@@ -291,8 +292,8 @@ hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesI,
 {
 	// All layers except output!
 	for(int i = vEdgeMatricesI.size()-1; i >= 0; i--) {
-		unsigned int iWidth 	= vEdgeMatricesI.at(i).getW();
-		unsigned int iHeight 	= vEdgeMatricesI.at(i).getH();
+		unsigned int iWidth 	= vEdgeMatricesI.at(i).GetW();
+		unsigned int iHeight 	= vEdgeMatricesI.at(i).GetH();
 
 		if(iWidth == 0 || iHeight == 0) {
 			continue;
@@ -306,8 +307,8 @@ hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesI,
 
 		// Calculate the result of the current layer
 		for(unsigned int y = 0; y < iHeight; y++) {
-			thrust::transform( vEdgeMatricesI.at(i).getRowBegin(y),
-				vEdgeMatricesI.at(i).getRowEnd(y),
+			thrust::transform( vEdgeMatricesI.at(i).GetRowBegin(y),
+				vEdgeMatricesI.at(i).GetRowEnd(y),
 				vErrors.at(i+1).begin(),
 				dvEdges.begin(),
 				thrust::multiplies<float>() );
@@ -331,8 +332,8 @@ hostBPPropagateBW(	std::vector<ANN::Matrix> &vEdgeMatricesI,
 
 	// All layers except output ..
 	for(int i = vEdgeMatricesI.size()-1; i >= 0 && vNeuronValues.size() > 0; i--) {
-		unsigned int iWidth 	= vEdgeMatricesI.at(i).getW();
-		unsigned int iHeight 	= vEdgeMatricesI.at(i).getH();
+		unsigned int iWidth 	= vEdgeMatricesI.at(i).GetW();
+		unsigned int iHeight 	= vEdgeMatricesI.at(i).GetH();
 
 		AdadtEdges( vEdgeMatricesI, vErrors, vMomentums, vNeuronValues,
 					fLearningRate, fWeightDecay, fMomentum,

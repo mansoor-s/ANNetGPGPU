@@ -76,7 +76,7 @@ public:
 	virtual int GetID() const;
 
 	/*
-	 * TODO
+	 * Deletes the all edges connecting two layers
 	 */
 	virtual void EraseAllEdges();
 	/**
@@ -104,7 +104,8 @@ public:
 	virtual const std::vector<AbsNeuron *> &GetNeurons() const;
 
 	/**
-	 *
+	 * Adds neurons to the layer
+	 * @param iSize Number of neurons to add.
 	 */
 	virtual void AddNeurons(const unsigned int &iSize) = 0;
 

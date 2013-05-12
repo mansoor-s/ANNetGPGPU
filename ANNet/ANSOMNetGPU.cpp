@@ -12,7 +12,7 @@
 #include <cuda.h>
 
 
-namespace ANN {
+namespace ANNGPGPU {
 
 int SOMNetGPU::GetCudaDeviceCount() const {
 	int iCount = 0;
@@ -42,9 +42,9 @@ std::vector<SplittedNetExport> SOMNetGPU::SplitDeviceData() const {
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
 
 		// Copy weights between neurons of the input and output layer
-		ANN::Matrix f2dEdges 		= GetOPLayer()->ExpEdgesIn(iStart, iStop);
+		ANNGPGPU::F2DArray f2dEdges 		= GetOPLayer()->ExpEdgesIn(iStart, iStop);
 		// Copy positions of the neurons in the output layer
-		ANN::Matrix f2dPositions 	= GetOPLayer()->ExpPositions(iStart, iStop);
+		ANNGPGPU::F2DArray f2dPositions 	= GetOPLayer()->ExpPositions(iStart, iStop);
 
 		// Copy conscience information
 		thrust::host_vector<float> hvConscience(iStop-iStart+1);
@@ -103,17 +103,17 @@ SOMNetGPU::SOMNetGPU() {
 	m_fConscienceRate 	= 0.f;
 	
 	// mexican hat shaped function for this SOM
-	SetDistFunction(&Functions::fcn_gaussian);
+	SetDistFunction(&ANN::Functions::fcn_gaussian);
 
-	m_fTypeFlag 	= ANNetSOM;
+	m_fTypeFlag 	= ANN::ANNetSOM;
 }
 
 SOMNetGPU::SOMNetGPU(AbsNet *pNet) {
 	if(pNet == NULL)
 		return;
 
-	std::vector<unsigned int> vDimI = ((SOMLayer*)(pNet->GetIPLayer() ))->GetDim();
-	std::vector<unsigned int> vDimO = ((SOMLayer*)(pNet->GetOPLayer() ))->GetDim();
+	std::vector<unsigned int> vDimI = ((ANN::SOMLayer*)(pNet->GetIPLayer() ))->GetDim();
+	std::vector<unsigned int> vDimO = ((ANN::SOMLayer*)(pNet->GetOPLayer() ))->GetDim();
 
 	// Copy weights between neurons of the input and output layer
 	ANN::F2DArray f2dEdges = pNet->GetOPLayer()->ExpEdgesIn();
@@ -124,7 +124,7 @@ SOMNetGPU::SOMNetGPU(AbsNet *pNet) {
 	// Copy training set
 	SetTrainingSet(pNet->GetTrainingSet() );
 
-	m_fTypeFlag 	= ANNetSOM;
+	m_fTypeFlag 	= ANN::ANNetSOM;
 }
 
 SOMNetGPU::~SOMNetGPU() {

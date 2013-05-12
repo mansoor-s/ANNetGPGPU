@@ -17,15 +17,15 @@
 #ifndef SWIG
 #include <ANSOMNet.h>
 #include <gpgpu/ANKernels.h>
-#include <gpgpu/ANMatrix.h>
+#include <gpgpu/AN2DArray.h>
 #endif
 
-namespace ANN {
+namespace ANNGPGPU {
 
-class SOMNetGPU : public SOMNet {
+class SOMNetGPU : public ANN::SOMNet {
 private:
-	ANN::Matrix m_EdgeMat;
-	ANN::Matrix m_PosiMat;
+	ANNGPGPU::F2DArray m_EdgeMat;
+	ANNGPGPU::F2DArray m_PosiMat;
 
 	std::vector<SplittedNetExport> m_vSExp;
 
@@ -35,7 +35,7 @@ private:
 
 public:
 	SOMNetGPU();
-	SOMNetGPU(AbsNet *pNet);
+	SOMNetGPU(ANN::AbsNet *pNet);
 	virtual ~SOMNetGPU();
 
 	/**

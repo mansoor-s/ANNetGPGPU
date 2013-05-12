@@ -11,17 +11,17 @@
 #ifndef SWIG
 #include <ANBPNet.h>
 #include <gpgpu/ANKernels.h>
-#include <gpgpu/ANMatrix.h>
+#include <gpgpu/AN2DArray.h>
 #include <math/ANFunctions.h>
 #endif
 
-namespace ANN {
+namespace ANNGPGPU {
 
 class BPNetGPU: public ANN::BPNet {
 private:
-	std::vector<ANN::Matrix> m_vEdgeMatricesI;
-	std::vector<ANN::Matrix> m_vMomentums;
-	std::vector<ANN::Matrix> m_vBiasEdges;
+	std::vector<ANNGPGPU::F2DArray> m_vEdgeMatricesI;
+	std::vector<ANNGPGPU::F2DArray> m_vMomentums;
+	std::vector<ANNGPGPU::F2DArray> m_vBiasEdges;
 	std::vector<thrust::device_vector<float> > m_vNeuronVals;
 	std::vector<thrust::device_vector<float> > m_dvOutDeltas;
 
@@ -41,7 +41,7 @@ public:
 	BPNetGPU();
 	virtual ~BPNetGPU();
 
-	virtual void CreateNet(const ConTable &Net);
+	virtual void CreateNet(const ANN::ConTable &Net);
 
 	virtual float SetOutput(const std::vector<float> &vOutArray);
 

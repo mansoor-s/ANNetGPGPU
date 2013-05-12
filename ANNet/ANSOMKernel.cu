@@ -9,6 +9,8 @@
 #include <cassert>
 #include <cmath>
 
+using namespace ANNGPGPU;
+
 
 struct saxmy_functor {
 	const float a;
@@ -121,7 +123,7 @@ struct hebbian_functor {
 };
 
 /*
- * Layout of SOMEdgeMatrix:
+ * Layout of SOMEdgeF2DArray:
  * 			COL1	COL2	COL3	COL(n+1)
  * ROW1		toNeur1	toNeur1	toNeur1	..
  * ROW2		toNeur2	toNeur2	toNeur2	..
@@ -144,8 +146,8 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
 		} else {
 			unsigned int BMUID = 0;
 
-			unsigned int iWidth 	= SExp.at(iDev).f2dEdges.getW();
-			unsigned int iHeight 	= SExp.at(iDev).f2dEdges.getH();
+			unsigned int iWidth 	= SExp.at(iDev).f2dEdges.GetW();
+			unsigned int iHeight 	= SExp.at(iDev).f2dEdges.GetH();
 
 			assert(iWidth > 0);
 			assert(iHeight > 0);
@@ -155,8 +157,8 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
 
 			for(unsigned int y = 0; y < iHeight; y++) {
 				thrust::transform(
-					SExp.at(iDev).f2dEdges.getRowBegin(y),	// input
-					SExp.at(iDev).f2dEdges.getRowEnd(y), 	// input
+					SExp.at(iDev).f2dEdges.GetRowBegin(y),	// input
+					SExp.at(iDev).f2dEdges.GetRowEnd(y), 	// input
 					dvTmp.begin(), 							// result
 					minus_pow_functor(InputVector[y]) ); 	// functor
 
@@ -201,7 +203,7 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
 			if(fLastBMU > dvRes[BMUID]) {
 				fLastBMU = dvRes[BMUID];
 
-				thrust::host_vector<float> vPos = SExp.at(iDev).f2dPositions.getCol(BMUID);
+				thrust::host_vector<float> vPos = SExp.at(iDev).f2dPositions.GetSubArrayY(BMUID);
 				retBMU = BMUExport(BMUID, iDev, vPos);
 			}
 		}
@@ -211,7 +213,7 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
 }
 
 /*
- * Layout of SOMPositionMatrix:
+ * Layout of SOMPositionF2DArray:
  * 			COL1	COL2	COL3	COL(n+1)
  * ROW1		Xpos	Xpos	Xpos	..
  * ROW2		Ypos	Ypos	Ypos	..
@@ -231,8 +233,8 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 			std::cout<<"hostSOMTraining(): Setting new cuda-capable device failed."<<std::endl;
 			continue;
 		} else {
-			unsigned int iWidth 	= SExp.at(iDev).f2dPositions.getW();
-			unsigned int iHeight 	= SExp.at(iDev).f2dPositions.getH();
+			unsigned int iWidth 	= SExp.at(iDev).f2dPositions.GetW();
+			unsigned int iHeight 	= SExp.at(iDev).f2dPositions.GetH();
 
 			thrust::device_vector<float> dvBMUPos = BMU.dvBMUPos;
 			thrust::device_vector<float> dvTmp(iWidth, 0.f); // temporary
@@ -243,8 +245,8 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 			// Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) );
 			for(unsigned int y = 0; y < iHeight; y++) { 	// for each coordinate position of the neuron
 				thrust::transform(
-					SExp.at(iDev).f2dPositions.getRowBegin(y),		// input
-					SExp.at(iDev).f2dPositions.getRowEnd(y), 		// input
+					SExp.at(iDev).f2dPositions.GetRowBegin(y),		// input
+					SExp.at(iDev).f2dPositions.GetRowEnd(y), 		// input
 					dvTmp.begin(), 						// result
 					minus_pow_functor(dvBMUPos[y]) ); 			// functor
 
@@ -280,17 +282,17 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 			);
 
 			// 3b. Use stencil to modify only neurons inside the radius
-			// Save result in the ANN::Matrix
-			iWidth 	= SExp.at(iDev).f2dEdges.getW();
-			iHeight = SExp.at(iDev).f2dEdges.getH();
+			// Save result in the ANN::F2DArray
+			iWidth 	= SExp.at(iDev).f2dEdges.GetW();
+			iHeight = SExp.at(iDev).f2dEdges.GetH();
 
 			for(unsigned int y = 0; y < iHeight; y++) {			// for each edge of the neuron
 				thrust::transform_if(
-					SExp.at(iDev).f2dEdges.getRowBegin(y),		// input 1
-					SExp.at(iDev).f2dEdges.getRowEnd(y), 		// input 1
+					SExp.at(iDev).f2dEdges.GetRowBegin(y),		// input 1
+					SExp.at(iDev).f2dEdges.GetRowEnd(y), 		// input 1
 					dvInfluence.begin(),						// input 2
 					dvTmp.begin(),								// stencil
-					SExp.at(iDev).f2dEdges.getRowBegin(y), 		// result
+					SExp.at(iDev).f2dEdges.GetRowBegin(y), 		// result
 					hebbian_functor(fLearningRate, dvInputVector[y]), // functor
 					thrust::identity<int>() ); 					// predicate
 			}

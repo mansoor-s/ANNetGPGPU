@@ -44,4 +44,4 @@ SOM.Training(1000);
 centroids = SOM.CalcCentroids()
 
 for i in centroids:
-  print i.GetOutput()
+  print i

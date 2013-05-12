@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
   fOut4[5] = 0;
 
   //SimpleNet gpu;
-  ANN::BPNetGPU gpu;
+  ANNGPGPU::BPNetGPU gpu;
   ANN::BPNet cpu;
   ANN::BPLayer layer1(3, ANN::ANLayerInput);
   layer1.AddFlag(ANN::ANBiasNeuron);

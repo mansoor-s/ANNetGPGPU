@@ -73,7 +73,7 @@ set( ANCUDASourceFiles
   ANBPKernel.cu
   ANSOMKernel.cu
   ANHFKernel.cu
-  ANMatrix.cu
+  AN2DArray.cu
 )
 
 SET(ANGUIFormularFiles

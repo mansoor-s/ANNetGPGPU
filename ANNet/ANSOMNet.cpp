@@ -355,21 +355,21 @@ void SOMNet::Training(const unsigned int &iCycles) {
 }
 
 std::vector<Centroid> SOMNet::CalcCentroids() {
-	// Ensure that direct access to centroid-array is possible
-	//m_vCentroids = std::vector<Centroid>(GetTrainingSet()->GetNrElements() );
-	
-	unsigned int iNrClusters = 0;
 	for(unsigned int i = 0; i < GetTrainingSet()->GetNrElements(); i++) {
 		m_vCentroids.push_back(Centroid() );
 	  
 		SetInput(GetTrainingSet()->GetInput(i) );
-		
+
 		// Present the input vector to each node and determine the BMU
 		FindBMNeuron();
 		
 		m_vCentroids[i].m_iBMUID 	= m_pBMNeuron->GetID();
-		m_vCentroids[i].m_vCentroid 	= m_pBMNeuron->GetConsI();
-		m_vCentroids[i].m_fDistance 	= m_pBMNeuron->GetValue();
+		m_vCentroids[i].m_vCentroid.clear();
+		for(unsigned int j = 0; j < m_pBMNeuron->GetConsI().size(); j++) {
+			m_vCentroids[i].m_vCentroid.push_back(m_pBMNeuron->GetConI(j)->GetValue());
+		}
+		m_vCentroids[i].m_vInput = GetTrainingSet()->GetInput(i);
+		m_vCentroids[i].m_fEucDist = sqrt(m_pBMNeuron->GetValue() );
 	}
 	
 	// Count the number of centroids
@@ -377,10 +377,7 @@ std::vector<Centroid> SOMNet::CalcCentroids() {
 	std::vector<Centroid> vCounter = m_vCentroids;
 	vCounter.erase(std::unique(vCounter.begin(), vCounter.end()), vCounter.end() );
 	std::cout<<"Number of clusters found: "<<vCounter.size()<<std::endl;
-	
-	// Calculate summed squared error
-	// TODO
-	
+
 	return m_vCentroids;
 }
 

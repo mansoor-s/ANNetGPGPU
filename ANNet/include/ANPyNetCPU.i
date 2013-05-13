@@ -38,9 +38,38 @@ Author: Daniel Frenzel"
 //%include gpgpu/ANBPNetGPU.i
 //%include gpgpu/ANSOMNetGPU.i
 
-%include std_vector.i
-namespace std {
-   %template(vectorINT) vector<int>;
-   %template(vectorFLT) vector<float>;
-   %template(vectorCNT) vector<ANN::Centroid>;
-};
+%include <std_vector.i>
+%extend std::vector<int> {
+	char *__str__() {
+		std::ostringstream ostrs;
+		char *c_str;
+		
+		for(unsigned int i = 0; i < $self->size(); i++) {
+			int fVal = $self->at(i);
+			ostrs << fVal << std::endl;
+		}
+
+		c_str = new char[ostrs.str().length()+1];
+		strcpy(c_str, ostrs.str().c_str());
+		return c_str;
+	}
+}
+%extend std::vector<float> {
+	char *__str__() {
+		std::ostringstream ostrs;
+		char *c_str;
+		
+		for(unsigned int i = 0; i < $self->size(); i++) {
+			float fVal = $self->at(i);
+			ostrs << fVal << std::endl;
+		}
+
+		c_str = new char[ostrs.str().length()+1];
+		strcpy(c_str, ostrs.str().c_str());
+		return c_str;
+	}
+}
+
+%template(vectorINT) std::vector<int>;
+%template(vectorFLT) std::vector<float>;
+%template(vectorCNT) std::vector<ANN::Centroid>;

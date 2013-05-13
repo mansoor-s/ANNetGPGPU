@@ -24,10 +24,12 @@ namespace ANN {
  * with the euclidean distance(s) to the input vector(s)
  */
 struct Centroid {
-	unsigned int 		m_iBMUID;
-	std::vector<Edge*> 	m_vCentroid;
-	float 			m_fDistance; 	// not sqrt(), just pow()! (faster)
+	std::vector<float> 	m_vInput;
+	std::vector<float> 	m_vCentroid;
 	
+	unsigned int 		m_iBMUID;
+	float 			m_fEucDist;
+
 	bool operator<(const Centroid &rhs) const {
 		return m_iBMUID < rhs.m_iBMUID;
 	}
@@ -46,12 +48,12 @@ struct Centroid {
 	bool operator!=(const Centroid &rhs) const {
 		return m_iBMUID != rhs.m_iBMUID;
 	}
-	
+
 	friend std::ostream& operator << (std::ostream &os, Centroid &op) {
 		for(unsigned int i = 0; i < op.m_vCentroid.size(); i++) {
-			std::cout<<"Centroid["<<i<<"]: "<<(float)(*op.m_vCentroid[i])<<std::endl;
+			std::cout<<"Centroid["<<i<<"]: "<<op.m_vCentroid[i]<<std::endl;
 		}
-		std::cout<<"Euclidean distance: "<<op.m_fDistance<<std::endl;
+		std::cout<<"Euclidean distance: "<<op.m_fEucDist<<std::endl;
 	}
 }; 
 

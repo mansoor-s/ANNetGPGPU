@@ -1,9 +1,9 @@
 from ANPyNetCPU import *
-black 	= vectorFLT([0,0,0])
-white 	= vectorFLT([1,1,1])
-red 	= vectorFLT([1,0,0])
-green 	= vectorFLT([0,1,0])
-blue 	= vectorFLT([0,0,1])
+black 	= vectorf([0,0,0])
+white 	= vectorf([1,1,1])
+red 	= vectorf([1,0,0])
+green 	= vectorf([0,1,0])
+blue 	= vectorf([0,0,1])
 
 trainSet = TrainingSet()
 trainSet.AddInput(black)

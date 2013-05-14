@@ -70,6 +70,6 @@ Author: Daniel Frenzel"
 	}
 }
 
-%template(vectorINT) std::vector<int>;
-%template(vectorFLT) std::vector<float>;
-%template(vectorCNT) std::vector<ANN::Centroid>;;
+%template(vectori) std::vector<int>;
+%template(vectorf) std::vector<float>;
+%template(vectorc) std::vector<ANN::Centroid>;

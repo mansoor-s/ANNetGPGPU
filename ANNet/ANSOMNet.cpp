@@ -354,31 +354,58 @@ void SOMNet::Training(const unsigned int &iCycles) {
 	}
 }
 
-std::vector<Centroid> SOMNet::CalcCentroids() {
+std::vector<Centroid> SOMNet::CalcCentroid2Input() {
+	std::vector<Centroid> vCentroids;
 	for(unsigned int i = 0; i < GetTrainingSet()->GetNrElements(); i++) {
-		m_vCentroids.push_back(Centroid() );
+		vCentroids.push_back(Centroid() );
 	  
 		SetInput(GetTrainingSet()->GetInput(i) );
 
 		// Present the input vector to each node and determine the BMU
 		FindBMNeuron();
 		
-		m_vCentroids[i].m_iBMUID 	= m_pBMNeuron->GetID();
-		m_vCentroids[i].m_vCentroid.clear();
+		vCentroids[i].m_iBMUID 	= m_pBMNeuron->GetID();
+		vCentroids[i].m_vCentroid.clear();
 		for(unsigned int j = 0; j < m_pBMNeuron->GetConsI().size(); j++) {
-			m_vCentroids[i].m_vCentroid.push_back(m_pBMNeuron->GetConI(j)->GetValue());
+			vCentroids[i].m_vCentroid.push_back(m_pBMNeuron->GetConI(j)->GetValue());
 		}
-		m_vCentroids[i].m_vInput = GetTrainingSet()->GetInput(i);
-		m_vCentroids[i].m_fEucDist = sqrt(m_pBMNeuron->GetValue() );
+		vCentroids[i].m_vInput = GetTrainingSet()->GetInput(i);
+		vCentroids[i].m_fEucDist = sqrt(m_pBMNeuron->GetValue() );
 	}
-	
+/*
 	// Count the number of centroids
-	std::sort(m_vCentroids.begin(), m_vCentroids.end() );
-	std::vector<Centroid> vCounter = m_vCentroids;
+	std::sort(vCentroids.begin(), vCentroids.end() );
+	std::vector<Centroid> vCounter = vCentroids;
+	vCounter.erase(std::unique(vCounter.begin(), vCounter.end()), vCounter.end() );
+	std::cout<<"Number of clusters found: "<<vCounter.size()<<std::endl;
+*/
+	return vCentroids;
+}
+
+std::vector<Centroid> SOMNet::GetCentroids() {
+	std::vector<Centroid> vCentroids;
+	for(unsigned int i = 0; i < GetTrainingSet()->GetNrElements(); i++) {
+		vCentroids.push_back(Centroid() );
+	  
+		SetInput(GetTrainingSet()->GetInput(i) );
+
+		// Present the input vector to each node and determine the BMU
+		FindBMNeuron();
+		
+		vCentroids[i].m_iBMUID 	= m_pBMNeuron->GetID();
+		vCentroids[i].m_vCentroid.clear();
+		for(unsigned int j = 0; j < m_pBMNeuron->GetConsI().size(); j++) {
+			vCentroids[i].m_vCentroid.push_back(m_pBMNeuron->GetConI(j)->GetValue());
+		}
+	}
+
+	// Count the number of centroids
+	std::vector<Centroid> vCounter = vCentroids;
+	std::sort(vCounter.begin(), vCounter.end() );
 	vCounter.erase(std::unique(vCounter.begin(), vCounter.end()), vCounter.end() );
 	std::cout<<"Number of clusters found: "<<vCounter.size()<<std::endl;
 
-	return m_vCentroids;
+	return vCounter;
 }
 
 void SOMNet::PropagateFW() {

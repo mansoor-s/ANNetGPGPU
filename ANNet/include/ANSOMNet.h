@@ -43,10 +43,7 @@ protected:
 	/* first Ctor */
 	std::vector<unsigned int> m_vDimI; // dimensions of the input layer (Cartesian coordinates)
 	std::vector<unsigned int> m_vDimO; // dimensions of the output layer (Cartesian coordinates)
-	
-	/* Saves the corresponding centroid to each input pattern */
-	std::vector<Centroid> m_vCentroids; // Array with size equal to number of input patterns
-	
+
 	/* second Ctor */
 	unsigned int 	m_iWidthI;	// width of the input layer
 	unsigned int 	m_iHeightI;	// height of the input layer
@@ -152,9 +149,15 @@ public:
 
 	/**
 	 * Clustering results of the network.
-	 * @return std::vector<Centroid> Returns the obtained centroids with the euclidean distances to the input.
+	 * @return std::vector<Centroid> Returns to each input value the obtained centroid with the euclidean distances to the input and the corresponding ID of the BMU.
 	 */
-	std::vector<Centroid> CalcCentroids();
+	std::vector<Centroid> CalcCentroid2Input();
+
+	/**
+	 * Clustering results of the network.
+	 * @return std::vector<Centroid> Returns the unique centroids and the ID of the corresponding BMU.
+	 */
+	std::vector<Centroid> GetCentroids();
 
 	/**
 	 * Sets learning rate scalar of the network.

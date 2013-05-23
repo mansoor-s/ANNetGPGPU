@@ -23,25 +23,27 @@ SOM.SetTrainingSet(trainSet)
 SOM.SetLearningRate(0.3)
 SOM.Training(1000)
 
-centroids = SOM.CalcCentroids()
+# gets to each input vector the corresponding centroid, eucl. distance and the ID of the BMU
+inputv = SOM.GetCentrOInpList()
+# gets an ordered list of different centroids with the ID of the corresponding BMU
+centroids = SOM.GetCentroidList()
 
+# output for fun
 for i in centroids:
-  # print distances
-  print "Distance: "
-  print i.m_fEucDist
-  
-  #print centroid
-  print "Centroid: "
-  print i # is the same as: print i.m_vCentroid
-  # or the same as:
-  #for j in i.m_vCentroid:
-  #  print j
-  #print "Input: "
+  print (i)
 
-  # example to copy values from an vectorFLT to python list
-  print "Input: "
-  list = []
-  for j in i.m_vInput:
-    list.append(j)
-  print list
-    
+# .. again
+for i in inputv:
+  print (i)
+  
+# Save IDs of the BMUs into a list
+IDList = []
+for i in inputv:
+  IDList.append(i.m_iBMUID)
+print (IDList)
+
+# Searches the corresponding centroids from the other list based on the index :D
+for i in IDList:
+  for j in centroids:
+    if i == j.m_iBMUID:
+      print (j.m_vCentroid)

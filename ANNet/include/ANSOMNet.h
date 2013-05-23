@@ -149,15 +149,15 @@ public:
 
 	/**
 	 * Clustering results of the network.
-	 * @return std::vector<Centroid> Returns to each input value the obtained centroid with the euclidean distances to the input and the corresponding ID of the BMU.
+	 * @return std::vector<Centroid> Returns to each input value the obtained centroid with the euclidean distance and the corresponding ID of the BMU.
 	 */
-	std::vector<Centroid> CalcCentroid2Input();
+	std::vector<Centroid> GetCentrOInpList();
 
 	/**
 	 * Clustering results of the network.
-	 * @return std::vector<Centroid> Returns the unique centroids and the ID of the corresponding BMU.
+	 * @return std::vector<Centroid> Returns the centroids found after training and the ID of the corresponding BMUs.
 	 */
-	std::vector<Centroid> GetCentroids();
+	std::vector<Centroid> GetCentroidList();
 
 	/**
 	 * Sets learning rate scalar of the network.

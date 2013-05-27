@@ -52,6 +52,20 @@ Functions::fcn_gaussian = {
 };
 
 const DistFunction
+Functions::fcn_cut_gaussian = {
+	(char*)"cut_gaussian",
+	fcn_cut_gaussian_bell,
+	fcn_decay
+};
+
+const DistFunction
+Functions::fcn_epanechicov = {
+	(char*)"epanechicov",
+	fcn_epanechicov_neighborhood,
+	fcn_decay
+};
+
+const DistFunction
 Functions::fcn_mexican = {
 	(char*)"mexican",
 	fcn_mexican_hat,
@@ -93,6 +107,14 @@ Functions::ResolveDistFByName (const char *name) {
 	if (strcmp (name, "bubble") == 0) {
 		//std::cout<<"fcn_mexican"<<std::endl;
 		return (&fcn_bubble);
+	}
+	if (strcmp (name, "cut_bubble") == 0) {
+		//std::cout<<"fcn_mexican"<<std::endl;
+		return (&fcn_cut_gaussian);
+	}
+	if (strcmp (name, "epanechicov") == 0) {
+		//std::cout<<"fcn_mexican"<<std::endl;
+		return (&fcn_epanechicov);
 	}
 	return (NULL);
 }

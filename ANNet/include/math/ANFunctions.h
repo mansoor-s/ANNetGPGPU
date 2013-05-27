@@ -192,10 +192,31 @@ fcn_gaussian_bell (const float& dist, const float& sigmaT) {
 	__host__ __device__
 #endif
 inline static float
+fcn_cut_gaussian_bell (const float& dist, const float& sigmaT) {
+	if(dist < sigmaT)
+		return exp(-pow(dist, 2.f)/(2.f*pow(sigmaT, 2.f)));
+	else return 0.f;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
+inline static float
 fcn_mexican_hat (const float& dist, const float& sigmaT) {
 	return 	2.f/(sqrt(3.f * sigmaT) * pow(M_PI, 0.25f) ) * 
 		(1.f-pow(dist, 2.f) / pow(sigmaT, 2.f) ) * 
 		fcn_gaussian_bell(dist, sigmaT);
+}
+//////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
+inline static float
+fcn_epanechicov_neighborhood (const float& dist, const float& sigmaT) {
+	float fVal = 1 - pow(dist/sigmaT, 2.f);
+	if(fVal > 0)
+		return fVal;
+	else return 0.f;
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef __CUDACC__
@@ -298,18 +319,19 @@ public:
 	/**
 	 * \brief A binary neighborhood function.
 	 * 
-	 * \f$f_{act} (dist, \sigma(t)) = \left\{\begin{array}{cl}1.0 & dist <
-	 * \sigma(t)\\0 & dist \geq \sigma(t)\end{array}\right.\f$
+	 * \f$
+	 * \\ f_{act} (dist, \sigma(t)) = \left\{\begin{array}{cl}1.0 & dist < \sigma(t)
+	 * \\0 & dist \geq \sigma(t)\end{array}\right.\f$
 	 */
 	static const DistFunction fcn_bubble;
 	
 	/**
-	 * \brief A gaussian neighborhood function.
+	 * \brief The gaussian neighborhood function.
 	 *
 	 * \f$
 	 *  \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
 	 *  \\ h(t) = {e^{-\frac{dist^2}{2\sigma(t)^2}}}
-	 * 	\\
+	 *  \\
 	 *  \\ \mbox{The Greek letter sigma (} \sigma_0 \mbox{) denotes the width of the lattice at time t(0)}
 	 *  \\ \mbox{and the Greek letter lambda (} \lambda \mbox{) denotes a time constant.}
 	 *  \\ \mbox{t is the current time-step (iteration of the loop).}
@@ -318,7 +340,37 @@ public:
 	static const DistFunction fcn_gaussian;
 	
 	/**
-	 * \brief A gaussian neighborhood function.
+	 * \brief The cut gaussian neighborhood function.
+	 *
+	 * \f$
+	 *  \\ {act} (dist, \sigma(t)) = \left\{\begin{array}{cl} {e^{-\frac{dist^2}{2\sigma(t)^2}}} & dist < \sigma(t)
+	 *  \\ 0 & dist \geq \sigma(t)\end{array}\right.
+	 *  \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
+	 *  \\
+	 *  \\ \mbox{The Greek letter sigma (} \sigma_0 \mbox{) denotes the width of the lattice at time t(0)}
+	 *  \\ \mbox{and the Greek letter lambda (} \lambda \mbox{) denotes a time constant.}
+	 *  \\ \mbox{t is the current time-step (iteration of the loop).}
+	 * \f$
+	 */
+	static const DistFunction fcn_cut_gaussian;
+	
+	/**
+	 * \brief Epanechicov neighborhood function.
+	 *
+	 * \f$
+	 *  \\ {act} (dist, \sigma(t)) = \left\{\begin{array}{cl} {1-{\frac{dist}{\sigma(t)}^2}} & {act} > 0
+	 *  \\ 0 & {act} \leq 0\end{array}\right.
+	 *  \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
+	 *  \\
+	 *  \\ \mbox{The Greek letter sigma (} \sigma_0 \mbox{) denotes the width of the lattice at time t(0)}
+	 *  \\ \mbox{and the Greek letter lambda (} \lambda \mbox{) denotes a time constant.}
+	 *  \\ \mbox{t is the current time-step (iteration of the loop).}
+	 * \f$
+	 */
+	static const DistFunction fcn_epanechicov;
+	
+	/**
+	 * \brief A wavelet gaussian neighborhood function (shape of mexican hat).
 	 *
 	 * \f$
 	 * \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}

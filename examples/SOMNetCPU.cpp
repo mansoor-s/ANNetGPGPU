@@ -80,8 +80,11 @@ int main(int argc, char *argv[]) {
   SOMap.CreateSOM(3, 1, w1,w1);
   SOMap.SetTrainingSet(input);
 
-  SOMap.SetConscienceRate(0.1);
-  SOMap.Training(5000);
+  SOMap.SetConscienceRate(0);
+  SOMap.SetDistFunction(&ANN::Functions::fcn_bubble);
+  //SOMap.SetDistFunction(&ANN::Functions::fcn_mexican);
+  //SOMap.SetDistFunction(&ANN::Functions::fcn_gaussian);
+  SOMap.Training(500);
 
   SOMReader w(w1, w1, w2);
   for(int x = 0; x < w1*w1; x++) {

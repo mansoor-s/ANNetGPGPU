@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   SOMap.SetConscienceRate(0);
   SOMap.Training(1000);
   
-  std::vector<ANN::Centroid> vCen =  SOMap.CalcCentroids();
+  std::vector<ANN::Centroid> vCen =  SOMap.GetCentroidList();
 
   SOMReader w(w1, w1, w2);
   for(int x = 0; x < w1*w1; x++) {

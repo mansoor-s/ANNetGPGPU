@@ -38,6 +38,13 @@ Functions::fcn_binary = {
  * SOM
  */
 const DistFunction
+Functions::fcn_bubble = {
+	(char*)"bubble",
+	fcn_bubble_neighborhood,
+	fcn_decay
+};
+
+const DistFunction
 Functions::fcn_gaussian = {
 	(char*)"gaussian",
 	fcn_gaussian_bell,
@@ -82,6 +89,10 @@ Functions::ResolveDistFByName (const char *name) {
 	if (strcmp (name, "mexican") == 0) {
 		//std::cout<<"fcn_mexican"<<std::endl;
 		return (&fcn_mexican);
+	}
+	if (strcmp (name, "bubble") == 0) {
+		//std::cout<<"fcn_mexican"<<std::endl;
+		return (&fcn_bubble);
 	}
 	return (NULL);
 }

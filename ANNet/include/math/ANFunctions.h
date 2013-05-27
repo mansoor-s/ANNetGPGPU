@@ -174,6 +174,16 @@ fcn_binary_derivate (const float& in, const float& theta) {
 	__host__ __device__
 #endif
 inline static float
+fcn_bubble_neighborhood (const float& dist, const float& sigmaT) {
+	if(dist < sigmaT)
+		return 1.f;
+	else return 0.f;
+}
+//////////////////////////////////////////////////////////////////////////////////////////////
+#ifdef __CUDACC__
+	__host__ __device__
+#endif
+inline static float
 fcn_gaussian_bell (const float& dist, const float& sigmaT) {
 	return exp(-pow(dist, 2.f)/(2.f*pow(sigmaT, 2.f)));
 }
@@ -183,7 +193,9 @@ fcn_gaussian_bell (const float& dist, const float& sigmaT) {
 #endif
 inline static float
 fcn_mexican_hat (const float& dist, const float& sigmaT) {
-	return (2.f/sqrt(3.f) * pow(M_PI, -0.25f) ) * (1.f - pow(dist, 2.f)) * fcn_gaussian_bell(dist, sigmaT);
+	return 	2.f/(sqrt(3.f * sigmaT) * pow(M_PI, 0.25f) ) * 
+		(1.f-pow(dist, 2.f) / pow(sigmaT, 2.f) ) * 
+		fcn_gaussian_bell(dist, sigmaT);
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
 #ifdef __CUDACC__
@@ -284,7 +296,15 @@ public:
 	static const TransfFunction fcn_binary;
 
 	/**
-	 * \brief A gaussian distance function.
+	 * \brief A binary neighborhood function.
+	 * 
+	 * \f$f_{act} (dist, \sigma(t)) = \left\{\begin{array}{cl}1.0 & dist <
+	 * \sigma(t)\\0 & dist \geq \sigma(t)\end{array}\right.\f$
+	 */
+	static const DistFunction fcn_bubble;
+	
+	/**
+	 * \brief A gaussian neighborhood function.
 	 *
 	 * \f$
 	 *  \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
@@ -296,13 +316,13 @@ public:
 	 * \f$
 	 */
 	static const DistFunction fcn_gaussian;
-
+	
 	/**
-	 * \brief A gaussian distance function.
+	 * \brief A gaussian neighborhood function.
 	 *
 	 * \f$
 	 * \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
-	 * \\ h(t) = (\frac{2}{\sqrt{3}}\pi^{-\frac{1}{4}})(1-dist^2)({e^{-\frac{dist^2}{2\sigma(t)^2}}})
+	 * \\ h(t) = \frac{2}{\sqrt{3*sigma(t)}\pi^{-\frac{1}{4}}}(1-\frac{dist^2}{sigma(t)^2})({e^{-\frac{dist^2}{2\sigma(t)^2}}})
 	 * \\
 	 * \\ \mbox{The Greek letter sigma (} \sigma_0 \mbox{) denotes the width of the lattice at time t(0)}
 	 * \\ \mbox{and the Greek letter lambda (} \lambda \mbox{) denotes a time constant.}

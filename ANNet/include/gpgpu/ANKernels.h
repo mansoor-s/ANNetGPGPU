@@ -20,6 +20,7 @@
 #include <containers/ANTrainingSet.h>
 #include <containers/AN2DArray.h>
 #include <thrust/device_vector.h>
+#include <thrust/transform.h>
 #include <gpgpu/AN2DArray.h>
 #include <math/ANFunctions.h>
 #endif
@@ -94,13 +95,15 @@ hostSOMFindBMNeuronID(std::vector<ANNGPGPU::SplittedNetExport> &SExp,
 		const float &fConscienceRate);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
+template<typename BinaryFunction>
 void
 hostSOMPropagateBW(std::vector<ANNGPGPU::SplittedNetExport> &SExp,
 		const thrust::device_vector<float> &dvInputVector,
 		const ANNGPGPU::BMUExport &,
 		const float &fSigmaT,
-		const float &fLearningRate );
-		
+		const float &fLearningRate,
+		const BinaryFunction &binaryDistFunc  );
+
 void
 hostSOMTraining( std::vector<ANNGPGPU::SplittedNetExport> &SExp,
 		const ANN::TrainingSet &InputSet,
@@ -108,6 +111,7 @@ hostSOMTraining( std::vector<ANNGPGPU::SplittedNetExport> &SExp,
 		const float &fSigma0,
 		const float &fLearningRate0,
 		const float &fConscienceRate,
-		float (*pfnDecay)(const float &, const float &, const float &) ) ;
+		float (*pfnDecay)(const float &, const float &, const float &),
+		const ANN::DistFunction &pDistFunc );
 
 #endif /* ANKERNELS_H_ */

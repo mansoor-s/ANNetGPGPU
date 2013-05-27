@@ -20,7 +20,7 @@
 #include <string.h>
 #endif
 
-//#define M_PI    3.14159265358979323846f 
+#define PI    3.14159265358979323846f 
 
 namespace ANN {
 
@@ -203,7 +203,7 @@ fcn_cut_gaussian_bell (const float& dist, const float& sigmaT) {
 #endif
 inline static float
 fcn_mexican_hat (const float& dist, const float& sigmaT) {
-	return 	2.f/(sqrt(3.f * sigmaT) * pow(M_PI, 0.25f) ) * 
+	return 	2.f/(sqrt(3.f * sigmaT) * pow(PI, 0.25f) ) * 
 		(1.f-pow(dist, 2.f) / pow(sigmaT, 2.f) ) * 
 		fcn_gaussian_bell(dist, sigmaT);
 }
@@ -287,8 +287,8 @@ public:
 	  * \param  name The function name, as given in the function structure.
 	  * \return NULL on failure, pointer to structure on success.
 	  */
-	static const TransfFunction* ResolveTransfFByName (const char *name);
-	static const DistFunction*	 ResolveDistFByName (const char *name);
+	static const TransfFunction* 	ResolveTransfFByName (const char *name);
+	static const DistFunction* 	ResolveDistFByName (const char *name);
 
 	 /**
 	  * \brief The sigmoid tanh function.

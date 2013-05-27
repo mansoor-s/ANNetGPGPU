@@ -146,7 +146,8 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 		m_fSigma0,
 		m_fLearningRate,
 		m_fConscienceRate,
-		&ANN::fcn_decay);
+		&ANN::fcn_decay,
+		*GetDistFunction() );
 
 	std::cout<<"Training cycles finished properly"<<std::endl;
 	// Write edge matrix back

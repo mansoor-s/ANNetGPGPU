@@ -108,7 +108,7 @@ Functions::ResolveDistFByName (const char *name) {
 		//std::cout<<"fcn_mexican"<<std::endl;
 		return (&fcn_bubble);
 	}
-	if (strcmp (name, "cut_bubble") == 0) {
+	if (strcmp (name, "cut_gaussian") == 0) {
 		//std::cout<<"fcn_mexican"<<std::endl;
 		return (&fcn_cut_gaussian);
 	}

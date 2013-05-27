@@ -99,13 +99,53 @@ struct sqrt_functor {
 };
 //////////////////////////////////////////////////////////////////////////////////////////////
 
-struct gaussian_bell_functor {
+struct bubble_functor {
 	float fSigmaT;
-	gaussian_bell_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
+	bubble_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
+
+    __host__ __device__
+	float operator()(const float& dist) const {
+    	return ANN::fcn_bubble_neighborhood(dist, fSigmaT);
+	}
+};
+
+struct gaussian_functor {
+	float fSigmaT;
+	gaussian_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
 
     __host__ __device__
 	float operator()(const float& dist) const {
     	return ANN::fcn_gaussian_bell(dist, fSigmaT);
+	}
+};
+
+struct cut_gaussian_functor {
+	float fSigmaT;
+	cut_gaussian_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
+
+    __host__ __device__
+	float operator()(const float& dist) const {
+    	return ANN::fcn_cut_gaussian_bell(dist, fSigmaT);
+	}
+};
+
+struct mexican_functor {
+	float fSigmaT;
+	mexican_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
+
+    __host__ __device__
+	float operator()(const float& dist) const {
+    	return ANN::fcn_mexican_hat(dist, fSigmaT);
+	}
+};
+
+struct epanechicov_functor {
+	float fSigmaT;
+	epanechicov_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
+
+    __host__ __device__
+	float operator()(const float& dist) const {
+    	return ANN::fcn_epanechicov_neighborhood(dist, fSigmaT);
 	}
 };
 
@@ -121,6 +161,7 @@ struct hebbian_functor {
     	return fWeight + (fInfluence*fLearningRate*(fInput-fWeight) );
 	}
 };
+//////////////////////////////////////////////////////////////////////////////////////////////
 
 /*
  * Layout of SOMEdgeF2DArray:
@@ -220,11 +261,13 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
  * ROW3		Zpos	Zpos	Zpos	..
  * ROW(n+1)	..		..		..		..
  */
+template<typename BinaryFunction>
 void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 		const thrust::device_vector<float> &dvInputVector,
 		const BMUExport &BMU,
 		const float &fSigmaT,
-		const float &fLearningRate
+		const float &fLearningRate,
+		const BinaryFunction &binaryDistFunc
 		)
 {
 	#pragma omp parallel for
@@ -268,7 +311,7 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 				dvDist.begin(),							// input
 				dvDist.end(), 							// input
 				dvInfluence.begin(), 						// result
-				gaussian_bell_functor(fSigmaT) );				// functor
+				binaryDistFunc );					// functor
 
 			// 3. Only handle neurons in radius:
 			// 3a. Make stencil
@@ -306,7 +349,8 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		const float &fSigma0, 
 		const float &fLearningRate0,
 		const float &fConscienceRate,
-		float (*pfnDecay)(const float &, const float &, const float &) )
+		float (*pfnDecay)(const float &, const float &, const float &),
+		const ANN::DistFunction &DistFunc )
 {
 	float fLambda 	= iCycles / log(fSigma0);
 
@@ -344,11 +388,46 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		float fLearningRate = pfnDecay(fLearningRate0, i, iCycles);
 
 		// Propagate BW
-		hostSOMPropagateBW( SExp,
-				dvInputVector,		// const
-				BMUExp,				// const
-				fSigmaT,			// const
-				fLearningRate ); 	// const
+		if (strcmp (DistFunc.name, "gaussian") == 0) {
+			hostSOMPropagateBW( SExp,
+					dvInputVector,			// const
+					BMUExp,				// const
+					fSigmaT,			// const
+					fLearningRate,
+					gaussian_functor(fSigmaT)); 	// const
+		}
+		else if (strcmp (DistFunc.name, "mexican") == 0) {
+			hostSOMPropagateBW( SExp,
+					dvInputVector,			// const
+					BMUExp,				// const
+					fSigmaT,			// const
+					fLearningRate,
+					mexican_functor(fSigmaT)); 	// const
+		}
+		else if (strcmp (DistFunc.name, "bubble") == 0) {
+			hostSOMPropagateBW( SExp,
+					dvInputVector,			// const
+					BMUExp,				// const
+					fSigmaT,			// const
+					fLearningRate,
+					bubble_functor(fSigmaT)); 	// const
+		}
+		else if (strcmp (DistFunc.name, "cut_gaussian") == 0) {
+			hostSOMPropagateBW( SExp,
+					dvInputVector,			// const
+					BMUExp,				// const
+					fSigmaT,			// const
+					fLearningRate,
+					cut_gaussian_functor(fSigmaT)); // const
+		}
+		else if (strcmp (DistFunc.name, "epanechicov") == 0) {
+			hostSOMPropagateBW( SExp,
+					dvInputVector,			// const
+					BMUExp,				// const
+					fSigmaT,			// const
+					fLearningRate,
+					epanechicov_functor(fSigmaT)); 	// const
+		}
 	}
 }
 

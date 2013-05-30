@@ -30,7 +30,7 @@ Author: Daniel Frenzel"
 %include ANBPLayer.i
 %include ANBPNet.i
 
-//%include math/ANFunctions.i
+%include math/ANFunctions.i
 //%include math/ANRandom.i
 
 //%include gpgpu/ANKernels.i

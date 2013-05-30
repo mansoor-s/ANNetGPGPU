@@ -50,8 +50,8 @@ typedef uint32_t NetTypeFlag;
 
 
 /**
- * \brief Represents a container for all layers in the network.
- *
+ * @class AbsNet
+ * @brief Represents a container for all layers in the network.
  * @author Daniel "dgrat" Frenzel
  */
 class AbsNet //: public Importer, public Exporter
@@ -59,7 +59,7 @@ class AbsNet //: public Importer, public Exporter
 protected:
 	NetTypeFlag m_fTypeFlag;
 
-	TrainingSet *m_pTrainingData;		// list of training data
+	TrainingSet *m_pTrainingData;			// list of training data
 	float m_fLearningRate;				// global learning rate
 	float m_fMomentum;
 	float m_fWeightDecay;
@@ -68,12 +68,12 @@ protected:
 	/* list of all layers in this net; last should be output layer, first input layer */
 
 	// TODO maybe USE MAP for index administration?!
-	std::vector<AbsLayer*> m_lLayers;	// list of all layers, layer->GetID() must be identical with indices of this array!
+	std::vector<AbsLayer*> m_lLayers;		// list of all layers, layer->GetID() must be identical with indices of this array!
 	AbsLayer *m_pIPLayer;				// pointer to input layer
 	AbsLayer *m_pOPLayer;				// pointer to output layer
 
 	/**
-	 * Adds a layer to the network.
+	 * @brief Adds a layer to the network.
 	 * @param iSize Number of neurons of the layer.
 	 * @param flType Flag describing the type of the net.
 	 */
@@ -81,42 +81,41 @@ protected:
 
 public:
 	AbsNet();
-	//AbsNet(AbsNet *pNet);	// TODO implement
 	virtual ~AbsNet();
 
 	/**
-	 *
+	 * @brief Creates a network in memory from container structure
+	 * @param Net container structure to create a network in memory.
 	 */
 	virtual void CreateNet(const ConTable &Net);
 
 	/**
-	 * Implement to determine propagation behavior
+	 * @brief Implement to determine propagation behavior
 	 */
 	virtual void PropagateFW() = 0;
 	/**
-	 * Implement to determine back propagation ( == learning ) behavior
+	 * @brief Implement to determine back propagation ( == learning ) behavior
 	 */
 	virtual void PropagateBW() = 0;
 
 	/**
-	 * Sets the type of the net
+	 * @brief Sets the type of the net
 	 * @param fType Flag describing the type of the net.
 	 */
 	virtual void SetFlag(const NetTypeFlag &fType);
 	/**
-	 * Adds a flag if not already set.
+	 * @brief Adds a flag if not already set.
 	 * @param fType Flag describing the type of the net.
 	 */
 	virtual void AddFlag(const NetTypeFlag &fType);
 	/**
-	 * Type of the net
+	 * @brief Type of the net
 	 * @return Returns the flag describing the type of the net.
 	 */
 	NetTypeFlag GetFlag() const;
 
 	/**
-	 * Cycles the input from m_pTrainingData
-	 * Checks total error of the output returned from SetExpectedOutputData()
+	 * @brief Cycles the input from m_pTrainingData and Checks total error of the output returned from SetExpectedOutputData()
 	 * @return Returns the total error of the net after every training step.
 	 * @param iCycles Maximum number of training cycles
 	 * @param fTolerance Maximum error value (working as a break condition for early break-off)
@@ -124,151 +123,143 @@ public:
 	virtual std::vector<float> TrainFromData(const unsigned int &iCycles, const float &fTolerance, const bool &bBreak, float &fProgress);
 
 	/**
-	 * Adds a new layer to the network. New layer will get appended to m_lLayers.
+	 * @brief Adds a new layer to the network. New layer will get appended to m_lLayers.
 	 * @param pLayer Pointer to the new layer.
 	 */
 	virtual void AddLayer(AbsLayer *pLayer);
 	/**
-	 * List of all layers of the net.
+	 * @brief List of all layers of the net.
 	 * @return Returns an array with pointers to every layer.
 	 */
 	virtual std::vector<AbsLayer*> GetLayers() const;
 
 	/**
-	 * Deletes the complete network (all connections and all values).
+	 * @brief Deletes the complete network (all connections and all values).
 	 */
 	virtual void EraseAll();
 
 	/**
-	 * Set the value of neurons in the input layer to new values
+	 * @brief Set the value of neurons in the input layer to new values
 	 * @param inputArray New values of the input layer
 	 */
 	virtual void SetInput(const std::vector<float> &inputArray);		// only usable if input or output layer was set
 	/**
-	 * Set the value of neurons in the input layer to new values
+	 * @brief Set the value of neurons in the input layer to new values
 	 * @param inputArray New values of the input layer
-	 *
 	 * @param iLayerID Index of the layer in m_lLayers
 	 */
 	virtual void SetInput(const std::vector<float> &inputArray, const unsigned int &iLayerID);
 	/**
-	 * Set the value of neurons in the input layer to new values
+	 * @brief Set the value of neurons in the input layer to new values
 	 * @param pInputArray New values of the input layer
-	 *
 	 * @param iLayerID Index of the layer in m_lLayers
-	 *
 	 * @param iSize Number of values in pInputArray
 	 */
 	virtual void SetInput(float *pInputArray, const unsigned int &iSize, const unsigned int &iLayerID);
 
 	/**
-	 * Set the values of the neurons equal to the values of the outputArray.
-	 * Also calcs the error delta of each neuron in the output layer.
+	 * @brief Set the values of the neurons equal to the values of the outputArray. Also calcs the error delta of each neuron in the output layer.
 	 * @return returns the total error of the output layer ( sum(pow(delta, 2)/2.f )
 	 * @param outputArray New values of the output layer
 	 */
 	virtual float SetOutput(const std::vector<float> &outputArray); 	// only usable if input or output layer was set
 	/**
-	 * Set the values of the neurons equal to the values of the outputArray.
-	 * Also calcs the error delta of each neuron in the output layer.
+	 * @brief Set the values of the neurons equal to the values of the outputArray. Also calcs the error delta of each neuron in the output layer.
 	 * @return returns the total error of the output layer ( sum(pow(delta, 2)/2.f )
 	 * @param outputArray New values of the output layer
-	 *
 	 * @param iLayerID Index of the layer in m_lLayers
 	 */
 	virtual float SetOutput(const std::vector<float> &outputArray, const unsigned int &iLayerID);
 	/**
-	 * Set the values of the neurons equal to the values of the outputArray.
-	 * Also calcs the error delta of each neuron in the output layer.
+	 * @brief Set the values of the neurons equal to the values of the outputArray. Also calcs the error delta of each neuron in the output layer.
 	 * @return returns the total error of the output layer ( sum(pow(delta, 2)/2.f )
 	 * @param pOutputArray New values of the output layer
-	 *
 	 * @param iSize Number of values in pInputArray
-	 *
 	 * @param iLayerID Index of the layer in m_lLayers
 	 */
 	virtual float SetOutput(float *pOutputArray, const unsigned int &iSize, const unsigned int &iLayerID);
 
 	/**
-	 *  Sets training data of the net.
+	 *  @brief Sets training data of the net.
 	 */
 	virtual void SetTrainingSet(TrainingSet *pData);
 	/**
-	 *  Sets training data of the net.
+	 *  @brief Sets training data of the net.
 	 */
 	virtual void SetTrainingSet(const TrainingSet &Data);
 	/**
-	 *  Training data of the net.
+	 *  @brief Training data of the net.
 	 *  @return Returns the current training set of the net or NULL if nothing was set.
 	 */
 	virtual TrainingSet *GetTrainingSet() const;
 
 	/**
-	 * Returns layer at index iLayerID.
+	 * @brief Returns layer at index iLayerID.
 	 * @return Pointer to Layer at iLayerID.
 	 */
 	virtual AbsLayer* GetLayer(const unsigned int &iLayerID) const;
 
 	/**
-	 * Pointer to the input layer (If input layer was already defined).
+	 * @brief Pointer to the input layer (If input layer was already defined).
 	 * @return Returns a pointer to the input layer.
 	 */
 	//virtual const AbsLayer *GetIPLayer() const;
 	/**
-	 * Pointer to the output layer (If output layer was already defined).
+	 * @brief Pointer to the output layer (If output layer was already defined).
 	 * @return Returns a pointer to the output layer.
 	 */
 	//virtual const AbsLayer *GetOPLayer() const;
 
-		/**
-	 * Pointer to the input layer (If input layer was already defined).
+	/**
+	 * @brief Pointer to the input layer (If input layer was already defined).
 	 * @return Returns a pointer to the input layer.
 	 */
 	virtual AbsLayer *GetIPLayer() const;
 	/**
-	 * Pointer to the output layer (If output layer was already defined).
+	 * @brief Pointer to the output layer (If output layer was already defined).
 	 * @return Returns a pointer to the output layer.
 	 */
 	virtual AbsLayer *GetOPLayer() const;
 	
 	/**
-	 * Sets the input layer
+	 * @brief Sets the input layer
 	 * @param iID ID of the layer.
 	 */
 	virtual void SetIPLayer(const unsigned int iID);
 	/**
-	 * Sets the output layer
+	 * @brief Sets the output layer
 	 * @param iID ID of the layer.
 	 */
 	virtual void SetOPLayer(const unsigned int iID);
 
 	/**
-	 * Defines the type of "activation" function the net has to use for back-/propagation.
+	 * @brief Defines the type of "activation" function the net has to use for back-/propagation.
 	 * @param pFunction New "activation" function
 	 */
 	virtual void SetTransfFunction(const TransfFunction *pFunction);
 	/**
+	 * @brief Access of the currently used transfer function of the network.
 	 * @return Returns the current net (activation) function.
 	 */
 	virtual const TransfFunction *GetTransfFunction() const;
 
 	/**
-	 * Save net's content to filesystem
+	 * @brief Save net's content to filesystem
 	 */
 	virtual void ExpToFS(std::string path);
 	/**
-	 * Load net's content to filesystem
+	 * @brief Load net's content to filesystem
 	 * @return The connections table of this net.
 	 */
 	virtual void ImpFromFS(std::string path);
 
 	/**
-	 * Only usable if input/output layer was already set.
+	 * @brief Only usable if input/output layer was already set.
 	 * @return Returns the values of the output layer after propagating the net.
 	 */
 	virtual std::vector<float> GetOutput();
 	/**
-	 * standard output of the net. Only usable if input/output layer was already set.
+	 * @brief standard output of the net. Only usable if input/output layer was already set.
 	 */
 	friend std::ostream& operator << (std::ostream &os, AbsNet &op);
 };

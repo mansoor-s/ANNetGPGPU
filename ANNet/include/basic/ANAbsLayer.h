@@ -149,10 +149,11 @@ public:
 
 	/** 
 	 * @brief Exports the layer to a plain array
-	 * NEURON1	 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1
-	 * NEURON2 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 2
-	 * NEURON3	 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 3
-	 * NEURON[i < iHeight] 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron i
+	 * \n Matrix layout:
+	 * \n NEURON1	 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1
+	 * \n NEURON2 			: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 2
+	 * \n NEURON3	 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 3
+	 * \n NEURON[i < iHeight] 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron i
 	 * @return Returns a matrix: width=size_of_this_layer; height=size_previous_layer
 	 */
 	virtual F2DArray ExpEdgesIn() const;
@@ -165,11 +166,12 @@ public:
 
 	/** 
 	 * @brief Exports the layer to a plain array
-	 * NEURON[iStart]		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1
-	 * NEURON[iStart+1]		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 2
-	 * NEURON[iStart+2]	 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 3
-	 * NEURON[iStart+n]	 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron n
-	 * NEURON[iStop] 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron iStop
+	 * \n Matrix layout:
+	 * \n NEURON[iStart]		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 1
+	 * \n NEURON[iStart+1]		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 2
+	 * \n NEURON[iStart+2]	 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron 3
+	 * \n NEURON[iStart+n]	 	: edge1, edge2, edge[n < iWidth] ==> directing to input neuron n
+	 * \n NEURON[iStop] 		: edge1, edge2, edge[n < iWidth] ==> directing to input neuron iStop
 	 * @param iStart Start index for export
 	 * @param iStart Stop index for export
 	 * @return Returns a matrix: width=size_of_this_layer; height=iStop-iStart
@@ -186,10 +188,11 @@ public:
 
 	/** 
 	 * @brief Exports the layer to a plain array
-	 * NEURON1			: edge1, edge1, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON2			: edge2, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON3			: edge3, edge3, edge[n < iWidth] ==> directing to next neuron 1, 2, n
-	 * NEURON[i < iHeight] 		: edge4, edge4, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * \n Matrix layout:
+	 * \n NEURON1			: edge1, edge1, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * \n NEURON2			: edge2, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * \n NEURON3			: edge3, edge3, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * \n NEURON[i < iHeight] 	: edge4, edge4, edge[n < iWidth] ==> directing to next neuron 1, 2, n
 	 * @return Returns a matrix: width=size_this_layer; height=size_of_next_layer
 	 */
 	virtual F2DArray ExpEdgesOut() const;
@@ -202,11 +205,11 @@ public:
 
 	/**
 	 * @brief Exports the layer to a plain array
-	 * pPositions:
-	 * NEURON1			: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON2			: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON3			: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON[i < iHeight] 		: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n Matrix layout:
+	 * \n NEURON1			: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n NEURON2			: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n NEURON3			: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n NEURON[i < iHeight] 	: X, Y, POS[n < iWidth] ==> directing to input
 	 * @return Returns a matrix of positions
 	 */
 	virtual F2DArray ExpPositions() const;
@@ -219,11 +222,11 @@ public:
 	
 	/**
 	 * @brief Exports the position coordinates of the neurons of this layer to an array
-	 * pPositions:
-	 * NEURON1			: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON2			: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON3			: X, Y, POS[n < iWidth] ==> directing to input
-	 * NEURON[i < iHeight] 		: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n Matrix layout:
+	 * \n NEURON1			: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n NEURON2			: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n NEURON3			: X, Y, POS[n < iWidth] ==> directing to input
+	 * \n NEURON[i < iHeight] 	: X, Y, POS[n < iWidth] ==> directing to input
 	 * @param iStart Start index for export
 	 * @param iStart Stop index for export
 	 * @return Returns a matrix of positions

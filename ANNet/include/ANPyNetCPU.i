@@ -6,7 +6,6 @@ Author: Daniel Frenzel"
 %module(docstring=DOCSTRING) ANPyNetCPU
 
 
-%include basic/ANList.i
 %include basic/ANEdge.i
 %include basic/ANAbsNeuron.i
 %include basic/ANAbsLayer.i

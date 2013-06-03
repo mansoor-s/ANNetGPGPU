@@ -25,6 +25,11 @@ class SOMNeuron;
 class Centroid;
 class DistFunction;
 
+
+/**
+ * @class SOMNet
+ * @brief Implementation of a self organizing map.
+ */
 class SOMNet : public AbsNet {
 protected:
 	const DistFunction 	*m_DistFunction;
@@ -52,27 +57,30 @@ protected:
 
 protected:
 	/**
-	 *
+	 * @brief Implements part of training process. 
+	 * Calculates the initial Sigma0 value.
 	 */
 	void FindSigma0();		// size of the net
 
 	/**
-	 *
+	 * @brief Implements part of training process. 
+	 * Searches for the best matching unit (neuron which fits best to current input). 
 	 */
 	void FindBMNeuron();	// best matching unit
 
 	/**
-	 * Implement to determine back propagation ( == learning ) behavior
+	 * @brief Implements part of training process. 
+	 * Propagates through the network backwardly.
 	 */
 	void PropagateBW();
 
 	/**
-	 * TODO Implement to determine propagation behavior
+	 * @brief Propagates through the network forwardly.
 	 */
 	void PropagateFW();
 
 	/**
-	 * Adds a layer to the network.
+	 * @brief Adds a layer to the network.
 	 * @param iSize Number of neurons of the layer.
 	 * @param flType Flag describing the type of the net.
 	 */
@@ -80,20 +88,23 @@ protected:
 
 public:
 	/**
-	 * Creates a self organizing map object.
+	 * @brief Creates a self organizing map object.
 	 */
 	SOMNet();
+	/**
+	 * @brief Creates a self organizing map object.
+	 */
 	SOMNet(AbsNet *pNet);
 
 	/**
-	 * Creates a double layered network. Each layer with vDim[1] * vDim[2] * vDim[n+1] * .. neurons.
+	 * @brief Creates a double layered network. Each layer with vDim[1] * vDim[2] * vDim[n+1] * .. neurons.
 	 * @param vDimI vector inheriting the dimensions of the input layer: vDim[X], vDim[Y], vDim[Z], vDim[DimN], ..
 	 * @param vDimO vector inheriting the dimensions of the output layer: vDim[X], vDim[Y], vDim[Z], vDim[DimN], ..
 	 */
 	SOMNet(const std::vector<unsigned int> &vDimI, const std::vector<unsigned int> &vDimO);
 
 	/**
-	 * Creates a double layered network.
+	 * @brief Creates a double layered network.
 	 * @param iWidthI Width of the input layer
 	 * @param iHeightI Height of the input layer
 	 * @param iWidthO Width of the output layer
@@ -105,19 +116,19 @@ public:
 	virtual ~SOMNet();
 
 	/**
-	 * Creates the network based on a connection table.
+	 * @brief Creates the network based on a connection table.
 	 * @param ConTable is the connection table
 	 */
 	void CreateNet(const ConTable &Net);
 
 	/**
-	 * Returns a pointer to the SOM.
+	 * @brief Returns a pointer to the SOM.
 	 * @return the pointer to the SOM
 	 */
 	SOMNet *GetNet();
 
 	/**
-	 * Creates a double layered network. Each layer with vDim[1] * vDim[2] * vDim[n+1] * .. neurons.
+	 * @brief Creates a double layered network. Each layer with vDim[1] * vDim[2] * vDim[n+1] * .. neurons.
 	 * The layers will get automatically connected properly, which means,
 	 * every neuron in the output layer is connected to each neuron in the input layer.
 	 * @param vDimI vector inheriting the dimensions of the input layer: vDim[X], vDim[Y], vDim[Z], vDim[DimN], ..
@@ -126,13 +137,22 @@ public:
 	void CreateSOM(	const std::vector<unsigned int> &vDimI,
 			const std::vector<unsigned int> &vDimO);
 
+	/**
+	 * @brief Creates a double layered network. Each layer with vDim[1] * vDim[2] * vDim[n+1] * .. neurons.
+	 * The layers will get automatically connected properly, which means,
+	 * every neuron in the output layer is connected to each neuron in the input layer.
+	 * @param vDimI vector inheriting the dimensions of the input layer: vDim[X], vDim[Y], vDim[Z], vDim[DimN], ..
+	 * @param vDimO vector inheriting the dimensions of the output layer: vDim[X], vDim[Y], vDim[Z], vDim[DimN], ..
+	 * @param f2dEdgeMat Matrix containing the values of the edges of the network.
+	 * @param f2dNeurPos Matrix containing the position coordinates of the network.
+	 */
 	void CreateSOM(	const std::vector<unsigned int> &vDimI,
 			const std::vector<unsigned int> &vDimO,
 			const F2DArray &f2dEdgeMat,
 			const F2DArray &f2dNeurPos);
 
 	/**
-	 * Creates a double layered network.
+	 * @brief Creates a double layered network.
 	 * @param iWidthI Width of the input layer
 	 * @param iHeightI Height of the input layer
 	 * @param iWidthO Width of the output layer
@@ -142,51 +162,55 @@ public:
 			const unsigned int &iWidthO, const unsigned int &iHeightO);
 
 	/**
-	 * Trains the network with given input until iCycles is reached.
+	 * @brief Trains the network with given input until iCycles is reached.
 	 * @param iCycles Maximum number of training cycles.
 	 */
 	void Training(const unsigned int &iCycles = 1000);
 
 	/**
-	 * Clustering results of the network.
+	 * @brief Clustering results of the network.
 	 * @return std::vector<Centroid> Returns to each input value the obtained centroid with the euclidean distance and the corresponding ID of the BMU.
 	 */
 	std::vector<Centroid> GetCentrOInpList();
 
 	/**
-	 * Clustering results of the network.
+	 * @brief Clustering results of the network.
 	 * @return std::vector<Centroid> Returns the centroids found after training and the ID of the corresponding BMUs.
 	 */
 	std::vector<Centroid> GetCentroidList();
 
 	/**
-	 * Sets learning rate scalar of the network.
+	 * @brief Sets learning rate scalar of the network.
 	 * @param fVal New value of the learning rate. Recommended: 0.005f - 1.0f
 	 */
 	void SetLearningRate 	(const float &fVal);
 	/**
+	 * @brief Gets learning rate scalar of the network.
 	 * @return Return the learning rate of the net.
 	 */
 	float GetLearningRate() const;
 
 	/**
+	 * @brief Sets the distance (neighborhood) function of the network.
 	 * @param pFCN Kind of function the net has to use while back-/propagating.
 	 */
 	void SetDistFunction (const DistFunction *pFCN);
 
 	/**
+	 * @brief Returns the currently used distance (neighborhood) function of the network.
 	 * @return Return the kind of function the net has to use while back-/propagating.
 	 */
 	const DistFunction *GetDistFunction() const;
 	
 	/**
-	 * Sets the rate for the application of the conscience mechanism. 
+	 * @brief Sets the scalar for the conscience mechanism. If it is zero, then conscience is not applied.
 	 * A value of zero leads to the standard kohonen implementation.
 	 * Value must be: 0.f < fVal < 1.f
 	 */
 	void SetConscienceRate(const float &fVal);
 	
 	/**
+	 * @brief Returns the conscience scalar of the network. If it is zero, then conscience is not applied.
 	 * @return Returns the rate for the application of the conscience mechanism. 
 	 * A value of zero leads to the standard kohonen implementation. 
 	 * Value must be: 0.f < fVal < 1.f

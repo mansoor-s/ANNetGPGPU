@@ -10,76 +10,78 @@
 #include <ANSOMLayer.h>
 #include <basic/ANAbsNeuron.h>
 #include <cuda.h>
-
+#include <ctime>
+#include <gpgpu/helper_cuda.h>
 
 namespace ANNGPGPU {
 
+////////////////////////////////////////////////////////////////////////////////
+// Data configuration
+////////////////////////////////////////////////////////////////////////////////
+const int MAX_GPU_COUNT = 32;
+////////////////////////////////////////////////////////////////////////////////
+
 int SOMNetGPU::GetCudaDeviceCount() const {
-	int iCount = 0;
+	int GPU_N = 0;
+	printf("Check for CUDA-capable devices\n");
+	checkCudaErrors(cudaGetDeviceCount(&GPU_N) );
+	if (GPU_N > MAX_GPU_COUNT) {
+	    GPU_N = MAX_GPU_COUNT;
+	}
+	printf("CUDA-capable device count: %i\n", GPU_N);
 
-	if(cudaGetDeviceCount(&iCount) != cudaSuccess)
-		return 0;
-
-	std::cout<<iCount<<" cuda-capable device(s) found."<<std::endl;
-	return iCount;
+	return GPU_N;
 }
 
-std::vector<SplittedNetExport> SOMNetGPU::SplitDeviceData() const {
-	std::vector<SplittedNetExport> vRes;
-  
+std::vector<SplittedNetExport*> SOMNetGPU::SplitDeviceData() const {
 	unsigned int iStart 		= 0;
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
-
-	unsigned int iDeviceCount = GetCudaDeviceCount();
-	for(unsigned int i = 0; i < iDeviceCount; i++) {
-		if(cudaSetDevice(i) != cudaSuccess) {
-			std::cout<<"SplitDeviceData(): Setting new cuda-capable device failed."<<std::endl;
-			break;
-		}
+	unsigned int iDeviceCount 	= GetCudaDeviceCount();
+	
+	std::vector<SplittedNetExport*> vRes;
+	
+	printf("Computing with %d GPUs ..\n", iDeviceCount);
+	#pragma omp parallel for
+	for(int i = 0; i < iDeviceCount; i++) { 
+		checkCudaErrors(cudaSetDevice(i) );
 
 		iStart = i*(iSizeOfLayer/iDeviceCount);
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
 
-		// Copy weights between neurons of the input and output layer
-		ANNGPGPU::F2DArray f2dEdges 		= GetOPLayer()->ExpEdgesIn(iStart, iStop);
-		// Copy positions of the neurons in the output layer
-		ANNGPGPU::F2DArray f2dPositions 	= GetOPLayer()->ExpPositions(iStart, iStop);
-
 		// Copy conscience information
 		thrust::host_vector<float> hvConscience(iStop-iStart+1);
-		thrust::device_vector<float> dvConscience;
 		for(unsigned int j = 0; j <= iStop-iStart; j++) {
 			hvConscience[j] = m_pOPLayer->GetNeuron(j+iStart)->GetValue();
 		}
-		dvConscience = hvConscience;
 
-		SplittedNetExport SExp(f2dEdges, f2dPositions, dvConscience);
-		vRes.push_back(SExp);
+		SplittedNetExport *pExp = new SplittedNetExport(GetOPLayer()->ExpEdgesIn(iStart, iStop), 	// Copy weights between neurons of the input and output layer
+								GetOPLayer()->ExpPositions(iStart, iStop), 	// Copy positions of the neurons in the output layer
+								hvConscience);
+		vRes.push_back(pExp);
 	}
 	return vRes;
 }
 
-void SOMNetGPU::CombineDeviceData(const std::vector<SplittedNetExport> &SExp) {
+void SOMNetGPU::CombineDeviceData(const std::vector<SplittedNetExport*> &SExp) {
 	unsigned int iStart 		= 0;
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
+	unsigned int iDeviceCount 	= GetCudaDeviceCount();
 
-	unsigned int iDeviceCount = GetCudaDeviceCount();
-	for(unsigned int i = 0; i < iDeviceCount; i++) {
-		if(cudaSetDevice(i) != cudaSuccess) {
-			std::cout<<"CombineDeviceData(): Setting new cuda-capable device failed."<<std::endl;
-			break;
-		}
-		
+	#pragma omp parallel for
+	for(int i = 0; i < iDeviceCount; i++) {
+		checkCudaErrors(cudaSetDevice(i) );
+
 		iStart = i*(iSizeOfLayer/iDeviceCount);
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
-		
+
 		// Copy weights between neurons of the input and output layer
-		GetOPLayer()->ImpEdgesIn(SExp.at(i).f2dEdges, iStart, iStop);
+		GetOPLayer()->ImpEdgesIn(SExp.at(i)->f2dEdges, iStart, iStop);
+		
 		// Copy back conscience
 		for(unsigned int j = 0; j <= iStop-iStart; j++) {
-			m_pOPLayer->GetNeuron(j+iStart)->SetValue(SExp.at(i).dvConscience[j]);
+			m_pOPLayer->GetNeuron(j+iStart)->SetValue((*SExp.at(i)->dvConscience)[j]);
 		}
 	}
 }
@@ -138,8 +140,13 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 		std::cout<<"No training set available!"<<std::endl;
 		return;
 	}
+	
+	clock_t begin = clock();
 
-	std::vector<SplittedNetExport> SExp = SplitDeviceData();
+	printf("Copy memory from host to device ..\n");
+	std::vector<SplittedNetExport*> SExp = SplitDeviceData();
+
+	printf("Calculate SOM ..\n");
 	hostSOMTraining(SExp,
 		*GetTrainingSet(),
 		iCycles,
@@ -148,10 +155,13 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 		m_fConscienceRate,
 		&ANN::fcn_decay,
 		*GetDistFunction() );
+	
+	clock_t end = clock();
+	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
 
-	std::cout<<"Training cycles finished properly"<<std::endl;
+	std::cout<<"Training cycles finished properly after "<<elapsed_secs<<" s"<<std::endl;
 	// Write edge matrix back
-	std::cout<<"Copy device memory back .."<<std::endl;
+	std::cout<<"Copy memory from device to host .."<<std::endl;
 	// Copy data from device to host
 	CombineDeviceData(SExp);	
 	std::cout<<".. Finished"<<std::endl;

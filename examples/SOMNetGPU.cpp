@@ -10,6 +10,7 @@
 #include <ANMath>
 #include <ANGPGPU>
 #include <math/ANRandom.h>
+#include <math/ANFunctions.h>
 #include <gui/QSOMReader.h>
 #include <gpgpu/ANKernels.h>
 
@@ -75,15 +76,16 @@ int main(int argc, char *argv[]) {
   input.AddInput(white);
 
   std::vector<float> vCol(3);
-  int w1 = 40;
+  int w1 = 1024;
   int w2 = 4;
 
   ANNGPGPU::SOMNetGPU gpu;
   gpu.CreateSOM(3, 1, w1,w1);
+  gpu.SetDistFunction(&ANN::Functions::fcn_bubble);
   gpu.SetTrainingSet(input);
 
   gpu.SetConscienceRate(0);
-  gpu.Training(5000);
+  gpu.Training(10000);
 
   SOMReader w(w1, w1, w2);
   for(int x = 0; x < w1*w1; x++) {

@@ -4,6 +4,7 @@
 #include <math/ANFunctions.h>
 #include <math/ANRandom.h>
 #include <gpgpu/ANKernels.h>
+#include <gpgpu/helper_cuda.h>
 #include <cfloat>
 
 #include <cassert>
@@ -172,8 +173,7 @@ struct hebbian_functor {
  * ROW(n+1)	..		..		..
  */
 BMUExport
-hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
-		const thrust::device_vector<float> &InputVector,
+hostSOMFindBMNeuronID(std::vector<SplittedNetExport*> &SExp,
 		const float &fConscienceRate)
 {
 	BMUExport retBMU;
@@ -181,72 +181,68 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
 
 	#pragma omp parallel for
 	for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
-		if(cudaSetDevice(iDev) != cudaSuccess) {
-			std::cout<<"hostSOMTraining(): Setting new cuda-capable device failed."<<std::endl;
-			continue;
-		} else {
-			unsigned int BMUID = 0;
+		checkCudaErrors(cudaSetDevice(iDev) );
+		unsigned int BMUID = 0;
 
-			unsigned int iWidth 	= SExp.at(iDev).f2dEdges.GetW();
-			unsigned int iHeight 	= SExp.at(iDev).f2dEdges.GetH();
+		unsigned int iWidth 	= SExp.at(iDev)->f2dEdges.GetW();
+		unsigned int iHeight 	= SExp.at(iDev)->f2dEdges.GetH();
 
-			assert(iWidth > 0);
-			assert(iHeight > 0);
+		assert(iWidth > 0);
+		assert(iHeight > 0);
 
-			thrust::device_vector<float> dvRes(iWidth, 0.f);
-			thrust::device_vector<float> dvTmp(iWidth, 0.f);// temporary
-
-			for(unsigned int y = 0; y < iHeight; y++) {
-				thrust::transform(
-					SExp.at(iDev).f2dEdges.GetRowBegin(y),	// input
-					SExp.at(iDev).f2dEdges.GetRowEnd(y), 	// input
-					dvTmp.begin(), 							// result
-					minus_pow_functor(InputVector[y]) ); 	// functor
-
-				thrust::transform(
-					dvRes.begin(), 						// input
-					dvRes.end(), 						// input
-					dvTmp.begin(),						// input
-					dvRes.begin(), 						// result
-					thrust::plus<float>() );			// functor
-			}
-			dvTmp = dvRes;
-
-			// implementation of conscience mechanism
-			if(fConscienceRate > 0.f) {
-				thrust::device_vector<float> dvConscience(iWidth, 1.f / (float)iWidth);
-
-				thrust::transform(
-					dvConscience.begin(),
-					dvConscience.end(),
-					SExp.at(iDev).dvConscience.begin(),
-					dvConscience.begin(),
-					thrust::minus<float>() );
-
-				thrust::transform(
-					dvRes.begin(),
-					dvRes.end(),
-					dvConscience.begin(),
-					dvRes.begin(),
-					thrust::minus<float>() );
-			}
+		thrust::device_vector<float> dvRes(iWidth, 0.f);
+		thrust::device_vector<float> dvTmp(iWidth, 0.f);// temporary
+		
+		for(unsigned int y = 0; y < iHeight; y++) {
+			thrust::transform(
+				SExp.at(iDev)->f2dEdges.GetRowBegin(y),	// input
+				SExp.at(iDev)->f2dEdges.GetRowEnd(y), 	// input
+				dvTmp.begin(), 							// result
+				minus_pow_functor((*SExp.at(iDev)->dvInput)[y]) ); 	// functor
 
 			thrust::transform(
-				dvTmp.begin(),
-				dvTmp.end(),
-				SExp.at(iDev).dvConscience.begin(),
-				SExp.at(iDev).dvConscience.begin(),
-				saxmy_functor(fConscienceRate) );
+				dvRes.begin(), 						// input
+				dvRes.end(), 						// input
+				dvTmp.begin(),						// input
+				dvRes.begin(), 						// result
+				thrust::plus<float>() );			// functor
+		}
+		dvTmp = dvRes;
 
-			hostGetMin(dvRes, BMUID);
+		// implementation of conscience mechanism
+		if(fConscienceRate > 0.f) {
+			thrust::device_vector<float> dvConscience(iWidth, 1.f / (float)iWidth);
 
-			// Check partial results for global BMU in all devices
-			if(fLastBMU > dvRes[BMUID]) {
-				fLastBMU = dvRes[BMUID];
+			thrust::transform(
+				dvConscience.begin(),
+				dvConscience.end(),
+				SExp.at(iDev)->dvConscience->begin(),
+				dvConscience.begin(),
+				thrust::minus<float>() );
 
-				thrust::host_vector<float> vPos = SExp.at(iDev).f2dPositions.GetSubArrayY(BMUID);
-				retBMU = BMUExport(BMUID, iDev, vPos);
-			}
+			thrust::transform(
+				dvRes.begin(),
+				dvRes.end(),
+				dvConscience.begin(),
+				dvRes.begin(),
+				thrust::minus<float>() );
+		}
+
+		thrust::transform(
+			dvTmp.begin(),
+			dvTmp.end(),
+			SExp.at(iDev)->dvConscience->begin(),
+			SExp.at(iDev)->dvConscience->begin(),
+			saxmy_functor(fConscienceRate) );
+
+		hostGetMin(dvRes, BMUID);
+
+		// Check partial results for global BMU in all devices
+		if(fLastBMU > dvRes[BMUID]) {
+			fLastBMU = dvRes[BMUID];
+
+			thrust::host_vector<float> vPos = SExp.at(iDev)->f2dPositions.GetSubArrayY(BMUID);
+			retBMU = BMUExport(BMUID, iDev, vPos);
 		}
 	}
 	
@@ -262,8 +258,7 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport> &SExp,
  * ROW(n+1)	..		..		..		..
  */
 template<typename BinaryFunction>
-void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
-		const thrust::device_vector<float> &dvInputVector,
+void hostSOMPropagateBW( std::vector<SplittedNetExport*> &SExp,
 		const BMUExport &BMU,
 		const float &fSigmaT,
 		const float &fLearningRate,
@@ -272,78 +267,75 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport> &SExp,
 {
 	#pragma omp parallel for
 	for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
-		if(cudaSetDevice(iDev) != cudaSuccess) {
-			std::cout<<"hostSOMTraining(): Setting new cuda-capable device failed."<<std::endl;
-			continue;
-		} else {
-			unsigned int iWidth 	= SExp.at(iDev).f2dPositions.GetW();
-			unsigned int iHeight 	= SExp.at(iDev).f2dPositions.GetH();
+		checkCudaErrors(cudaSetDevice(iDev) );
+		
+		unsigned int iWidth 	= SExp.at(iDev)->f2dPositions.GetW();
+		unsigned int iHeight 	= SExp.at(iDev)->f2dPositions.GetH();
 
-			thrust::device_vector<float> dvBMUPos = BMU.dvBMUPos;
-			thrust::device_vector<float> dvTmp(iWidth, 0.f); // temporary
-			thrust::device_vector<float> dvInfluence(iWidth, 0.f);
-			thrust::device_vector<float> dvDist(iWidth, 0.f);
+		thrust::device_vector<float> dvBMUPos = BMU.dvBMUPos;
+		thrust::device_vector<float> dvTmp(iWidth, 0.f); // temporary
+		thrust::device_vector<float> dvInfluence(iWidth, 0.f);
+		thrust::device_vector<float> dvDist(iWidth, 0.f);
 
-			// 1. Calc distances for all neurons to BMNeuron
-			// Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) );
-			for(unsigned int y = 0; y < iHeight; y++) { 	// for each coordinate position of the neuron
-				thrust::transform(
-					SExp.at(iDev).f2dPositions.GetRowBegin(y),		// input
-					SExp.at(iDev).f2dPositions.GetRowEnd(y), 		// input
-					dvTmp.begin(), 						// result
-					minus_pow_functor(dvBMUPos[y]) ); 			// functor
-
-				thrust::transform(
-					dvDist.begin(), 					// input
-					dvDist.end(), 						// input
-					dvTmp.begin(),						// input
-					dvDist.begin(), 					// result
-					thrust::plus<float>() );				// functor
-			}
+		// 1. Calc distances for all neurons to BMNeuron
+		// Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) );
+		for(unsigned int y = 0; y < iHeight; y++) { 	// for each coordinate position of the neuron
 			thrust::transform(
-				dvDist.begin(),							// input
-				dvDist.end(), 							// input
-				dvDist.begin(), 						// result
-				sqrt_functor() );						// functor
+				SExp.at(iDev)->f2dPositions.GetRowBegin(y),		// input
+				SExp.at(iDev)->f2dPositions.GetRowEnd(y), 		// input
+				dvTmp.begin(), 						// result
+				minus_pow_functor(dvBMUPos[y]) ); 			// functor
 
-			// 2. Calculate the influence for each neuron
 			thrust::transform(
-				dvDist.begin(),							// input
-				dvDist.end(), 							// input
-				dvInfluence.begin(), 						// result
-				binaryDistFunc );					// functor
+				dvDist.begin(), 					// input
+				dvDist.end(), 						// input
+				dvTmp.begin(),						// input
+				dvDist.begin(), 					// result
+				thrust::plus<float>() );				// functor
+		}
+		thrust::transform(
+			dvDist.begin(),							// input
+			dvDist.end(), 							// input
+			dvDist.begin(), 						// result
+			sqrt_functor() );						// functor
 
-			// 3. Only handle neurons in radius:
-			// 3a. Make stencil
-			dvTmp.assign(iWidth, fSigmaT);
-			thrust::transform(
-				dvDist.begin(), 						// input 1
-				dvDist.end(),							// input 1
-				dvTmp.begin(),							// input 1
-				dvTmp.begin(), 							// result
-				thrust::less<float>() 						// functor
-			);
+		// 2. Calculate the influence for each neuron
+		thrust::transform(
+			dvDist.begin(),							// input
+			dvDist.end(), 							// input
+			dvInfluence.begin(), 						// result
+			binaryDistFunc );					// functor
 
-			// 3b. Use stencil to modify only neurons inside the radius
-			// Save result in the ANN::F2DArray
-			iWidth 	= SExp.at(iDev).f2dEdges.GetW();
-			iHeight = SExp.at(iDev).f2dEdges.GetH();
+		// 3. Only handle neurons in radius:
+		// 3a. Make stencil
+		dvTmp.assign(iWidth, fSigmaT);
+		thrust::transform(
+			dvDist.begin(), 						// input 1
+			dvDist.end(),							// input 1
+			dvTmp.begin(),							// input 1
+			dvTmp.begin(), 							// result
+			thrust::less<float>() 						// functor
+		);
 
-			for(unsigned int y = 0; y < iHeight; y++) {			// for each edge of the neuron
-				thrust::transform_if(
-					SExp.at(iDev).f2dEdges.GetRowBegin(y),		// input 1
-					SExp.at(iDev).f2dEdges.GetRowEnd(y), 		// input 1
-					dvInfluence.begin(),						// input 2
-					dvTmp.begin(),								// stencil
-					SExp.at(iDev).f2dEdges.GetRowBegin(y), 		// result
-					hebbian_functor(fLearningRate, dvInputVector[y]), // functor
-					thrust::identity<int>() ); 					// predicate
-			}
+		// 3b. Use stencil to modify only neurons inside the radius
+		// Save result in the ANN::F2DArray
+		iWidth 	= SExp.at(iDev)->f2dEdges.GetW();
+		iHeight = SExp.at(iDev)->f2dEdges.GetH();
+
+		for(unsigned int y = 0; y < iHeight; y++) {			// for each edge of the neuron
+			thrust::transform_if(
+				SExp.at(iDev)->f2dEdges.GetRowBegin(y),		// input 1
+				SExp.at(iDev)->f2dEdges.GetRowEnd(y), 		// input 1
+				dvInfluence.begin(),						// input 2
+				dvTmp.begin(),								// stencil
+				SExp.at(iDev)->f2dEdges.GetRowBegin(y), 		// result
+				hebbian_functor(fLearningRate, (*SExp.at(iDev)->dvInput)[y]), // functor
+				thrust::identity<int>() ); 					// predicate
 		}
 	}
 }
 
-void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
+void hostSOMTraining( std::vector<SplittedNetExport*> &SExp,
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,
 		const float &fSigma0, 
@@ -374,12 +366,17 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 
 		// Set input
 		std::vector<float> vCurInput = InputSet.GetInput(ANN::RandInt(iMin, iMax) );
-		thrust::device_vector<float> dvInputVector(vCurInput.size() );
-		thrust::copy(vCurInput.begin(), vCurInput.end(), dvInputVector.begin() );
+		
+		#pragma omp parallel for
+		for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
+			checkCudaErrors(cudaSetDevice(iDev) );
+			thrust::device_vector<float> *p_dvInputVector = new thrust::device_vector<float>(vCurInput.size() );
+			thrust::copy(vCurInput.begin(), vCurInput.end(), p_dvInputVector->begin() );
+			SExp[iDev]->dvInput = p_dvInputVector;
+		}
 
 		// Find BMNeuron
-		BMUExport BMUExp;
-		BMUExp = hostSOMFindBMNeuronID(SExp, dvInputVector, fConscienceRate);
+		BMUExport BMUExp = hostSOMFindBMNeuronID(SExp, fConscienceRate);
 
 		// Calc m_fSigmaT if conscience is _not_ used
 		if(fConscienceRate <= 0.f) {
@@ -390,7 +387,6 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		// Propagate BW
 		if (strcmp (DistFunc.name, "gaussian") == 0) {
 			hostSOMPropagateBW( SExp,
-					dvInputVector,			// const
 					BMUExp,				// const
 					fSigmaT,			// const
 					fLearningRate,
@@ -398,7 +394,6 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		}
 		else if (strcmp (DistFunc.name, "mexican") == 0) {
 			hostSOMPropagateBW( SExp,
-					dvInputVector,			// const
 					BMUExp,				// const
 					fSigmaT,			// const
 					fLearningRate,
@@ -406,7 +401,6 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		}
 		else if (strcmp (DistFunc.name, "bubble") == 0) {
 			hostSOMPropagateBW( SExp,
-					dvInputVector,			// const
 					BMUExp,				// const
 					fSigmaT,			// const
 					fLearningRate,
@@ -414,7 +408,6 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		}
 		else if (strcmp (DistFunc.name, "cut_gaussian") == 0) {
 			hostSOMPropagateBW( SExp,
-					dvInputVector,			// const
 					BMUExp,				// const
 					fSigmaT,			// const
 					fLearningRate,
@@ -422,7 +415,6 @@ void hostSOMTraining( std::vector<SplittedNetExport> &SExp,
 		}
 		else if (strcmp (DistFunc.name, "epanechicov") == 0) {
 			hostSOMPropagateBW( SExp,
-					dvInputVector,			// const
 					BMUExp,				// const
 					fSigmaT,			// const
 					fLearningRate,

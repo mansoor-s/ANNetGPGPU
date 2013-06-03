@@ -184,9 +184,11 @@ F2DArray AbsLayer::ExpEdgesIn(int iStart, int iStop) const {
 	vRes.Alloc(iWidth, iHeight);
 	
 	#pragma omp parallel for
-	for(int y = iStart; y < static_cast<int>(iHeight); y++) {
+	for(int y = 0; y < static_cast<int>(iHeight); y++) {
+		int iC = 0;
 		for(unsigned int x = iStart; x <= iStop; x++) {
-			vRes[y][x] = m_lNeurons.at(x)->GetConI(y)->GetValue();
+			vRes[y][iC] = m_lNeurons.at(x)->GetConI(y)->GetValue();
+			iC++;
 		}
 	}
 	return vRes;
@@ -233,8 +235,10 @@ void AbsLayer::ImpEdgesIn(const F2DArray &mat, int iStart, int iStop) {
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
+		int iC = 0;
 		for(unsigned int x = iStart; x <= iStop; x++) {
-			m_lNeurons.at(x)->GetConI(y)->SetValue(mat[y][x]);
+			m_lNeurons.at(x)->GetConI(y)->SetValue(mat[y][iC]);
+			iC++;
 		}
 	}
 }
@@ -285,8 +289,10 @@ F2DArray AbsLayer::ExpPositions(int iStart, int iStop) const {
 
 	#pragma omp parallel for
 	for(int y = 0; y < static_cast<int>(iHeight); y++) {
-		for(unsigned int x = iStart; x <= iStop; x++) {
-			vRes[y][x] = m_lNeurons.at(x)->GetPosition().at(y);
+		int iC = 0;
+		for(int x = iStart; x <= iStop; x++) {
+			vRes[y][iC] = m_lNeurons.at(x)->GetPosition().at(y);
+			iC++;
 		}
 	}
 	return vRes;
@@ -314,12 +320,14 @@ void AbsLayer::ImpPositions(const F2DArray &f2dPos, int iStart, int iStop) {
 
 	assert(iStop-iStart <= m_lNeurons.size() );
 	
+	int iC = 0;
 	#pragma omp parallel for
 	for(int x = iStart; x <= static_cast<int>(iStop); x++) {
 		std::vector<float> vPos(iHeight);
 		for(unsigned int y = 0; y < iHeight; y++) {
-			vPos[y] = f2dPos.GetValue(x, y);
+			vPos[y] = f2dPos.GetValue(iC, y);
 		}
+		iC++;
 		m_lNeurons.at(x)->SetPosition(vPos);
 	}
 }

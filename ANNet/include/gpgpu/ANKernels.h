@@ -44,16 +44,18 @@ public:
 
 class SplittedNetExport {
 public:
-	SplittedNetExport() {};
-	SplittedNetExport(const ANNGPGPU::F2DArray &mEdgeMat, const ANNGPGPU::F2DArray &mPosMat, const thrust::device_vector<float> &vConscience) {
-		f2dEdges 		= mEdgeMat;
+	SplittedNetExport(const ANNGPGPU::F2DArray &mEdgeMat, const ANNGPGPU::F2DArray &mPosMat, thrust::host_vector<float> vConscience) {
+		f2dEdges 	= mEdgeMat;
 		f2dPositions 	= mPosMat;
-		dvConscience 	= vConscience;
+		
+		dvConscience = new thrust::device_vector<float>;
+		*dvConscience 	= vConscience;
 	}
   
 	ANNGPGPU::F2DArray f2dEdges;
 	ANNGPGPU::F2DArray f2dPositions;
-	thrust::device_vector<float> dvConscience;
+	thrust::device_vector<float> *dvConscience;
+	thrust::device_vector<float> *dvInput;
 };
 
 }
@@ -90,22 +92,20 @@ float hostGetMin(const thrust::device_vector<float>& vec, unsigned int &ID);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 ANNGPGPU::BMUExport
-hostSOMFindBMNeuronID(std::vector<ANNGPGPU::SplittedNetExport> &SExp,
-		const thrust::device_vector<float> &InputVector,
+hostSOMFindBMNeuronID(std::vector<ANNGPGPU::SplittedNetExport*> &SExp,
 		const float &fConscienceRate);
 
 //////////////////////////////////////////////////////////////////////////////////////////////
 template<typename BinaryFunction>
 void
-hostSOMPropagateBW(std::vector<ANNGPGPU::SplittedNetExport> &SExp,
-		const thrust::device_vector<float> &dvInputVector,
+hostSOMPropagateBW(std::vector<ANNGPGPU::SplittedNetExport*> &SExp,
 		const ANNGPGPU::BMUExport &,
 		const float &fSigmaT,
 		const float &fLearningRate,
 		const BinaryFunction &binaryDistFunc  );
 
 void
-hostSOMTraining( std::vector<ANNGPGPU::SplittedNetExport> &SExp,
+hostSOMTraining( std::vector<ANNGPGPU::SplittedNetExport*> &SExp,
 		const ANN::TrainingSet &InputSet,
 		const unsigned int &iCycles,
 		const float &fSigma0,

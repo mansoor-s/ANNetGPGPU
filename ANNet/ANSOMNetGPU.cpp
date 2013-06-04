@@ -37,14 +37,14 @@ std::vector<SplittedNetExport*> SOMNetGPU::SplitDeviceData() const {
 	unsigned int iStart 		= 0;
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
-	unsigned int iDeviceCount 	= GetCudaDeviceCount();
+	unsigned int iDeviceCount 	= 1;//GetCudaDeviceCount();
 	
 	std::vector<SplittedNetExport*> vRes;
 	
 	printf("Computing with %d GPUs ..\n", iDeviceCount);
 	#pragma omp parallel for
 	for(int i = 0; i < iDeviceCount; i++) { 
-		checkCudaErrors(cudaSetDevice(i) );
+		//checkCudaErrors(cudaSetDevice(i) );
 
 		iStart = i*(iSizeOfLayer/iDeviceCount);
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
@@ -67,11 +67,11 @@ void SOMNetGPU::CombineDeviceData(const std::vector<SplittedNetExport*> &SExp) {
 	unsigned int iStart 		= 0;
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
-	unsigned int iDeviceCount 	= GetCudaDeviceCount();
+	unsigned int iDeviceCount 	= 1;//GetCudaDeviceCount();
 
 	#pragma omp parallel for
 	for(int i = 0; i < iDeviceCount; i++) {
-		checkCudaErrors(cudaSetDevice(i) );
+		//checkCudaErrors(cudaSetDevice(i) );
 
 		iStart = i*(iSizeOfLayer/iDeviceCount);
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;

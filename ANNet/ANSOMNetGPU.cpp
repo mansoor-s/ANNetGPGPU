@@ -10,8 +10,8 @@
 #include <ANSOMLayer.h>
 #include <basic/ANAbsNeuron.h>
 #include <cuda.h>
-#include <ctime>
 #include <gpgpu/helper_cuda.h>
+#include <gpgpu/timer.h>
 
 namespace ANNGPGPU {
 
@@ -151,7 +151,7 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 	printf("Copy memory from host to device ..\n");
 	std::vector<SplittedNetExport*> SExp = SplitDeviceData();
 
-	clock_t begin = clock();
+	StartTimer();
 
 	printf("Calculate SOM ..\n");
 	hostSOMTraining(SExp,
@@ -163,10 +163,8 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 		&ANN::fcn_decay,
 		*GetDistFunction() );
 	
-	clock_t end = clock();
-	double elapsed_secs = double(end - begin) / CLOCKS_PER_SEC;
+	printf("GPU Processing time: %f (ms)\n", GetTimer() );
 
-	std::cout<<"Training cycles finished properly after "<<elapsed_secs<<" s"<<std::endl;
 	// Write edge matrix back
 	std::cout<<"Copy memory from device to host .."<<std::endl;
 	// Copy data from device to host

@@ -24,14 +24,10 @@ namespace ANNGPGPU {
 
 class SOMNetGPU : public ANN::SOMNet {
 private:
-	ANNGPGPU::F2DArray m_EdgeMat;
-	ANNGPGPU::F2DArray m_PosiMat;
-	std::vector<SplittedNetExport*> m_vSExp;
-
 	int GetCudaDeviceCount() const;
 	
 	std::vector<SplittedNetExport*> SplitDeviceData() const;
-	void CombineDeviceData(const std::vector<SplittedNetExport*> &SExp);
+	void CombineDeviceData(std::vector<SplittedNetExport*> &SExp);
 
 public:
 	SOMNetGPU();

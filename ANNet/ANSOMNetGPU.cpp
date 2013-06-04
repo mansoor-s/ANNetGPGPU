@@ -37,12 +37,11 @@ std::vector<SplittedNetExport*> SOMNetGPU::SplitDeviceData() const {
 	unsigned int iStart 		= 0;
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
-	unsigned int iDeviceCount 	= 1;//GetCudaDeviceCount();
+	unsigned int iDeviceCount 	= GetCudaDeviceCount();
 	
-	std::vector<SplittedNetExport*> vRes;
+	std::vector<SplittedNetExport*> vRes(iDeviceCount);
 	
 	printf("Computing with %d GPUs ..\n", iDeviceCount);
-	#pragma omp parallel for
 	for(int i = 0; i < iDeviceCount; i++) { 
 		checkCudaErrors(cudaSetDevice(i) );
 
@@ -55,36 +54,43 @@ std::vector<SplittedNetExport*> SOMNetGPU::SplitDeviceData() const {
 			hvConscience[j] = m_pOPLayer->GetNeuron(j+iStart)->GetValue();
 		}
 
-		SplittedNetExport *pExp = new SplittedNetExport(GetOPLayer()->ExpEdgesIn(iStart, iStop), 	// Copy weights between neurons of the input and output layer
-								GetOPLayer()->ExpPositions(iStart, iStop), 	// Copy positions of the neurons in the output layer
-								hvConscience);
-		vRes.push_back(pExp);
+		printf(".. Copy edges: %d/%d\n", i+1, iDeviceCount);
+		F2DArray f2dEdges 	= GetOPLayer()->ExpEdgesIn(iStart, iStop);
+		printf(".. Copy positions: %d/%d\n", i+1, iDeviceCount);
+		F2DArray f2dPositions 	= GetOPLayer()->ExpPositions(iStart, iStop);
+
+		// Create network export container
+		vRes[i] = new SplittedNetExport(f2dEdges, f2dPositions, hvConscience);
 	}
 	return vRes;
 }
 
-void SOMNetGPU::CombineDeviceData(const std::vector<SplittedNetExport*> &SExp) {
+void SOMNetGPU::CombineDeviceData(std::vector<SplittedNetExport*> &SExp) {
 	unsigned int iStart 		= 0;
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
-	unsigned int iDeviceCount 	= 1;//GetCudaDeviceCount();
+	unsigned int iDeviceCount 	= GetCudaDeviceCount();
 
-	#pragma omp parallel for
 	for(int i = 0; i < iDeviceCount; i++) {
 		checkCudaErrors(cudaSetDevice(i) );
 
 		iStart = i*(iSizeOfLayer/iDeviceCount);
 		iStop = (i+1)*(iSizeOfLayer/iDeviceCount)-1;
 
-		// Copy weights between neurons of the input and output layer
-		GetOPLayer()->ImpEdgesIn(SExp.at(i)->f2dEdges, iStart, iStop);
-
 		// Copy back conscience
 		for(unsigned int j = 0; j <= iStop-iStart; j++) {
 			m_pOPLayer->GetNeuron(j+iStart)->SetValue((*SExp.at(i)->dvConscience)[j]);
 		}
+		
+		printf(".. Copy back edges: %d/%d\n", i+1, iDeviceCount);
+		// Copy weights between neurons of the input and output layer
+		GetOPLayer()->ImpEdgesIn(SExp.at(i)->f2dEdges, iStart, iStop);
+		
+		// delete old network export container
 		delete SExp.at(i);
 	}
+	// delete old network export container
+	SExp.clear();
 }
 
 SOMNetGPU::SOMNetGPU() {
@@ -141,11 +147,11 @@ void SOMNetGPU::Training(const unsigned int &iCycles) {
 		std::cout<<"No training set available!"<<std::endl;
 		return;
 	}
-	
-	clock_t begin = clock();
 
 	printf("Copy memory from host to device ..\n");
 	std::vector<SplittedNetExport*> SExp = SplitDeviceData();
+
+	clock_t begin = clock();
 
 	printf("Calculate SOM ..\n");
 	hostSOMTraining(SExp,

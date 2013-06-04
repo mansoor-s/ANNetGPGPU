@@ -32,13 +32,14 @@
 #endif /*__linux__*/
 
 namespace ANN {
+
 /*
  * predeclaration of some functions
  */
-inline float RandFloat(float begin, float end);
-inline int RandInt(int x,int y);
-
+inline float RandFloat(float fMin, float fMax);
+inline int RandInt(int iMin, int iMax);
 inline void InitTime();
+
 #define INIT_TIME InitTime();
 
 #ifdef WIN32
@@ -52,31 +53,48 @@ inline void InitTime();
 	#include <windows.h>
 #endif /*WIN32*/
 
+/**
+ * @brief Initialises the system clock
+ */
 void InitTime() {
 	time_t t;
 	time(&t);
 	srand((unsigned int)t);
 }
-/*
- * Returns a random number
- * Call of getTickCount() necessary
+
+/**
+ * @brief A random number generator for floats
+ * @param fMin Minimum value of random number 
+ * @param fMax Maximum value of random number
+ * @return Returns a random fMin >= number <= fMax
  */
-float RandFloat(float begin, float end) {
+float RandFloat(float fMin, float fMax) {
 	float temp;
 	/* swap low & high around if the user makes no sense */
-	if (begin > end) {
-		temp = begin;
-		begin = end;
-		end = temp;
+	if (fMin > fMax) {
+		temp = fMin;
+		fMin = fMax;
+		fMax = temp;
 	}
-
 	/* calculate the random number & return it */
-	return rand() / (RAND_MAX + 1.f) * (end - begin) + begin;
+	return rand() / (RAND_MAX + 1.f) * (fMax - fMin) + fMin;
 }
 
-//returns a random integer between x and y
-int RandInt(int x,int y) {
-	return rand()%(y-x+1)+x;
+/**
+ * @brief A random number generator for integers
+ * @param fMin Minimum value of random number 
+ * @param fMax Maximum value of random number
+ * @return Returns a random fMin >= number <= fMax
+ */
+int RandInt(int iMin, int iMax) {
+	int temp;
+	/* swap low & high around if the user makes no sense */
+	if (iMin > iMax) {
+		temp = iMin;
+		iMin = iMax;
+		iMax = temp;
+	}
+	return rand()%(iMax-iMin+1)+iMin;
 }
 
 }

@@ -25,12 +25,12 @@
 namespace ANN {
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-/** Some basic functions of the neuronal net
+/* Some basic functions of the neuronal net
  * All of the functions could get used with CUDA
  * and there the declaration must be in the same file as the implementation
  */
 //////////////////////////////////////////////////////////////////////////////////////////////
-/**
+/*
  * Transfer functions for backpropagation networks
  */
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +166,7 @@ fcn_binary_derivate (const float& in, const float& theta) {
 #endif
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-/**
+/*
  * Distance functions for self organizing maps
  */
 //////////////////////////////////////////////////////////////////////////////////////////////
@@ -228,43 +228,56 @@ fcn_decay (const float& sigma0, const float& T, const float& lambda) {
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////
-/** \brief Represents an activation function.
-  *
-  * Complete definition of the function and it's derivate.
-  */
+
+/** 
+ * @class TransfFunction
+ * @brief Represents an activation function.
+ * Complete definition of the function and it's derivate.
+ */
 class TransfFunction {
 public:
-	/** \brief The symbolic name of the function. */
+	/** 
+	 * @brief The symbolic name of the function. 
+	 */
 	char * name;
 
-	/** \brief Plain function itself for backpropagation networks.
-	  *
-	  * The first parameter gives the x-value,
-	  * the second one is the theta value, taken from the neuron.
-	  */
+	/** 
+	 * @brief Transfer function for backpropagation networks.
+	 * The first parameter gives the x-value,
+	 * the second one is the theta value, taken from the neuron.
+	 */
 	float (* normal)(const float&, const float&);
 
-	/** \brief The derivative function for backpropagation networks.
-	  *
-	  * Used for the backpropagation algorithm.
-	  */
+	/** 
+	 * @brief The derivative of the transfre function for backpropagation networks.
+	 * Used for the backpropagation algorithm.
+	 */
 	float (* derivate)(const float&, const float&);
 };
 
+/** 
+ * @class DistFunction
+ * @brief Represents a neighborhood and decay function.
+ * Consists of a distance and a decay function. 
+ * Normally just the neighborhood function is free to be changed. 
+ */
 class DistFunction {
 public:
-	/** \brief The symbolic name of the function. */
+	/** 
+	 * @brief The symbolic name of the function.
+	 * Determined normally by the name of the used neighborhood function.
+	 */
 	char * name;
 
-	/**  \brief The distance function for SOMs
-	 *
+	/** 
+	 * @brief The distance (or neighborhood) function for SOMs
 	 * Used for the determination of the excitation of a neuron.
 	 */
 	float (* distance)(const float&, const float&);
 
-	/**  \brief The decay function for SOMs
-	 *
-	 * Calculates the decay after each epoch. \n
+	/**  
+	 * @brief The decay function for SOMs
+	 * Calculates the decay after each epoch.\n
 	 * \f$
 	 * \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
 	 * \\
@@ -276,49 +289,53 @@ public:
 	float (* decay)(const float& sigma, const float& t, const float& lambda);
 };
 
-/** \class Functions
- ** \brief List of activation functions that are available to the
- **        Network.
+/** 
+ * @class Functions
+ * @brief List of activation functions that are available to the Network.
  */
 class Functions {
 public:
-	/** \brief Resolve an activation function by symbolic name.
-	  *
-	  * \param  name The function name, as given in the function structure.
-	  * \return NULL on failure, pointer to structure on success.
-	  */
-	static const TransfFunction* 	ResolveTransfFByName (const char *name);
-	static const DistFunction* 	ResolveDistFByName (const char *name);
+	/** 
+	 * @brief Resolve activation function by symbolic name.
+	 * @param  name The function name, as given in the function structure.
+	 * @return NULL on failure, pointer to structure on success.
+	 */
+	static const TransfFunction* ResolveTransfFByName (const char *name);
+	
+	/** 
+	 * @brief Resolve neighborhood function by symbolic name.
+	 * @param  name The function name, as given in the function structure.
+	 * @return NULL on failure, pointer to structure on success.
+	 */
+	static const DistFunction* ResolveDistFByName (const char *name);
 
 	 /**
-	  * \brief The sigmoid tanh function.
-	  *
+	  * @brief The sigmoid tanh function.
 	  * \f$f_{act} (x, \Theta) = tanh (x - \Theta)\f$
 	  */
 	static const TransfFunction fcn_tanh;
+
 	 /**
-	  * \brief The sigmoid log function.
-	  *
+	  * @brief The sigmoid log function.
 	  * \f$f_{act} (x, \Theta) = \frac{1}{1 + e^{-(x - \Theta)}}\f$
 	  */
 	static const TransfFunction fcn_log;
+	
 	 /**
-	  * \brief A linear activation function.
-	  *
+	  * @brief A linear activation function.
 	  * \f$f_{act} (x, \Theta) = x - \Theta\f$
 	  */
 	static const TransfFunction fcn_linear;
+
 	 /**
-	  * \brief A binary activation function.
-	  *
+	  * @brief A binary activation function.
 	  * \f$f_{act} (x, \Theta) = \left\{\begin{array}{cl}1.0 & x \geq
 	  * \Theta\\-1.0 & x < \Theta\end{array}\right.\f$
 	  */
 	static const TransfFunction fcn_binary;
 
 	/**
-	 * \brief A binary neighborhood function.
-	 * 
+	 * @brief A binary neighborhood function.
 	 * \f$
 	 * \\ f_{act} (dist, \sigma(t)) = \left\{\begin{array}{cl}1.0 & dist < \sigma(t)
 	 * \\0 & dist \geq \sigma(t)\end{array}\right.\f$
@@ -326,8 +343,7 @@ public:
 	static const DistFunction fcn_bubble;
 	
 	/**
-	 * \brief The gaussian neighborhood function.
-	 *
+	 * @brief The gaussian neighborhood function.
 	 * \f$
 	 *  \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
 	 *  \\ h(t) = {e^{-\frac{dist^2}{2\sigma(t)^2}}}
@@ -340,8 +356,7 @@ public:
 	static const DistFunction fcn_gaussian;
 	
 	/**
-	 * \brief The cut gaussian neighborhood function.
-	 *
+	 * @brief The cut gaussian neighborhood function.
 	 * \f$
 	 *  \\ {act} (dist, \sigma(t)) = \left\{\begin{array}{cl} {e^{-\frac{dist^2}{2\sigma(t)^2}}} & dist < \sigma(t)
 	 *  \\ 0 & dist \geq \sigma(t)\end{array}\right.
@@ -355,8 +370,7 @@ public:
 	static const DistFunction fcn_cut_gaussian;
 	
 	/**
-	 * \brief Epanechicov neighborhood function.
-	 *
+	 * @brief Epanechicov neighborhood function.
 	 * \f$
 	 *  \\ {act} (dist, \sigma(t)) = \left\{\begin{array}{cl} {1-{\frac{dist}{\sigma(t)}^2}} & {act} > 0
 	 *  \\ 0 & {act} \leq 0\end{array}\right.
@@ -370,8 +384,7 @@ public:
 	static const DistFunction fcn_epanechicov;
 	
 	/**
-	 * \brief A wavelet gaussian neighborhood function (shape of mexican hat).
-	 *
+	 * @brief A wavelet gaussian neighborhood function (shape of mexican hat).
 	 * \f$
 	 * \\ \sigma(t) = \sigma_0e^{-\frac{t}{\lambda}}
 	 * \\ h(t) = \frac{2}{\sqrt{3*sigma(t)}\pi^{-\frac{1}{4}}}(1-\frac{dist^2}{sigma(t)^2})({e^{-\frac{dist^2}{2\sigma(t)^2}}})

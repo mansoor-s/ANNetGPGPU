@@ -45,18 +45,18 @@ typedef uint32_t LayerTypeFlag;
  */
 class AbsLayer {
 protected:
-	/*
-	 * Array of pointers to all neurons in this layer.
+	/**
+	 * @brief Array of pointers to all neurons in this layer.
 	 */
 	std::vector<AbsNeuron *> m_lNeurons;
 
-	/*
-	 * ID of the layer
+	/**
+	 * @brief Index of the layer
 	 */
 	int m_iID;
 
-	/*
-	 * Flag describing the kind of layer.
+	/**
+	 * @brief Flag describing the type of layer.
 	 * (i. e. input, hidden or output possible)
 	 */
 	LayerTypeFlag m_fTypeFlag;
@@ -91,7 +91,7 @@ public:
 	virtual void Resize(const unsigned int &iSize) = 0;
 
 	/**
-	 * Pointer to the neuron at index.
+	 * @brief Pointer to the neuron at index iID.
 	 * @return Returns the pointer of the neuron at index iID
 	 * @param iID Index of the neuron in m_lNeurons
 	 */
@@ -147,6 +147,8 @@ public:
 	 */
 	friend void SetEdgesToValue(AbsLayer *pSrcLayer, AbsLayer *pDestLayer, const float &fVal, const bool &bAdaptState = false);
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	/** 
 	 * @brief Exports the layer to a plain array
 	 * \n Matrix layout:
@@ -157,12 +159,6 @@ public:
 	 * @return Returns a matrix: width=size_of_this_layer; height=size_previous_layer
 	 */
 	virtual F2DArray ExpEdgesIn() const;
-	
-	/**
-	 * @brief Imports weight informations from a weight matrix and saves them to the incoming edges.
-	 * @param f2dEdges Array which stores the weight informations
-	 */
-	virtual void ImpEdgesIn(const F2DArray &f2dEdges);
 
 	/** 
 	 * @brief Exports the layer to a plain array
@@ -179,6 +175,12 @@ public:
 	virtual F2DArray ExpEdgesIn(int iStart, int iStop) const;
 	
 	/**
+	 * @brief Imports weight informations from a weight matrix and saves them to the incoming edges.
+	 * @param f2dEdges Array which stores the weight informations
+	 */
+	virtual void ImpEdgesIn(const F2DArray &f2dEdges);
+	
+	/**
 	 * @brief Imports weight informations from a plain array and saves them to the incoming edges.
 	 * Import for iStop-iStart edges.
 	 * @param iStart Start index for import
@@ -186,6 +188,8 @@ public:
 	 */
 	virtual void ImpEdgesIn(const F2DArray &, int iStart, int iStop);
 
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
+	
 	/** 
 	 * @brief Exports the layer to a plain array
 	 * \n Matrix layout:
@@ -197,11 +201,34 @@ public:
 	 */
 	virtual F2DArray ExpEdgesOut() const;
 	
+	/** 
+	 * @brief Exports the layer to a plain array
+	 * \n Matrix layout:
+	 * \n NEURON1			: edge1, edge1, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * \n NEURON2			: edge2, edge2, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * \n NEURON3			: edge3, edge3, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * \n NEURON[i < iHeight] 	: edge4, edge4, edge[n < iWidth] ==> directing to next neuron 1, 2, n
+	 * @param iStart Start index for export
+	 * @param iStart Stop index for export
+	 * @return Returns a matrix: width=size_this_layer; height=size_of_next_layer
+	 */
+	virtual F2DArray ExpEdgesOut(int iStart, int iStop) const;
+	
 	/**
 	 * @brief Imports weight informations from a weight matrix and saves them to the outgoing edges.
 	 * @param f2dEdges Matrix which stores the weight informations
 	 */
 	virtual void ImpEdgesOut(const F2DArray &f2dEdges);
+	
+	/**
+	 * @brief Imports weight informations from a weight matrix and saves them to the outgoing edges.
+	 * @param f2dEdges Matrix which stores the weight informations
+	 * @param iStart Start index for import
+	 * @param iStart Stop index for import
+	 */
+	virtual void ImpEdgesOut(const F2DArray &f2dEdges, int iStart, int iStop);
+
+	/////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	/**
 	 * @brief Exports the layer to a plain array
@@ -215,12 +242,6 @@ public:
 	virtual F2DArray ExpPositions() const;
 	
 	/**
-	 * @brief Imports an layer from a plain array
-	 * @param f2dPos Matrix which stores the position coordinates of the neurons
-	 */
-	virtual void ImpPositions(const F2DArray &f2dPos);
-	
-	/**
 	 * @brief Exports the position coordinates of the neurons of this layer to an array
 	 * \n Matrix layout:
 	 * \n NEURON1			: X, Y, POS[n < iWidth] ==> directing to input
@@ -232,6 +253,12 @@ public:
 	 * @return Returns a matrix of positions
 	 */
 	virtual F2DArray ExpPositions(int iStart, int iStop) const;
+	
+	/**
+	 * @brief Imports an layer from a plain array
+	 * @param f2dPos Matrix which stores the position coordinates of the neurons
+	 */
+	virtual void ImpPositions(const F2DArray &f2dPos);
 	
 	/**
 	 * @brief Imports the position coordinates from a matrix and saves them to the neurons in this layer

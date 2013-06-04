@@ -48,7 +48,10 @@ public:
 		f2dEdges 	= mEdgeMat;
 		f2dPositions 	= mPosMat;
 		
-		dvConscience = new thrust::device_vector<float>;
+		dvInput 	= NULL;
+		dvConscience 	= NULL;
+		
+		dvConscience 	= new thrust::device_vector<float>;
 		*dvConscience 	= vConscience;
 	}
   
@@ -56,6 +59,30 @@ public:
 	ANNGPGPU::F2DArray f2dPositions;
 	thrust::device_vector<float> *dvConscience;
 	thrust::device_vector<float> *dvInput;
+	
+	void SetInput(thrust::device_vector<float> *p_dvInput) {
+		assert(p_dvInput != NULL);
+
+		if(dvInput != NULL) {
+			delete dvInput;
+			dvInput = NULL;
+		}
+		if(dvInput == NULL && p_dvInput != NULL) {
+			dvInput = p_dvInput;
+		}
+	}
+	
+	void SetConscience(thrust::device_vector<float> *p_dvConscience) {
+		assert(p_dvConscience != NULL);
+
+		if(dvConscience != NULL) {
+			delete dvConscience;
+			dvConscience = NULL;
+		}
+		if(dvConscience == NULL && p_dvConscience != NULL) {
+			dvConscience = p_dvConscience;
+		}
+	}
 };
 
 }

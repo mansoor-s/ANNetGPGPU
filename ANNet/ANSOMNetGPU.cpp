@@ -78,11 +78,12 @@ void SOMNetGPU::CombineDeviceData(const std::vector<SplittedNetExport*> &SExp) {
 
 		// Copy weights between neurons of the input and output layer
 		GetOPLayer()->ImpEdgesIn(SExp.at(i)->f2dEdges, iStart, iStop);
-		
+
 		// Copy back conscience
 		for(unsigned int j = 0; j <= iStop-iStart; j++) {
 			m_pOPLayer->GetNeuron(j+iStart)->SetValue((*SExp.at(i)->dvConscience)[j]);
 		}
+		delete SExp.at(i);
 	}
 }
 

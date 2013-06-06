@@ -141,6 +141,22 @@ std::vector<float> F2DArray::GetSubArrayY(const unsigned int &iX) const {
 	return vSubArray;
 }
 
+void F2DArray::SetSubArrayX(const unsigned int &iY, const std::vector<float> &vRow) {
+	assert(iY < m_iY);
+	assert(vRow.size() == m_iX);
+
+	memcpy(&m_pArray[iY*m_iX], &vRow.data()[0], m_iX*sizeof(float) );
+}
+
+void F2DArray::SetSubArrayY(const unsigned int &iX, const std::vector<float> &vCol) {
+	assert(iX < m_iX);
+	assert(vCol.size() == m_iY);
+
+	for(unsigned int y = 0; y < m_iY; y++) {
+		SetValue(iX, y, vCol.at(y) );
+	}
+}
+
 void F2DArray::SetValue(const unsigned int &iX, const unsigned int &iY, const float &fVal) {
 	assert(iY < m_iY);
 	assert(iX < m_iX);

@@ -1,4 +1,6 @@
 %include <std_vector.i>
+
+
 %extend std::vector<int> {
 	char *__str__() {
 		std::ostringstream ostrs;
@@ -19,6 +21,7 @@
 		return c_str;
 	}
 }
+
 %extend std::vector<float> {
 	char *__str__() {
 		std::ostringstream ostrs;
@@ -39,6 +42,7 @@
 		return c_str;
 	}
 }
+
 %extend std::vector<ANN::Centroid> {
 	char *__str__() {
 		std::ostringstream ostrs;
@@ -66,6 +70,7 @@
 		return c_str;
 	}
 }
+
 %template(vectori) std::vector<int>;
 %template(vectorf) std::vector<float>;
 %template(vectorc) std::vector<ANN::Centroid>;

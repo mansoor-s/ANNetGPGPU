@@ -61,6 +61,9 @@ public:
 	
 	unsigned int GetTotalSize() const;
 
+	void SetSubArrayX(const unsigned int &iY, const std::vector<float> &vRow);
+	void SetSubArrayY(const unsigned int &iX, const std::vector<float> &vCol);
+	
 	std::vector<float> GetSubArrayX(const unsigned int &iY) const;
 	std::vector<float> GetSubArrayY(const unsigned int &iX) const;
 

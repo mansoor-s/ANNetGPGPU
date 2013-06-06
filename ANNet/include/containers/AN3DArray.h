@@ -50,12 +50,16 @@ public:
 
 	unsigned int GetTotalSize() const; 	// X*Y*Z
 
+	void SetSubArrayYZ(const unsigned int &iX, const F2DArray &mYZ);
+	void SetSubArrayXZ(const unsigned int &iY, const F2DArray &mXZ);
+	void SetSubArrayXY(const unsigned int &iZ, const F2DArray &mXY);
+	
 	/* return a pointer to the subarray at: Y,X */
 	F2DArray GetSubArrayYZ(const unsigned int &iX) const;
 	F2DArray GetSubArrayXZ(const unsigned int &iY) const;
 	F2DArray GetSubArrayXY(const unsigned int &iZ) const;
 
-	void SetValue(const float &fVal, const int &iX, const int &iY, const int &iZ);
+	void SetValue(const int &iX, const int &iY, const int &iZ, const float &fVal);
 	float GetValue(const int &iX, const int &iY, const int &iZ) const;
 
 //OPERATORS

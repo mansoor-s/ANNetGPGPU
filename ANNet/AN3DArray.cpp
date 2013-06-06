@@ -79,6 +79,36 @@ unsigned int F3DArray::GetTotalSize() const {
 	return (m_iX*m_iY*m_iZ);
 }
 
+void F3DArray::SetSubArrayYZ(const unsigned int &iX, const F2DArray &mYZ) {
+	assert( iX < m_iX );
+
+	for(unsigned int y = 0; y < m_iY; y++) {
+		for(int z = 0; z < m_iZ; z++) {
+			SetValue(iX, y, z, mYZ.GetValue(y, z) );
+		}
+	}
+}
+
+void F3DArray::SetSubArrayXZ(const unsigned int &iY, const F2DArray &mXZ) {
+	assert( iY < m_iY );
+
+	for(unsigned int x = 0; x < m_iX; x++) {
+		for(int z = 0; z < m_iZ; z++) {
+			SetValue(x, iY, z, mXZ.GetValue(x, z) );
+		}
+	}
+}
+
+void F3DArray::SetSubArrayXY(const unsigned int &iZ, const F2DArray &mXY) {
+	assert( iZ < m_iZ );
+
+	for(unsigned int x = 0; x < m_iX; x++) {
+		for(int y = 0; y < m_iY; y++) {
+			SetValue(x, y, iZ, mXY.GetValue(x, y) );
+		}
+	}
+}
+
 F2DArray F3DArray::GetSubArrayYZ(const unsigned int &iX) const {
 	assert( iX < m_iX );
 
@@ -86,7 +116,7 @@ F2DArray F3DArray::GetSubArrayYZ(const unsigned int &iX) const {
 	f2dYZ.Alloc(m_iY, m_iZ);
 	for(unsigned int y = 0; y < m_iY; y++) {
 		for(int z = 0; z < m_iZ; z++) {
-			f2dYZ.SetValue(GetValue(iX, y, z), y, z);
+			f2dYZ.SetValue(y, z, GetValue(iX, y, z) );
 		}
 	}
 	return f2dYZ;
@@ -99,7 +129,7 @@ F2DArray F3DArray::GetSubArrayXZ(const unsigned int &iY) const {
 	f2dXZ.Alloc(m_iX, m_iZ);
 	for(unsigned int x = 0; x < m_iX; x++) {
 		for(int z = 0; z < m_iZ; z++) {
-			f2dXZ.SetValue(GetValue(x, iY, z), x, z);
+			f2dXZ.SetValue(x, z, GetValue(x, iY, z) );
 		}
 	}
 	return f2dXZ;
@@ -112,8 +142,8 @@ F2DArray F3DArray::GetSubArrayXY(const unsigned int &iZ) const {
 	return F2DArray(m_iX, m_iY, pSubArray);
 }
 
-void F3DArray::SetValue(const float &fVal,
-		const int &iX, const int &iY, const int &iZ)
+void F3DArray::SetValue(const int &iX, const int &iY, const int &iZ, 
+			const float &fVal)
 {
 	assert( iY < m_iY );
 	assert( iX < m_iX );

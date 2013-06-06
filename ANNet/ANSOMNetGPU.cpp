@@ -38,9 +38,12 @@ std::vector<SplittedNetExport*> SOMNetGPU::SplitDeviceData() const {
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
 	unsigned int iDeviceCount 	= GetCudaDeviceCount();
+	// To make things easy ..
+	if(iSizeOfLayer%iDeviceCount != 0) {
+		iDeviceCount = 1;
+	}
 	
 	std::vector<SplittedNetExport*> vRes(iDeviceCount);
-	
 	printf("Computing with %d GPUs ..\n", iDeviceCount);
 	for(int i = 0; i < iDeviceCount; i++) { 
 		checkCudaErrors(cudaSetDevice(i) );
@@ -70,6 +73,10 @@ void SOMNetGPU::CombineDeviceData(std::vector<SplittedNetExport*> &SExp) {
 	unsigned int iStop 		= 0;
 	unsigned int iSizeOfLayer 	= GetOPLayer()->GetNeurons().size();
 	unsigned int iDeviceCount 	= GetCudaDeviceCount();
+	// To make things easy ..
+	if(iSizeOfLayer%iDeviceCount != 0) {
+		iDeviceCount = 1;
+	}
 
 	for(int i = 0; i < iDeviceCount; i++) {
 		checkCudaErrors(cudaSetDevice(i) );

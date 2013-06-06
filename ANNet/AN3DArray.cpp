@@ -23,6 +23,21 @@ F3DArray::F3DArray() {
 	m_iZ = 0;
 }
 
+F3DArray::F3DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const unsigned int &iSizeZ, const float &fVal) {
+	Alloc(iSizeX, iSizeY, iSizeZ);
+	for(unsigned int i = 0; i < iSizeX*iSizeY*iSizeZ; i++) {
+		m_pArray[i] = fVal;
+	}
+}
+
+F3DArray::F3DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const unsigned int &iSizeZ, float *pArray) {
+	assert(pArray != NULL);
+	assert(iSizeX*iSizeY*iSizeZ >= 0);
+  
+	Alloc(iSizeX, iSizeY, iSizeZ);
+	memcpy( m_pArray, pArray, m_iX*m_iY*m_iZ*sizeof(float) );
+}
+
 F3DArray::~F3DArray() {
 /*
 	if(m_iX*m_iY*m_iZ > 0) {

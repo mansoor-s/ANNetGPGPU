@@ -27,8 +27,7 @@ namespace ANN {
 class F3DArray;
 
 /**
- * \brief Pseudo 2D-array as a container for the neurons and error deltas of the network.
- *
+ * \brief Pseudo 2D-array.
  * @author Daniel "dgrat" Frenzel
  */
 class F2DArray {
@@ -36,7 +35,6 @@ class F2DArray {
 
 private:
 	bool m_bAllocated;
-	
 	unsigned int m_iX;	// nr. of neurons in layer m_iY
 	unsigned int m_iY;	// nr. of layer in net
 	float *m_pArray;	// value of neuron

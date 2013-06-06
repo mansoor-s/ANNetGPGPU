@@ -23,8 +23,7 @@ namespace ANN {
 class F2DArray;
 
 /**
- * \brief Pseudo 3D-array as a container for the weights of the network.
- *
+ * \brief Pseudo 3D-array.
  * @author Daniel "dgrat" Frenzel
  */
 class F3DArray {
@@ -34,12 +33,13 @@ private:
 	unsigned int m_iX;	// nr. of neuron in layer m_iY
 	unsigned int m_iY;	// nr. of layer in net
 	unsigned int m_iZ;	// nr. of axon/weight of neuron m:iX in layer m_iY
-
 	float *m_pArray;
 
 public:
 	// Standard C++ "conventions"
 	F3DArray();
+	F3DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const unsigned int &iSizeZ, const float &fVal);
+	F3DArray(const unsigned int &iSizeX, const unsigned int &iSizeY, const unsigned int &iSizeZ, float *pArray);
 	virtual ~F3DArray();
 
 	void Alloc(const unsigned int &iX, const unsigned int &iY, const unsigned int &iZ);

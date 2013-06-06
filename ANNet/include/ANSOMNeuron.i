@@ -2,6 +2,8 @@
 #include <ANSOMNeuron.h>
 %}
 
+%ignore ANN::GetDistance2Neur;
+
 %include <ANSOMNeuron.h>  
 %include <std_sstream.i>
 

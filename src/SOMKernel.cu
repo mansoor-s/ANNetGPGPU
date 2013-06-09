@@ -1,172 +1,56 @@
 #ifndef _SOMKERNELS_
 #define _SOMKERNELS_
 
-#include "include/math/Functions.h"
 #include "include/math/Random.h"
 #include "include/gpgpu/Kernels.h"
+#include "include/gpgpu/Functors.h"
 #include "include/gpgpu/helper_cuda.h"
-#include <cfloat>
 
+#include <cfloat>
 #include <cassert>
 #include <cmath>
+
+//#include <omp.h>
 
 using namespace ANNGPGPU;
 
 
-struct saxmy_functor {
-	const float a;
-
-	saxmy_functor(float _a) : a(_a) {}
-
-	__host__ __device__
-	float operator()(const float& x, const float& y) const { 
-		return a * (x - y);
-	}
-};
-
-
-// return the biggest of two tuples
-struct bigger_tuple_functor {
-    __device__ __host__
-    thrust::tuple<float, unsigned int> operator() (	
-    	const thrust::tuple<float, unsigned int> &a, 
-		const thrust::tuple<float, unsigned int> &b ) 
-    {
-    	return (a >= b) ? a : b;
-    }
-};
-
-// return the biggest of two tuples
-struct smaller_tuple_functor {
-    __device__ __host__
-    thrust::tuple<float, unsigned int> operator() (	
-    	const thrust::tuple<float, unsigned int> &a, 
-		const thrust::tuple<float, unsigned int> &b ) 
-    {
-    	return (a <= b) ? a : b;
-    }
-};
-
 float hostGetMax(const thrust::device_vector<float>& vec, unsigned int &ID) {
-    // create implicit index sequence [0, 1, 2, ... ]
+	// create implicit index sequence [0, 1, 2, ... ]
 	thrust::counting_iterator<unsigned int> begin(0);
 	thrust::counting_iterator<unsigned int> end(vec.size() );
+	thrust::tuple<float, unsigned int> init(vec[0], 0);
+	thrust::tuple<float, unsigned int> smallest;
 
-    thrust::tuple<float, unsigned int> init(vec[0], 0);
-    thrust::tuple<float, unsigned int> smallest;
+	smallest = reduce( thrust::make_zip_iterator(make_tuple(vec.begin(), begin) ),
+			thrust::make_zip_iterator(make_tuple(vec.end(), end) ),
+			init,
+			bigger_tuple_functor() );
 
-    smallest = reduce( thrust::make_zip_iterator(make_tuple(vec.begin(), begin) ),
-    				   thrust::make_zip_iterator(make_tuple(vec.end(), end) ),
-                       init,
-                       bigger_tuple_functor() );
-
-    ID = thrust::get<1>(smallest);
-    return vec[ID];
+	ID = thrust::get<1>(smallest);
+	return vec[ID];
 }
 
 float hostGetMin(const thrust::device_vector<float>& vec, unsigned int &ID) {
-    // create implicit index sequence [0, 1, 2, ... ]
+	// create implicit index sequence [0, 1, 2, ... ]
 	thrust::counting_iterator<unsigned int> begin(0);
 	thrust::counting_iterator<unsigned int> end(vec.size() );
-	
 	thrust::tuple<float, unsigned int> init(vec[0], 0);
 	thrust::tuple<float, unsigned int> smallest;
 	
 	smallest = reduce( thrust::make_zip_iterator(make_tuple(vec.begin(), begin) ),
-					   thrust::make_zip_iterator(make_tuple(vec.end(), end) ),
-					   init,
-					   smaller_tuple_functor() );
+			thrust::make_zip_iterator(make_tuple(vec.end(), end) ),
+			init,
+			smaller_tuple_functor() );
 
 	ID = thrust::get<1>(smallest);
-    return vec[ID];
+	return vec[ID];
 }
 //////////////////////////////////////////////////////////////////////////////////////////////
-
-struct minus_pow_functor {
-    const float fVal;
-    minus_pow_functor(float val) : fVal(val) {}
-
-    __host__ __device__
-	float operator()(const float& val) const { 
-		return pow(fVal-val, 2);
-	}
-};
-
-struct sqrt_functor {
-    __host__ __device__
-	float operator()(const float& val) const { 
-		return sqrt(val);
-	}
-};
 //////////////////////////////////////////////////////////////////////////////////////////////
-
-struct bubble_functor {
-	float fSigmaT;
-	bubble_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
-
-    __host__ __device__
-	float operator()(const float& dist) const {
-    	return ANN::fcn_bubble_neighborhood(dist, fSigmaT);
-	}
-};
-
-struct gaussian_functor {
-	float fSigmaT;
-	gaussian_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
-
-    __host__ __device__
-	float operator()(const float& dist) const {
-    	return ANN::fcn_gaussian_bell(dist, fSigmaT);
-	}
-};
-
-struct cut_gaussian_functor {
-	float fSigmaT;
-	cut_gaussian_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
-
-    __host__ __device__
-	float operator()(const float& dist) const {
-    	return ANN::fcn_cut_gaussian_bell(dist, fSigmaT);
-	}
-};
-
-struct mexican_functor {
-	float fSigmaT;
-	mexican_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
-
-    __host__ __device__
-	float operator()(const float& dist) const {
-    	return ANN::fcn_mexican_hat(dist, fSigmaT);
-	}
-};
-
-struct epanechicov_functor {
-	float fSigmaT;
-	epanechicov_functor(const float &sigmaT) : fSigmaT(sigmaT)	{}
-
-    __host__ __device__
-	float operator()(const float& dist) const {
-    	return ANN::fcn_epanechicov_neighborhood(dist, fSigmaT);
-	}
-};
-
-struct hebbian_functor {
-	float fLearningRate;
-	float fInput;
-
-	hebbian_functor(const float &learning_rate, const float &input) :
-		fLearningRate(learning_rate), fInput(input) {}
-
-    __host__ __device__
-	float operator()(const float& fWeight, const float& fInfluence) const {
-    	return fWeight + (fInfluence*fLearningRate*(fInput-fWeight) );
-	}
-};
-//////////////////////////////////////////////////////////////////////////////////////////////
-
 /*
  * Layout of SOMEdgeF2DArray:
- * 			COL1	COL2	COL3	COL(n+1)
+ * 		COL1	COL2	COL3	COL(n+1)
  * ROW1		toNeur1	toNeur1	toNeur1	..
  * ROW2		toNeur2	toNeur2	toNeur2	..
  * ROW3		toNeur3	toNeur3	toNeur3	..
@@ -179,25 +63,28 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport*> &SExp,
 	BMUExport retBMU;
 	float fLastBMU = FLT_MAX;
 
-	#pragma omp parallel for
-	for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
+	omp_set_num_threads(SExp.size() );  	// create as many CPU threads as there are CUDA devices
+	#pragma omp parallel 			//for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
+	{
+		unsigned int iDev = omp_get_thread_num();
 		checkCudaErrors(cudaSetDevice(iDev) );
 		unsigned int BMUID = 0;
 
 		unsigned int iWidth 	= SExp.at(iDev)->f2dEdges.GetW();
 		unsigned int iHeight 	= SExp.at(iDev)->f2dEdges.GetH();
 
-		assert(iWidth > 0);
-		assert(iHeight > 0);
+		assert(iWidth 	> 0);
+		assert(iHeight 	> 0);
 
 		thrust::device_vector<float> dvRes(iWidth, 0.f);
-		thrust::device_vector<float> dvTmp(iWidth, 0.f);// temporary
-		
+		thrust::device_vector<float> dvTmp(iWidth, 0.f); 			// temporary
+		thrust::device_vector<float> dvConscience(iWidth, 1.f / (float)iWidth);
+
 		for(unsigned int y = 0; y < iHeight; y++) {
 			thrust::transform(
-				SExp.at(iDev)->f2dEdges.GetRowBegin(y),	// input
-				SExp.at(iDev)->f2dEdges.GetRowEnd(y), 	// input
-				dvTmp.begin(), 							// result
+				SExp.at(iDev)->f2dEdges.GetRowBegin(y),			// input
+				SExp.at(iDev)->f2dEdges.GetRowEnd(y), 			// input
+				dvTmp.begin(), 						// result
 				minus_pow_functor((*SExp.at(iDev)->dvInput)[y]) ); 	// functor
 
 			thrust::transform(
@@ -205,14 +92,11 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport*> &SExp,
 				dvRes.end(), 						// input
 				dvTmp.begin(),						// input
 				dvRes.begin(), 						// result
-				thrust::plus<float>() );			// functor
+				thrust::plus<float>() );				// functor
 		}
-		dvTmp = dvRes;
 
 		// implementation of conscience mechanism
 		if(fConscienceRate > 0.f) {
-			thrust::device_vector<float> dvConscience(iWidth, 1.f / (float)iWidth);
-
 			thrust::transform(
 				dvConscience.begin(),
 				dvConscience.end(),
@@ -229,8 +113,8 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport*> &SExp,
 		}
 
 		thrust::transform(
-			dvTmp.begin(),
-			dvTmp.end(),
+			dvRes.begin(),
+			dvRes.end(),
 			SExp.at(iDev)->dvConscience->begin(),
 			SExp.at(iDev)->dvConscience->begin(),
 			saxmy_functor(fConscienceRate) );
@@ -240,18 +124,16 @@ hostSOMFindBMNeuronID(std::vector<SplittedNetExport*> &SExp,
 		// Check partial results for global BMU in all devices
 		if(fLastBMU > dvRes[BMUID]) {
 			fLastBMU = dvRes[BMUID];
-
 			thrust::host_vector<float> vPos = SExp.at(iDev)->f2dPositions.GetSubArrayY(BMUID);
 			retBMU = BMUExport(BMUID, iDev, vPos);
 		}
 	}
-	
 	return retBMU;
 }
 
 /*
  * Layout of SOMPositionF2DArray:
- * 			COL1	COL2	COL3	COL(n+1)
+ * 		COL1	COL2	COL3	COL(n+1)
  * ROW1		Xpos	Xpos	Xpos	..
  * ROW2		Ypos	Ypos	Ypos	..
  * ROW3		Zpos	Zpos	Zpos	..
@@ -265,26 +147,27 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport*> &SExp,
 		const BinaryFunction &binaryDistFunc
 		)
 {
-	#pragma omp parallel for
-	for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
+	omp_set_num_threads(SExp.size() );  	// create as many CPU threads as there are CUDA devices
+	#pragma omp parallel 			//for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
+	{
+		unsigned int iDev = omp_get_thread_num();
 		checkCudaErrors(cudaSetDevice(iDev) );
 		
 		unsigned int iWidth 	= SExp.at(iDev)->f2dPositions.GetW();
 		unsigned int iHeight 	= SExp.at(iDev)->f2dPositions.GetH();
 
-		thrust::device_vector<float> dvBMUPos = BMU.dvBMUPos;
-		thrust::device_vector<float> dvTmp(iWidth, 0.f); // temporary
+		thrust::device_vector<float> dvTmp(iWidth, 0.f); 			// temporary
 		thrust::device_vector<float> dvInfluence(iWidth, 0.f);
 		thrust::device_vector<float> dvDist(iWidth, 0.f);
 
 		// 1. Calc distances for all neurons to BMNeuron
 		// Distance = sqrt(pow(x,2)+pow(y,2)+pow(z,2)+pow(n+1,2) );
-		for(unsigned int y = 0; y < iHeight; y++) { 	// for each coordinate position of the neuron
+		for(int y = 0; y < static_cast<int>(iHeight); y++) { 				// for each coordinate position of the neuron
 			thrust::transform(
 				SExp.at(iDev)->f2dPositions.GetRowBegin(y),		// input
 				SExp.at(iDev)->f2dPositions.GetRowEnd(y), 		// input
 				dvTmp.begin(), 						// result
-				minus_pow_functor(dvBMUPos[y]) ); 			// functor
+				minus_pow_functor(BMU.dvBMUPos[y]) ); 			// functor
 
 			thrust::transform(
 				dvDist.begin(), 					// input
@@ -293,6 +176,7 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport*> &SExp,
 				dvDist.begin(), 					// result
 				thrust::plus<float>() );				// functor
 		}
+
 		thrust::transform(
 			dvDist.begin(),							// input
 			dvDist.end(), 							// input
@@ -304,7 +188,7 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport*> &SExp,
 			dvDist.begin(),							// input
 			dvDist.end(), 							// input
 			dvInfluence.begin(), 						// result
-			binaryDistFunc );					// functor
+			binaryDistFunc );						// functor
 
 		// 3. Only handle neurons in radius:
 		// 3a. Make stencil
@@ -322,15 +206,15 @@ void hostSOMPropagateBW( std::vector<SplittedNetExport*> &SExp,
 		iWidth 	= SExp.at(iDev)->f2dEdges.GetW();
 		iHeight = SExp.at(iDev)->f2dEdges.GetH();
 
-		for(unsigned int y = 0; y < iHeight; y++) {			// for each edge of the neuron
+		for(int y = 0; y < static_cast<int>(iHeight); y++) {				// for each edge of the neuron
 			thrust::transform_if(
-				SExp.at(iDev)->f2dEdges.GetRowBegin(y),		// input 1
-				SExp.at(iDev)->f2dEdges.GetRowEnd(y), 		// input 1
-				dvInfluence.begin(),						// input 2
-				dvTmp.begin(),								// stencil
+				SExp.at(iDev)->f2dEdges.GetRowBegin(y),			// input 1
+				SExp.at(iDev)->f2dEdges.GetRowEnd(y), 			// input 1
+				dvInfluence.begin(),					// input 2
+				dvTmp.begin(),						// stencil
 				SExp.at(iDev)->f2dEdges.GetRowBegin(y), 		// result
 				hebbian_functor(fLearningRate, (*SExp.at(iDev)->dvInput)[y]), // functor
-				thrust::identity<int>() ); 					// predicate
+				thrust::identity<int>() ); 				// predicate
 		}
 	}
 }
@@ -367,7 +251,6 @@ void hostSOMTraining( std::vector<SplittedNetExport*> &SExp,
 		// Set input
 		std::vector<float> vCurInput = InputSet.GetInput(ANN::RandInt(iMin, iMax) );
 		
-		#pragma omp parallel for
 		for(int iDev = 0; iDev < static_cast<int>(SExp.size() ); iDev++) {
 			checkCudaErrors(cudaSetDevice(iDev) );
 			thrust::device_vector<float> *p_dvInputVector = new thrust::device_vector<float>(vCurInput.size() );

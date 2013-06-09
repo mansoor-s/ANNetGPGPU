@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
   input.AddInput(white);
 
   std::vector<float> vCol(3);
-  int w1 = 40;
+  int w1 = 64;
   int w2 = 4;
 
   ANN::SOMNet SOMap;

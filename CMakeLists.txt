@@ -7,7 +7,7 @@ PROJECT (ANNetGPGPU)
 FIND_PACKAGE(Doxygen)
 
 ADD_SUBDIRECTORY (src) 			# ANNet library
-ADD_SUBDIRECTORY (examples/designer) 	# BP network designer
+#ADD_SUBDIRECTORY (examples/designer) 	# BP network designer
 ADD_SUBDIRECTORY (examples/misc) 	# several examples
 
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include)

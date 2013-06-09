@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
   input.AddInput(white);
 
   std::vector<float> vCol(3);
-  int w1 = 1024;
+  int w1 = 64;
   int w2 = 4;
 
   ANNGPGPU::SOMNetGPU gpu;
@@ -82,8 +82,7 @@ int main(int argc, char *argv[]) {
   gpu.SetDistFunction(&ANN::Functions::fcn_bubble);
   gpu.SetTrainingSet(input);
 
-  gpu.SetConscienceRate(0);
-  gpu.Training(10000);
+  gpu.Training(500);
 
   SOMReader w(w1, w1, w2);
   for(int x = 0; x < w1*w1; x++) {
@@ -94,7 +93,6 @@ int main(int argc, char *argv[]) {
 
 	  w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
   }
-
   w.Save("SOMGPU.png");
 
   return 0;

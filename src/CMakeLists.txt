@@ -69,13 +69,14 @@ SET( ANCUDASourceFiles
   SOMNetGPU.cpp
   BPKernel.cu
   SOMKernel.cu
+  SOMExport.cu
   HFKernel.cu
   2DArray.cu
 )
 
 IF (CUDA_FOUND)
   INCLUDE(FindCUDA)
-  SET(CUDA_NVCC_FLAGS "-O3 -arch=sm_13 --pre-include gcc_cuda_compat.h")
+  SET(CUDA_NVCC_FLAGS "-Xcompiler -fopenmp --pre-include gcc_cuda_compat.h")
   INCLUDE_DIRECTORIES (${CUDA_SDK_ROOT_DIR}/C/common/inc/)
 
   IF (CUDATHRUST_FOUND)
@@ -96,7 +97,7 @@ IF (BZIP2_FOUND)
 
   # Linke OpenMP to ANNet library
   IF(OPENMP_FOUND)
-    TARGET_LINK_LIBRARIES (ANNet ${BZIP2_LIBRARIES} -fopenmp)
+    TARGET_LINK_LIBRARIES (ANNet ${BZIP2_LIBRARIES} -lgomp)
   ELSEIF(NOT OPENMP_FOUND)
     TARGET_LINK_LIBRARIES (ANNet ${BZIP2_LIBRARIES})
   ENDIF(OPENMP_FOUND)

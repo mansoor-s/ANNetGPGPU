@@ -16,8 +16,10 @@
 
 #ifndef SWIG
 #include "../containers/TrainingSet.h"
-#include "../containers/2DArray.h"
+
 #include "../gpgpu/2DArray.h"
+#include "../gpgpu/SOMExport.h"
+
 #include "../math/Functions.h"
 
 #include <cassert>
@@ -27,67 +29,6 @@
 #include <thrust/transform.h>
 #endif
 
-
-namespace ANNGPGPU {
-
-class BMUExport {
-public:
-	BMUExport() {};
-	BMUExport(unsigned int iUID, unsigned int iDID, thrust::host_vector<float> vPos) {
-		iBMUID 			= iUID;
-		iDeviceID 		= iDID;
-		dvBMUPos 		= vPos;
-	}
-
-	unsigned int iBMUID;
-	unsigned int iDeviceID;
-	thrust::host_vector<float> dvBMUPos;
-};
-
-class SplittedNetExport {
-public:
-	SplittedNetExport(const ANNGPGPU::F2DArray &mEdgeMat, const ANNGPGPU::F2DArray &mPosMat, thrust::host_vector<float> vConscience) {
-		f2dEdges 	= mEdgeMat;
-		f2dPositions 	= mPosMat;
-		
-		dvInput 	= NULL;
-		dvConscience 	= NULL;
-		
-		dvConscience 	= new thrust::device_vector<float>;
-		*dvConscience 	= vConscience;
-	}
-  
-	ANNGPGPU::F2DArray f2dEdges;
-	ANNGPGPU::F2DArray f2dPositions;
-	thrust::device_vector<float> *dvConscience;
-	thrust::device_vector<float> *dvInput;
-	
-	void SetInput(thrust::device_vector<float> *p_dvInput) {
-		assert(p_dvInput != NULL);
-
-		if(dvInput != NULL) {
-			delete dvInput;
-			dvInput = NULL;
-		}
-		if(dvInput == NULL && p_dvInput != NULL) {
-			dvInput = p_dvInput;
-		}
-	}
-	
-	void SetConscience(thrust::device_vector<float> *p_dvConscience) {
-		assert(p_dvConscience != NULL);
-
-		if(dvConscience != NULL) {
-			delete dvConscience;
-			dvConscience = NULL;
-		}
-		if(dvConscience == NULL && p_dvConscience != NULL) {
-			dvConscience = p_dvConscience;
-		}
-	}
-};
-
-}
 
 /*
  * BP kernels

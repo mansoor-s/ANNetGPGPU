@@ -2,89 +2,61 @@
 #define _BPKERNELS_
 
 #include "include/gpgpu/Kernels.h"
-#include "include/math/Functions.h"
+#include "include/gpgpu/Functors.h"
 #include "include/math/Functions.h"
 
 using namespace ANNGPGPU;
 
-// Y <- A * X + Y
-struct saxpy_functor {
-    const float a;
-
-    saxpy_functor(float _a) : a(_a) {}
-
-    __host__ __device__
-	float operator()(const float& x, const float& y) const {
-		return a * x + y;
-	}
-};
-
-// Y <- A * X * Y
-struct sax_functor {
-    const float a;
-
-    sax_functor(float _a) : a(_a) {}
-
-    __host__ __device__
-	float operator()(const float& x) const {
-		return a * x;
-	}
-};
-///////////////////////////////////////////////////////////////////////
 
 inline void
-SwitchTransfFunc(	std::vector<thrust::device_vector<float> > &vNeuronValues,
-					thrust::device_vector<float> &dvLayer,
-					thrust::device_vector<float> &dvBias,
-					thrust::device_vector<float> &dvInput,
-					const ANN::TransfFunction &function)
+SwitchTransfFunc(std::vector<thrust::device_vector<float> > &vNeuronValues,
+		thrust::device_vector<float> &dvLayer,
+		thrust::device_vector<float> &dvBias,
+		thrust::device_vector<float> &dvInput,
+		const ANN::TransfFunction &function)
 {
 	// Run values through transfer function
 	if (strcmp(function.name, "tanh") == 0) {
-	    thrust::transform(
-	    		dvLayer.begin(),
-	    		dvLayer.end(),
-	    		dvBias.begin(),
-	    		dvLayer.begin(),
-	    		ANN::tanTransferFcn() );
+		thrust::transform(dvLayer.begin(),
+				dvLayer.end(),
+				dvBias.begin(),
+				dvLayer.begin(),
+				ANN::tanTransferFcn() );
 		// Now the input of the next layer will be the the previous one
-	    dvInput = dvLayer;
+		dvInput = dvLayer;
 		vNeuronValues.push_back(dvLayer);
 		return;
 	}
 	if (strcmp(function.name, "log") == 0) {
-	    thrust::transform(
-	    		dvLayer.begin(),
-	    		dvLayer.end(),
-	    		dvBias.begin(),
-	    		dvLayer.begin(),
+		thrust::transform(dvLayer.begin(),
+				dvLayer.end(),
+				dvBias.begin(),
+				dvLayer.begin(),
 	    		ANN::logTransferFcn() );
 		// Now the input of the next layer will be the the previous one
-	    dvInput = dvLayer;
+		dvInput = dvLayer;
 		vNeuronValues.push_back(dvLayer);
 		return;
 	}
 	if (strcmp(function.name, "binary") == 0) {
-	    thrust::transform(
-	    		dvLayer.begin(),
-	    		dvLayer.end(),
-	    		dvBias.begin(),
-	    		dvLayer.begin(),
-	    		ANN::binTransferFcn() );
+		thrust::transform(dvLayer.begin(),
+				dvLayer.end(),
+				dvBias.begin(),
+				dvLayer.begin(),
+				ANN::binTransferFcn() );
 		// Now the input of the next layer will be the the previous one
-	    dvInput = dvLayer;
+		dvInput = dvLayer;
 		vNeuronValues.push_back(dvLayer);
 		return;
 	}
 	if (strcmp(function.name, "linear") == 0) {
-	    thrust::transform(
-	    		dvLayer.begin(),
-	    		dvLayer.end(),
-	    		dvBias.begin(),
-	    		dvLayer.begin(),
-	    		ANN::linTransferFcn() );
+		thrust::transform(dvLayer.begin(),
+				dvLayer.end(),
+				dvBias.begin(),
+				dvLayer.begin(),
+				ANN::linTransferFcn() );
 		// Now the input of the next layer will be the the previous one
-	    dvInput = dvLayer;
+		dvInput = dvLayer;
 		vNeuronValues.push_back(dvLayer);
 		return;
 	}
@@ -92,71 +64,66 @@ SwitchTransfFunc(	std::vector<thrust::device_vector<float> > &vNeuronValues,
 
 inline void
 SwitchDevTransfFunc(thrust::device_vector<float> &dvNeurons,
-					const std::vector<thrust::device_vector<float> > &vNeuronValues,
-					const ANN::TransfFunction &function,
-					const int &i)
+		const std::vector<thrust::device_vector<float> > &vNeuronValues,
+		const ANN::TransfFunction &function,
+		const int &i)
 {
 	if (strcmp(function.name, "tanh") == 0) {
-	    thrust::transform(
-				vNeuronValues.at(i).begin(),
+		thrust::transform(vNeuronValues.at(i).begin(),
 				vNeuronValues.at(i).end(),
 				dvNeurons.begin(),
-	    		ANN::devTanTransferFcn() );
+				ANN::devTanTransferFcn() );
 	    return;
 	}
 	if (strcmp(function.name, "log") == 0) {
-	    thrust::transform(
-				vNeuronValues.at(i).begin(),
+		thrust::transform(vNeuronValues.at(i).begin(),
 				vNeuronValues.at(i).end(),
 				dvNeurons.begin(),
-	    		ANN::devLogTransferFcn() );
+				ANN::devLogTransferFcn() );
 	    return;
 	}
 	if (strcmp(function.name, "binary") == 0) {
-				thrust::transform(
-				vNeuronValues.at(i).begin(),
+		thrust::transform(vNeuronValues.at(i).begin(),
 				vNeuronValues.at(i).end(),
 				dvNeurons.begin(),
-	    		ANN::devBinTransferFcn() );
+				ANN::devBinTransferFcn() );
 	    return;
 	}
 	if (strcmp(function.name, "linear") == 0) {
-	    thrust::transform(
-				vNeuronValues.at(i).begin(),
+		thrust::transform(vNeuronValues.at(i).begin(),
 				vNeuronValues.at(i).end(),
 				dvNeurons.begin(),
-	    		ANN::devLinTransferFcn() );
+				ANN::devLinTransferFcn() );
 	    return;
 	}
 }
 ///////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////
 std::vector<float>
-hostBPCalcDelta(	const thrust::device_vector<float> &dvNeurOut,	// from forward run
-					const std::vector<float> &vTrainOut ) 			// from training set
+hostBPCalcDelta(const thrust::device_vector<float> &dvNeurOut,	// from forward run
+		const std::vector<float> &vTrainOut ) 			// from training set
 {
 	thrust::device_vector<float> dvTrainOut (vTrainOut.begin(), vTrainOut.end() );
 	thrust::device_vector<float> dvDelta	(vTrainOut.size(), 0.f);
-    std::vector<float> vRes(vTrainOut.size() );
+	std::vector<float> vRes(vTrainOut.size() );
 
 	// Calc error deltas of output layer
-    thrust::transform(
-    		dvTrainOut.begin(),
-    		dvTrainOut.end(),
-    		dvNeurOut.begin(),
-    		dvDelta.begin(),
-    		thrust::minus<float>() );
+	thrust::transform(dvTrainOut.begin(),
+		dvTrainOut.end(),
+		dvNeurOut.begin(),
+		dvDelta.begin(),
+		thrust::minus<float>() );
 
-    thrust::copy(dvDelta.begin(), dvDelta.end(), vRes.begin());
-    return vRes;
+	thrust::copy(dvDelta.begin(), dvDelta.end(), vRes.begin());
+	return vRes;
 }
 ///////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////
 std::vector<thrust::device_vector<float> >
-hostBPPropagateFW(	const std::vector<ANNGPGPU::F2DArray> &vEdgeMatrices,
-					const std::vector<ANNGPGPU::F2DArray> &vBiasEdgeMatrices,
-					const std::vector<float> &vInput,
-					const ANN::TransfFunction &function)
+hostBPPropagateFW(const std::vector<ANNGPGPU::F2DArray> &vEdgeMatrices,
+		const std::vector<ANNGPGPU::F2DArray> &vBiasEdgeMatrices,
+		const std::vector<float> &vInput,
+		const ANN::TransfFunction &function)
 {
 	std::vector<thrust::device_vector<float> > vNeuronValues(1, vInput);
 
@@ -187,21 +154,21 @@ hostBPPropagateFW(	const std::vector<ANNGPGPU::F2DArray> &vEdgeMatrices,
 				thrust::negate<float>() );
 
 			// bias weights
-		    thrust::transform( dvBias.begin(),
-		    		dvBias.end(),
-		    		dvLayer.begin(),
-		    		dvLayer.begin(),
-		    		saxpy_functor(1) );
+			thrust::transform( dvBias.begin(),
+				dvBias.end(),
+				dvLayer.begin(),
+				dvLayer.begin(),
+				saxpy_functor(1) );
 		}
 
 		// Calculate the result of the current layer
 		for(unsigned int y = 0; y < iHeight; y++) {
-		    // Y <- A * X + Y
-		    thrust::transform( vEdgeMatrices.at(i).GetRowBegin(y),
-		    		vEdgeMatrices.at(i).GetRowEnd(y),
-		    		dvLayer.begin(),
-		    		dvLayer.begin(),
-		    		saxpy_functor(dvInput[y]) );
+			// Y <- A * X + Y
+			thrust::transform( vEdgeMatrices.at(i).GetRowBegin(y),
+				vEdgeMatrices.at(i).GetRowEnd(y),
+				dvLayer.begin(),
+				dvLayer.begin(),
+				saxpy_functor(dvInput[y]) );
 		}
 
 		SwitchTransfFunc( vNeuronValues, dvLayer, dvBias, dvInput, function );
@@ -209,16 +176,16 @@ hostBPPropagateFW(	const std::vector<ANNGPGPU::F2DArray> &vEdgeMatrices,
 	return vNeuronValues;
 }
 ///////////////////////////////////////////////////////////////////////
-
+///////////////////////////////////////////////////////////////////////
 inline void
-AdadtEdges(	std::vector<ANNGPGPU::F2DArray> &vEdgeMatricesI,
-			std::vector<thrust::device_vector<float> > &vErrors,
-			std::vector<ANNGPGPU::F2DArray> &vMomentums,
-			const std::vector<thrust::device_vector<float> > &vNeuronValues,
-			const float &fLearningRate,
-			const float &fWeightDecay,
-			const float &fMomentum,
-			const unsigned int iWidth, const unsigned int iHeight, const unsigned int i)
+AdadtEdges(std::vector<ANNGPGPU::F2DArray> &vEdgeMatricesI,
+		std::vector<thrust::device_vector<float> > &vErrors,
+		std::vector<ANNGPGPU::F2DArray> &vMomentums,
+		const std::vector<thrust::device_vector<float> > &vNeuronValues,
+		const float &fLearningRate,
+		const float &fWeightDecay,
+		const float &fMomentum,
+		const unsigned int iWidth, const unsigned int iHeight, const unsigned int i)
 {
 	/*
 	 * Quick standard implementation
@@ -281,14 +248,14 @@ AdadtEdges(	std::vector<ANNGPGPU::F2DArray> &vEdgeMatricesI,
 }
 
 void
-hostBPPropagateBW(	std::vector<ANNGPGPU::F2DArray> &vEdgeMatricesI,
-					std::vector<ANNGPGPU::F2DArray> &vMomentums,
-					std::vector<thrust::device_vector<float> > &vErrors,
-					const std::vector<thrust::device_vector<float> > &vNeuronValues,
-					const float &fLearningRate,
-					const float &fWeightDecay,
-					const float &fMomentum,
-					const ANN::TransfFunction &function )
+hostBPPropagateBW(std::vector<ANNGPGPU::F2DArray> &vEdgeMatricesI,
+		std::vector<ANNGPGPU::F2DArray> &vMomentums,
+		std::vector<thrust::device_vector<float> > &vErrors,
+		const std::vector<thrust::device_vector<float> > &vNeuronValues,
+		const float &fLearningRate,
+		const float &fWeightDecay,
+		const float &fMomentum,
+		const ANN::TransfFunction &function )
 {
 	// All layers except output!
 	for(int i = vEdgeMatricesI.size()-1; i >= 0; i--) {

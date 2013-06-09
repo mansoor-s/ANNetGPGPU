@@ -18,7 +18,7 @@
 #include <iostream>
 #include <vector>
 #ifdef CUDA
-	#include "../gpgpu/2DArray.h"
+#include "../gpgpu/2DArray.h"
 #endif
 #endif
 

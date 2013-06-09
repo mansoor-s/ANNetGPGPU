@@ -1,13 +1,14 @@
 # The name of our project is "ANNetGPGPU". CMakeLists files in this project can
 # refer to the root source directory of the project as ${ANNetGPU_SOURCE_DIR} and
 # to the root binary directory of the project as ${ANNetGPU_SOURCE_DIR}.
-cmake_minimum_required (VERSION 2.8)
+CMAKE_MINIMUM_REQUIRED (VERSION 2.8)
 PROJECT (ANNetDesigner)
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${CMAKE_SOURCE_DIR})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC")
 
 FIND_PACKAGE(Qt4)
+FIND_PACKAGE(CUDA)
 
 # Make sure the compiler can find include files from our ANNet library.
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include)
@@ -80,21 +81,21 @@ SET( ANGUIHeaderFiles
   gui/QTrainingThread.h
 )
 
-if (QT4_FOUND)
+IF (QT4_FOUND)
   QT4_WRAP_CPP(ANGUIHeaderFiles_MOC ${ANGUIHeaderFiles} ${3rdPartyHeaderFiles})
   QT4_WRAP_UI(ANGUIHeaderFiles_MOC ${ANGUIFormularFiles})
   INCLUDE(${QT_USE_FILE})
   INCLUDE_DIRECTORIES(${CMAKE_CURRENT_BINARY_DIR})
   ADD_DEFINITIONS(${QT_DEFINITIONS})
 
-  add_library (ANNetGUI STATIC ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
-  target_link_libraries (ANNetGUI ANNet ${QT_LIBRARIES})
-endif (QT4_FOUND)
+  ADD_LIBRARY (ANNetGUI STATIC ${ANGUIHeaderFiles_MOC} ${ANGUISourceFiles} ${3rdPartySourceFiles})
+  TARGET_LINK_LIBRARIES (ANNetGUI ANNet ${QT_LIBRARIES})
+ENDIF (QT4_FOUND)
 
 # Build Qt designer
-if (WIN32)
-  add_executable (ANNetDesigner WIN32 ANNetDesigner.cpp)
-elseif(NOT WIN32)
-  add_executable (ANNetDesigner ANNetDesigner.cpp)
-endif(WIN32)
-target_link_libraries (ANNetDesigner ANNetGUI) 
+IF (WIN32)
+  ADD_EXECUTABLE (ANNetDesigner WIN32 ANNetDesigner.cpp)
+ELSEIF(NOT WIN32)
+  ADD_EXECUTABLE (ANNetDesigner ANNetDesigner.cpp)
+ENDIF(WIN32)
+TARGET_LINK_LIBRARIES (ANNetDesigner ANNetGUI) 

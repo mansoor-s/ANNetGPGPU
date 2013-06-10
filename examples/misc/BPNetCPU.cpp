@@ -49,14 +49,14 @@ int main(int argc, char *argv[]) {
 	input.AddOutput(fOut4, 6);
 
 	std::vector<float> errors;
-	cpu_one.SetLearningRate(0.2);
+	cpu_one.SetLearningRate(0.075);
 	cpu_one.SetMomentum(0);
 	cpu_one.SetWeightDecay(0);
 	cpu_one.SetTrainingSet(input);
 
 	bool b = false;
 	float f;
-	errors = cpu_one.TrainFromData(100, 0.001, b, f);
+	errors = cpu_one.TrainFromData(1000, 0.001, b, f);
 	std::cout<< cpu_one <<std::endl;
 
 	cpu_one.ExpToFS("foo.bar");

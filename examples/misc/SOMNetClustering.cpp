@@ -6,7 +6,6 @@
  */
 
 #include <ANNet>
-#include <ANGPGPU>
 #include <ANContainers>
 #include <ANMath>
 
@@ -33,25 +32,26 @@ int main(int argc, char *argv[]) {
 	input.AddInput(white);
 
 	std::vector<float> vCol(3);
-	int w1 = 64;
-	int w2 = 4;
+	int w1 = 4;
+	int w2 = 64;
 
-	ANNGPGPU::SOMNetGPU gpu;
-	gpu.CreateSOM(3, 1, w1,w1);
-	gpu.SetTrainingSet(input);
-	gpu.SetDistFunction(&ANN::Functions::fcn_bubble);
+	ANN::SOMNet cpu;
+	cpu.CreateSOM(3, 1, w1,w1);
+	cpu.SetTrainingSet(input);
+	cpu.SetDistFunction(&ANN::Functions::fcn_bubble);
 
-	gpu.Training(500);
+	cpu.Training(1000);
+	std::vector<ANN::Centroid> vCen =  cpu.GetCentroidList();
 
 	SOMReader w(w1, w1, w2);
 	for(int x = 0; x < w1*w1; x++) {
-		ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)gpu.GetOPLayer())->GetNeuron(x);
-		vCol[0] = pNeur->GetConI(0)->GetValue();
-		vCol[1] = pNeur->GetConI(1)->GetValue();
-		vCol[2] = pNeur->GetConI(2)->GetValue();
+	      ANN::SOMNeuron *pNeur = (ANN::SOMNeuron*)((ANN::SOMLayer*)cpu.GetOPLayer())->GetNeuron(x);
+	      vCol[0] = pNeur->GetConI(0)->GetValue();
+	      vCol[1] = pNeur->GetConI(1)->GetValue();
+	      vCol[2] = pNeur->GetConI(2)->GetValue();
 
-		w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
+	      w.SetField(QPoint(pNeur->GetPosition()[0], pNeur->GetPosition()[1]), vCol );
 	}
-	w.Save("ColorsByGPU.png");
+	w.Save("ClustersByCPU.png");
 	return 0;
 }

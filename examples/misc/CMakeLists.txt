@@ -9,6 +9,7 @@ FIND_PACKAGE(CUDA)
 
 # Make sure the compiler can find include files from our ANNet library.
 INCLUDE_DIRECTORIES (${ANNetGPGPU_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES (${ANNetMisc_SOURCE_DIR})
 
 SET( ANGUIHeaderFiles 
   QSOMReader.h
@@ -30,6 +31,9 @@ if (QT4_FOUND)
   target_link_libraries (SOMReader ${QT_LIBRARIES})
 endif (QT4_FOUND)
 
+add_executable (BPNetCPU BPNetCPU.cpp)
+target_link_libraries (BPNetCPU ANNet) 
+
 # Build misc examples
 if (CUDA_FOUND)
   if (QT4_FOUND)
@@ -44,9 +48,6 @@ endif(CUDA_FOUND)
 add_executable (LoadBPNet LoadBPNet.cpp)
 target_link_libraries (LoadBPNet ANNet) 
 
-add_executable (BPNet BPNet.cpp)
-target_link_libraries (BPNet ANNet) 
-
 add_executable (HFNet HFNet.cpp)
 target_link_libraries (HFNet ANNet) 
 
@@ -54,7 +55,7 @@ if (QT4_FOUND)
   add_executable (SOMNetCPU SOMNetCPU.cpp)
   target_link_libraries (SOMNetCPU ANNet SOMReader) 
     
-  add_executable (SOMNetClusteringApproach SOMNetClusteringApproach.cpp)
-  target_link_libraries (SOMNetClusteringApproach ANNet SOMReader)  
+  add_executable (SOMNetClustering SOMNetClustering.cpp)
+  target_link_libraries (SOMNetClustering ANNet SOMReader)  
 endif(QT4_FOUND)
 
